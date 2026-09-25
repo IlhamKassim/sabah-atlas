@@ -1,0 +1,38 @@
+[project]
+name = "sabah-atlas"
+version = "0.1.0"
+description = "Atlas Ekonomi Sabah — workspace root"
+requires-python = ">=3.12"
+dependencies = [
+    "atlas-core",
+    "atlas-pipelines",
+    "atlas-ml",
+    "atlas-api",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.8",
+    "httpx>=0.28",
+]
+
+[tool.uv.workspace]
+members = ["packages/core", "pipelines", "ml", "apps/api"]
+
+[tool.uv.sources]
+atlas-core = { workspace = true }
+atlas-pipelines = { workspace = true }
+atlas-ml = { workspace = true }
+atlas-api = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["packages/core/tests", "pipelines/tests", "ml/tests", "apps/api/tests"]
+addopts = "-q"

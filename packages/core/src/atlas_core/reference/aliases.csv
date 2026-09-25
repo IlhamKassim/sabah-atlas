@@ -1,0 +1,194 @@
+state,alias,district_id
+Johor,Batu Pahat,jhr-batu-pahat
+Johor,Johor Bahru,jhr-johor-bahru
+Johor,Kluang,jhr-kluang
+Johor,Kota Tinggi,jhr-kota-tinggi
+Johor,Kulai,jhr-kulai
+Johor,Kulaijaya,jhr-kulai
+Johor,Ledang,jhr-tangkak
+Johor,Mersing,jhr-mersing
+Johor,Muar,jhr-muar
+Johor,Pontian,jhr-pontian
+Johor,Segamat,jhr-segamat
+Johor,Tangkak,jhr-tangkak
+Kedah,Baling,kdh-baling
+Kedah,Bandar Baharu,kdh-bandar-baharu
+Kedah,Kota Setar,kdh-kota-setar
+Kedah,Kuala Muda,kdh-kuala-muda
+Kedah,Kubang Pasu,kdh-kubang-pasu
+Kedah,Kulim,kdh-kulim
+Kedah,Langkawi,kdh-langkawi
+Kedah,Padang Terap,kdh-padang-terap
+Kedah,Pendang,kdh-pendang
+Kedah,Pokok Sena,kdh-pokok-sena
+Kedah,Sik,kdh-sik
+Kedah,Yan,kdh-yan
+Kelantan,Bachok,ktn-bachok
+Kelantan,Gua Musang,ktn-gua-musang
+Kelantan,Jeli,ktn-jeli
+Kelantan,Kecil Lojing,ktn-kecil-lojing
+Kelantan,Kota Bharu,ktn-kota-bharu
+Kelantan,Kuala Krai,ktn-kuala-krai
+Kelantan,Machang,ktn-machang
+Kelantan,Pasir Mas,ktn-pasir-mas
+Kelantan,Pasir Puteh,ktn-pasir-puteh
+Kelantan,Tanah Merah,ktn-tanah-merah
+Kelantan,Tumpat,ktn-tumpat
+Melaka,Alor Gajah,mlk-alor-gajah
+Melaka,Jasin,mlk-jasin
+Melaka,Melaka Tengah,mlk-melaka-tengah
+Negeri Sembilan,Jelebu,nsn-jelebu
+Negeri Sembilan,Jempol,nsn-jempol
+Negeri Sembilan,Kuala Pilah,nsn-kuala-pilah
+Negeri Sembilan,Port Dickson,nsn-port-dickson
+Negeri Sembilan,Rembau,nsn-rembau
+Negeri Sembilan,Seremban,nsn-seremban
+Negeri Sembilan,Tampin,nsn-tampin
+Pahang,Bentong,phg-bentong
+Pahang,Bera,phg-bera
+Pahang,Cameron Highland,phg-cameron-highlands
+Pahang,Cameron Highlands,phg-cameron-highlands
+Pahang,Jerantut,phg-jerantut
+Pahang,Kuantan,phg-kuantan
+Pahang,Lipis,phg-lipis
+Pahang,Maran,phg-maran
+Pahang,Pekan,phg-pekan
+Pahang,Raub,phg-raub
+Pahang,Rompin,phg-rompin
+Pahang,Temerloh,phg-temerloh
+Perak,Bagan Datuk,prk-bagan-datuk
+Perak,Batang Padang,prk-batang-padang
+Perak,Hilir Perak,prk-hilir-perak
+Perak,Hulu Perak,prk-hulu-perak
+Perak,Kampar,prk-kampar
+Perak,Kerian,prk-kerian
+Perak,Kinta,prk-kinta
+Perak,Kuala Kangsar,prk-kuala-kangsar
+Perak,Larut & Matang,prk-larut-dan-matang
+Perak,Larut Dan Matang,prk-larut-dan-matang
+Perak,Larut dan Matang,prk-larut-dan-matang
+Perak,Manjung,prk-manjung
+Perak,Manjung (Dinding),prk-manjung
+Perak,Muallim,prk-muallim
+Perak,Perak Tengah,prk-perak-tengah
+Perak,Selama,prk-selama
+Perlis,Perlis,pls-perlis
+Pulau Pinang,Barat Daya,png-barat-daya
+Pulau Pinang,S.P. Selatan,png-seberang-perai-selatan
+Pulau Pinang,S.P.Tengah,png-seberang-perai-tengah
+Pulau Pinang,S.P.Utara,png-seberang-perai-utara
+Pulau Pinang,Seberang Perai Selatan,png-seberang-perai-selatan
+Pulau Pinang,Seberang Perai Tengah,png-seberang-perai-tengah
+Pulau Pinang,Seberang Perai Utara,png-seberang-perai-utara
+Pulau Pinang,Sp Selatan,png-seberang-perai-selatan
+Pulau Pinang,Sp Tengah,png-seberang-perai-tengah
+Pulau Pinang,Sp Utara,png-seberang-perai-utara
+Pulau Pinang,Timur Laut,png-timur-laut
+Sabah,Beaufort,sbh-beaufort
+Sabah,Beluran,sbh-beluran
+Sabah,K. Kinabalu,sbh-kota-kinabalu
+Sabah,KK,sbh-kota-kinabalu
+Sabah,Kalabakan,sbh-kalabakan
+Sabah,Keningau,sbh-keningau
+Sabah,Kinabatangan,sbh-kinabatangan
+Sabah,Kota Belud,sbh-kota-belud
+Sabah,Kota Kinabalu,sbh-kota-kinabalu
+Sabah,Kota Marudu,sbh-kota-marudu
+Sabah,Kuala Penyu,sbh-kuala-penyu
+Sabah,Kudat,sbh-kudat
+Sabah,Kunak,sbh-kunak
+Sabah,Lahad Datu,sbh-lahad-datu
+Sabah,Membakut,sbh-membakut
+Sabah,Nabawan,sbh-nabawan
+Sabah,Nabawan / Persiangan,sbh-nabawan
+Sabah,Papar,sbh-papar
+Sabah,Penampang,sbh-penampang
+Sabah,Persiangan,sbh-nabawan
+Sabah,Pitas,sbh-pitas
+Sabah,Putatan,sbh-putatan
+Sabah,Ranau,sbh-ranau
+Sabah,Sabah offshore oil & gas (Supra),sbh-supra
+Sabah,Sandakan,sbh-sandakan
+Sabah,Semporna,sbh-semporna
+Sabah,Sipitang,sbh-sipitang
+Sabah,Supra,sbh-supra
+Sabah,Tambunan,sbh-tambunan
+Sabah,Tawau,sbh-tawau
+Sabah,Telupid,sbh-telupid
+Sabah,Tenom,sbh-tenom
+Sabah,Tongod,sbh-tongod
+Sabah,Tuaran,sbh-tuaran
+Sarawak,Asajaya,swk-asajaya
+Sarawak,Bau,swk-bau
+Sarawak,Belaga,swk-belaga
+Sarawak,Beluru,swk-beluru
+Sarawak,Betong,swk-betong
+Sarawak,Bintulu,swk-bintulu
+Sarawak,Bukit Mabong,swk-bukit-mabong
+Sarawak,Dalat,swk-dalat
+Sarawak,Daro,swk-daro
+Sarawak,Gedong,swk-gedong
+Sarawak,Julau,swk-julau
+Sarawak,Kabong,swk-kabong
+Sarawak,Kanowit,swk-kanowit
+Sarawak,Kapit,swk-kapit
+Sarawak,Kuching,swk-kuching
+Sarawak,Lawas,swk-lawas
+Sarawak,Limbang,swk-limbang
+Sarawak,Lingga,swk-lingga
+Sarawak,Lubok Antu,swk-lubok-antu
+Sarawak,Lundu,swk-lundu
+Sarawak,Maradong,swk-maradong
+Sarawak,Marudi,swk-marudi
+Sarawak,Matu,swk-matu
+Sarawak,Miri,swk-miri
+Sarawak,Mukah,swk-mukah
+Sarawak,Pakan,swk-pakan
+Sarawak,Pantu,swk-pantu
+Sarawak,Pusa,swk-pusa
+Sarawak,Samarahan,swk-samarahan
+Sarawak,Saratok,swk-saratok
+Sarawak,Sarawak offshore oil & gas (Supra),swk-supra
+Sarawak,Sarikei,swk-sarikei
+Sarawak,Sebauh,swk-sebauh
+Sarawak,Sebuyau,swk-sebuyau
+Sarawak,Selangau,swk-selangau
+Sarawak,Serian,swk-serian
+Sarawak,Sibu,swk-sibu
+Sarawak,Siburan,swk-siburan
+Sarawak,Simunjan,swk-simunjan
+Sarawak,Song,swk-song
+Sarawak,Sri Aman,swk-sri-aman
+Sarawak,Subis,swk-subis
+Sarawak,Supra,swk-supra
+Sarawak,Tanjong Manis,swk-tanjung-manis
+Sarawak,Tanjung Manis,swk-tanjung-manis
+Sarawak,Tatau,swk-tatau
+Sarawak,Tebedu,swk-tebedu
+Sarawak,Telang Usan,swk-telang-usan
+Selangor,Gombak,sgr-gombak
+Selangor,Hulu Langat,sgr-ulu-langat
+Selangor,Hulu Selangor,sgr-ulu-selangor
+Selangor,Klang,sgr-klang
+Selangor,Kuala Langat,sgr-kuala-langat
+Selangor,Kuala Selangor,sgr-kuala-selangor
+Selangor,Petaling,sgr-petaling
+Selangor,Sabak Bernam,sgr-sabak-bernam
+Selangor,Sepang,sgr-sepang
+Selangor,Ulu Langat,sgr-ulu-langat
+Selangor,Ulu Selangor,sgr-ulu-selangor
+Terengganu,Besut,trg-besut
+Terengganu,Dungun,trg-dungun
+Terengganu,Hulu,trg-hulu-terengganu
+Terengganu,Hulu Terengganu,trg-hulu-terengganu
+Terengganu,Kemaman,trg-kemaman
+Terengganu,Kuala Nerus,trg-kuala-nerus
+Terengganu,Kuala Terengganu,trg-kuala-terengganu
+Terengganu,Marang,trg-marang
+Terengganu,Setiu,trg-setiu
+W.P. Kuala Lumpur,Kuala Lumpur,kul-kuala-lumpur
+W.P. Kuala Lumpur,W.P. Kuala Lumpur,kul-kuala-lumpur
+W.P. Labuan,Labuan,lbn-labuan
+W.P. Labuan,W.P. Labuan,lbn-labuan
+W.P. Putrajaya,Putrajaya,pjy-putrajaya
+W.P. Putrajaya,W.P. Putrajaya,pjy-putrajaya

@@ -1,0 +1,285 @@
+# Indicator catalogue. `direction`: up = higher is better, down = lower is better,
+# neutral = descriptive only (never flagged as strength/concern).
+# `jalur`: band group in the district signature strip (null = not in the strip).
+- code: income_median
+  label: Median household income
+  short: Median income
+  unit: RM / month
+  format: currency
+  direction: up
+  category: welfare
+  jalur: welfare
+  source: dosm_hh_income_district
+  description: Median gross monthly household income from the Household Income Survey.
+- code: income_mean
+  label: Mean household income
+  short: Mean income
+  unit: RM / month
+  format: currency
+  direction: up
+  category: welfare
+  jalur: null
+  source: dosm_hh_income_district
+  description: Mean gross monthly household income from the Household Income Survey.
+- code: poverty_absolute
+  label: Absolute poverty rate
+  short: Poverty
+  unit: "% of households"
+  format: pct
+  direction: down
+  category: welfare
+  jalur: welfare
+  source: dosm_hh_poverty_district
+  description: Share of households with income below the Poverty Line Income (PLI 2019 methodology).
+- code: poverty_relative
+  label: Relative poverty rate
+  short: Relative poverty
+  unit: "% of households"
+  format: pct
+  direction: down
+  category: welfare
+  jalur: null
+  source: dosm_hh_poverty_district
+  description: Share of households with income below half the national median.
+- code: gini
+  label: Gini coefficient of household income
+  short: Gini
+  unit: index (0–1)
+  format: decimal3
+  direction: down
+  category: welfare
+  jalur: welfare
+  source: dosm_hh_inequality_district
+  description: Income inequality within the district; 0 is perfect equality, 1 maximal inequality.
+- code: expenditure_mean
+  label: Mean household consumption expenditure
+  short: Mean expenditure
+  unit: RM / month
+  format: currency
+  direction: neutral
+  category: welfare
+  jalur: null
+  source: dosm_hies_district
+  description: Mean monthly household consumption expenditure from the HIES.
+- code: gdp_real
+  label: GDP at constant 2015 prices
+  short: GDP
+  unit: RM million
+  format: number1
+  direction: neutral
+  category: structure
+  jalur: null
+  source: dosm_gdp_district_real_supply
+  description: District gross domestic product, supply side, constant 2015 prices.
+- code: gdp_per_capita
+  label: GDP per capita
+  short: GDP / capita
+  unit: RM / person / year
+  format: currency
+  direction: up
+  category: structure
+  jalur: welfare
+  source: derived
+  derived_from: [gdp_real, population]
+  description: District GDP (constant 2015 prices) divided by mid-year population. Only 2020 has both.
+- code: share_agriculture
+  label: Agriculture share of GDP
+  short: Agriculture
+  unit: "% of GDP"
+  format: pct
+  direction: neutral
+  category: structure
+  jalur: structure
+  source: derived
+  derived_from: [gdp_real]
+  description: Agriculture (incl. oil palm, rubber, livestock, forestry, fishing) as a share of district GDP.
+- code: share_mining
+  label: Mining & quarrying share of GDP
+  short: Mining
+  unit: "% of GDP"
+  format: pct
+  direction: neutral
+  category: structure
+  jalur: null
+  source: derived
+  derived_from: [gdp_real]
+  description: Mining and quarrying as a share of district GDP (offshore oil & gas is in 'Supra').
+- code: share_manufacturing
+  label: Manufacturing share of GDP
+  short: Manufacturing
+  unit: "% of GDP"
+  format: pct
+  direction: neutral
+  category: structure
+  jalur: structure
+  source: derived
+  derived_from: [gdp_real]
+  description: Manufacturing as a share of district GDP.
+- code: share_construction
+  label: Construction share of GDP
+  short: Construction
+  unit: "% of GDP"
+  format: pct
+  direction: neutral
+  category: structure
+  jalur: null
+  source: derived
+  derived_from: [gdp_real]
+  description: Construction as a share of district GDP.
+- code: share_services
+  label: Services share of GDP
+  short: Services
+  unit: "% of GDP"
+  format: pct
+  direction: neutral
+  category: structure
+  jalur: structure
+  source: derived
+  derived_from: [gdp_real]
+  description: Services as a share of district GDP.
+- code: population
+  label: Population
+  short: Population
+  unit: thousand persons
+  format: number1
+  direction: neutral
+  category: demography
+  jalur: null
+  source: dosm_population_district
+  description: Mid-year population estimate (all sexes, ages and ethnicities).
+- code: pop_density
+  label: Population density
+  short: Density
+  unit: persons / km²
+  format: number0
+  direction: neutral
+  category: demography
+  jalur: structure
+  source: derived
+  derived_from: [population]
+  description: Population divided by district land area computed from the boundary layer.
+- code: share_age_65plus
+  label: Population aged 65 and over
+  short: Aged 65+
+  unit: "% of population"
+  format: pct
+  direction: neutral
+  category: demography
+  jalur: null
+  source: derived
+  derived_from: [population]
+  description: Share of the population aged 65 and above.
+- code: share_noncitizen
+  label: Non-citizen share of population
+  short: Non-citizens
+  unit: "% of population"
+  format: pct
+  direction: neutral
+  category: demography
+  jalur: null
+  source: derived
+  derived_from: [population]
+  description: Share of the population who are not Malaysian citizens. Descriptive context for labour-market and per-capita figures.
+- code: lfpr
+  label: Labour force participation rate
+  short: Participation
+  unit: "% of working-age"
+  format: pct
+  direction: up
+  category: labour
+  jalur: momentum
+  source: dosm_lfs_district
+  description: Labour force as a share of the working-age (15–64) population, Labour Force Survey.
+- code: unemployment_rate
+  label: Unemployment rate
+  short: Unemployment
+  unit: "% of labour force"
+  format: pct
+  direction: down
+  category: labour
+  jalur: momentum
+  source: dosm_lfs_district
+  description: Unemployed persons as a share of the labour force, Labour Force Survey.
+- code: employment_ratio
+  label: Employment-to-population ratio
+  short: Employment ratio
+  unit: "% of working-age"
+  format: pct
+  direction: up
+  category: labour
+  jalur: null
+  source: dosm_lfs_district
+  description: Employed persons as a share of the working-age population.
+- code: labour_force
+  label: Labour force
+  short: Labour force
+  unit: thousand persons
+  format: number1
+  direction: neutral
+  category: labour
+  jalur: null
+  source: dosm_lfs_district
+  description: Persons aged 15–64 who are employed or unemployed.
+- code: access_piped_water
+  label: Households with piped water
+  short: Piped water
+  unit: "% of households"
+  format: pct
+  direction: up
+  category: access
+  jalur: access
+  source: dosm_hh_access_amenities
+  description: Share of households with access to treated piped water.
+- code: access_electricity
+  label: Households with electricity
+  short: Electricity
+  unit: "% of households"
+  format: pct
+  direction: up
+  category: access
+  jalur: access
+  source: dosm_hh_access_amenities
+  description: Share of households with access to electricity.
+- code: access_sanitation
+  label: Households with improved sanitation
+  short: Sanitation
+  unit: "% of households"
+  format: pct
+  direction: up
+  category: access
+  jalur: null
+  source: dosm_hh_access_amenities
+  description: Share of households with access to improved sanitation.
+- code: gdp_growth
+  label: Real GDP growth, 2015–2020 average
+  short: GDP growth
+  unit: "% / year"
+  format: pct
+  direction: up
+  category: momentum
+  jalur: momentum
+  source: derived
+  derived_from: [gdp_real]
+  description: Compound annual growth rate of real district GDP between 2015 and 2020 (includes the 2020 pandemic year).
+- code: income_growth
+  label: Median income growth since 2019
+  short: Income growth
+  unit: "% / year"
+  format: pct
+  direction: up
+  category: momentum
+  jalur: momentum
+  source: derived
+  derived_from: [income_median]
+  description: Compound annual growth of nominal median household income from the 2019 survey round to the latest round.
+- code: population_growth
+  label: Population growth, 2020–latest
+  short: Pop. growth
+  unit: "% / year"
+  format: pct
+  direction: neutral
+  category: momentum
+  jalur: null
+  source: derived
+  derived_from: [population]
+  description: Compound annual growth of mid-year population from 2020 to the latest estimate.

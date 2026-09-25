@@ -1,0 +1,10 @@
+# Source values excluded from the atlas, with the reason. Published on /methodology.
+# Each entry matches on (source_id, district_id, period[, indicator]).
+- source_id: dosm_lfs_district
+  district_id: swk-telang-usan
+  period: 2018
+  indicator: unemployment_rate
+  found: "2026-09-26"
+  reason: >-
+    u_rate is 293.0 while every other labour-force field for the row is empty; an
+    unemployment rate above 100% is impossible, so the value is treated as a source error.

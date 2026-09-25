@@ -1,0 +1,66 @@
+# Tier-1 source datasets. `id` is our stable source key; `dataset_id` is the
+# publisher's. Licence and vintage metadata are scraped from the catalogue page
+# at ingest time and stored with each bronze snapshot.
+- id: dosm_hh_income_district
+  publisher: DOSM
+  dataset_id: hh_income_district
+  title: Household income by district
+  parquet: https://storage.dosm.gov.my/hies/hh_income_district.parquet
+  page: https://open.dosm.gov.my/data-catalogue/hh_income_district
+  licence: CC BY 4.0
+- id: dosm_hh_poverty_district
+  publisher: DOSM
+  dataset_id: hh_poverty_district
+  title: Poverty by district
+  parquet: https://storage.dosm.gov.my/hies/hh_poverty_district.parquet
+  page: https://open.dosm.gov.my/data-catalogue/hh_poverty_district
+  licence: CC BY 4.0
+- id: dosm_hh_inequality_district
+  publisher: DOSM
+  dataset_id: hh_inequality_district
+  title: Income inequality (Gini) by district
+  parquet: https://storage.dosm.gov.my/hies/hh_inequality_district.parquet
+  page: https://open.dosm.gov.my/data-catalogue/hh_inequality_district
+  licence: CC BY 4.0
+- id: dosm_hies_district
+  publisher: DOSM
+  dataset_id: hies_district
+  title: Household income and expenditure survey, district tabulation
+  parquet: https://storage.dosm.gov.my/hies/hies_district.parquet
+  page: https://open.dosm.gov.my/data-catalogue/hies_district
+  licence: CC BY 4.0
+- id: dosm_gdp_district_real_supply
+  publisher: DOSM
+  dataset_id: gdp_district_real_supply
+  title: GDP by district, constant 2015 prices, supply side
+  parquet: https://storage.dosm.gov.my/gdp/gdp_district_real_supply.parquet
+  page: https://open.dosm.gov.my/data-catalogue/gdp_district_real_supply
+  licence: CC BY 4.0
+- id: dosm_population_district
+  publisher: DOSM
+  dataset_id: population_district
+  title: Population by district, sex, age and ethnicity
+  parquet: https://storage.dosm.gov.my/population/population_district.parquet
+  page: https://open.dosm.gov.my/data-catalogue/population_district
+  licence: CC BY 4.0
+- id: dosm_lfs_district
+  publisher: DOSM
+  dataset_id: lfs_district
+  title: Labour force by district
+  parquet: https://storage.dosm.gov.my/labour/lfs_district.parquet
+  page: https://open.dosm.gov.my/data-catalogue/lfs_district
+  licence: CC BY 4.0
+- id: dosm_hh_access_amenities
+  publisher: DOSM
+  dataset_id: hh_access_amenities
+  title: Household access to basic amenities by district
+  parquet: https://storage.dosm.gov.my/hies/hh_access_amenities.parquet
+  page: https://open.dosm.gov.my/data-catalogue/hh_access_amenities
+  licence: CC BY 4.0
+- id: geoboundaries_mys_adm2
+  publisher: geoBoundaries (William & Mary geoLab)
+  dataset_id: gbOpen/MYS/ADM2
+  title: Malaysia district boundaries (ADM2, 2020)
+  geojson: https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MYS/ADM2/geoBoundaries-MYS-ADM2.geojson
+  page: https://www.geoboundaries.org/countryDownloads.html
+  licence: CC BY 3.0

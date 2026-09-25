@@ -1,0 +1,30 @@
+# Local lake (bronze/silver/gold) and caches — rebuilt by `atlas build`
+data/lake/
+data/cache/
+*.parquet
+!packages/core/src/atlas_core/reference/*.parquet
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+mlruns/
+
+# Node
+node_modules/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# Env
+.env
+.env.local
+
+# OS / tools
+.DS_Store
+.claude/worktrees/
+.kilo/
