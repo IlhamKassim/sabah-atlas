@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "api",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "uvicorn", "atlas_api.main:app", "--port", "8000", "--reload", "--reload-dir", "apps/api/src"],
+      "port": 8000
+    },
+    {
+      "name": "web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "apps/web", "dev", "--port", "3000"],
+      "port": 3000
+    }
+  ]
+}

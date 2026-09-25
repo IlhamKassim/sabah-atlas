@@ -39,12 +39,15 @@ def districts(scope: str) -> list[dict]:
            FROM observation
            WHERE indicator_code IN ('income_median','poverty_absolute','population','gdp_per_capita')
            ORDER BY district_id, indicator_code, period DESC""")
+    clusters = {r["district_id"]: r["cluster"] for r in fetch(
+        "SELECT district_id, payload->>'cluster' AS cluster FROM analytics WHERE kind='typology'")}
     by = defaultdict(dict)
     for h in headline:
         by[h["district_id"]][h["indicator_code"]] = {
             "value": h["value"], "period": h["period"], "pct_sabah": h["pct_sabah"]}
     for r in rows:
         r["headline"] = by.get(r["id"], {})
+        r["cluster"] = clusters.get(r["id"])
     return rows
 
 
@@ -124,3 +127,10 @@ def compare(ids: list[str]) -> dict:
 
 def model_cards() -> list[dict]:
     return [r["card"] for r in fetch("SELECT card FROM model_card ORDER BY model_version")]
+
+
+def all_analytics(kind: str) -> list[dict]:
+    return fetch(
+        """SELECT a.district_id, d.slug, d.display_name AS name, d.division, a.payload, a.model_version
+           FROM analytics a JOIN district d ON d.id = a.district_id
+           WHERE a.kind = %s AND d.state = 'Sabah' ORDER BY d.display_name""", (kind,))

@@ -72,7 +72,10 @@ def healthz() -> dict:
 
 @v1.get("/meta", summary="Release, indicator catalogue and sources")
 def meta() -> dict:
-    return {"release": q.release(), "indicators": q.indicators(), "sources": q.sources()}
+    from atlas_core.catalog import errata
+
+    return {"release": q.release(), "indicators": q.indicators(), "sources": q.sources(),
+            "errata": errata()}
 
 
 @v1.get("/districts", summary="All districts with headline indicators")
@@ -115,6 +118,11 @@ def forecast(key: str, indicator: str = "income_median", scenario: str = "baseli
         raise HTTPException(404, f"no forecast for {indicator!r}")
     return {"district": d, "indicator": indicator, "scenario": scenario,
             "model_version": fc.get("model_version"), **series}
+
+
+@v1.get("/analytics/{kind}", summary="One analytics layer for every Sabah district")
+def analytics_all(kind: Literal["forecast", "scorecard", "typology", "shift_share", "drivers"]) -> list[dict]:
+    return q.all_analytics(kind)
 
 
 @v1.get("/model-cards", summary="Model cards for every analytics layer")
