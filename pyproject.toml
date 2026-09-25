@@ -27,11 +27,18 @@ atlas-ml = { workspace = true }
 atlas-api = { workspace = true }
 
 [tool.ruff]
-line-length = 100
+line-length = 110
 target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"pipelines/scripts/*" = ["B905", "F841"]
+"pipelines/src/atlas_pipelines/cli_app.py" = ["B008"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["atlas_core", "atlas_pipelines", "atlas_ml", "atlas_api"]
 
 [tool.pytest.ini_options]
 testpaths = ["packages/core/tests", "pipelines/tests", "ml/tests", "apps/api/tests"]

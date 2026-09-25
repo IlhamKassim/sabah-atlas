@@ -88,6 +88,26 @@ def _gdp() -> tuple[pd.DataFrame, pd.DataFrame]:
     return total.dropna(subset=["value"]), sect
 
 
+def state_series() -> pd.DataFrame:
+    """State and national benchmark series: state, indicator, period, value, source_id."""
+    parts = []
+    sid = "dosm_gdp_state_real_supply"
+    g, _ = _load(sid)
+    g = g[(g.series == "abs") & g.sector.isin(["p0", *GDP_SECTORS])].copy()
+    g["indicator"] = g.sector.map(lambda s: "gdp_real" if s == "p0" else f"gdp_{GDP_SECTORS[s]}")
+    parts.append(g.assign(period=_year(g.date), source_id=sid)[
+        ["state", "indicator", "period", "value", "source_id"]])
+    sid = "dosm_hh_income_state"
+    i, _ = _load(sid)
+    i = i.melt(id_vars=["state", "date"], value_vars=["income_median", "income_mean"],
+               var_name="indicator")
+    parts.append(i.assign(period=_year(i.date), source_id=sid)[
+        ["state", "indicator", "period", "value", "source_id"]])
+    out = pd.concat(parts, ignore_index=True).dropna(subset=["value"])
+    out["value"] = out.value.astype(float)
+    return out
+
+
 def boundary_flags(obs: pd.DataFrame) -> pd.Series:
     """Quality flag per observation row for boundary breaks (see LINEAGE)."""
     flag = pd.Series(pd.NA, index=obs.index, dtype="object")
@@ -175,6 +195,7 @@ def run() -> dict[str, int]:
         })
 
     geo = geometry()
+    write_table("silver", "state_series", state_series())
     write_table("silver", "observation", obs)
     write_table("silver", "gdp_sector", gdp_sect)
     write_table("silver", "source", pd.DataFrame(src_rows))

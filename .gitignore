@@ -28,3 +28,7 @@ next-env.d.ts
 .DS_Store
 .claude/worktrees/
 .kilo/
+
+# Generated releases (published as GitHub Release assets; DOI via Zenodo)
+data/releases/
+apps/web/public/data/releases/

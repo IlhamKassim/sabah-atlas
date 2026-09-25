@@ -64,3 +64,17 @@
   geojson: https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MYS/ADM2/geoBoundaries-MYS-ADM2.geojson
   page: https://www.geoboundaries.org/countryDownloads.html
   licence: CC BY 3.0
+- id: dosm_gdp_state_real_supply
+  publisher: DOSM
+  dataset_id: gdp_state_real_supply
+  title: GDP by state, constant 2015 prices, supply side
+  parquet: https://storage.dosm.gov.my/gdp/gdp_state_real_supply.parquet
+  page: https://open.dosm.gov.my/data-catalogue/gdp_state_real_supply
+  licence: CC BY 4.0
+- id: dosm_hh_income_state
+  publisher: DOSM
+  dataset_id: hh_income_state
+  title: Household income by state
+  parquet: https://storage.dosm.gov.my/hies/hh_income_state.parquet
+  page: https://open.dosm.gov.my/data-catalogue/hh_income_state
+  licence: CC BY 4.0
