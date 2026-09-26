@@ -24,7 +24,7 @@ export function DistrictPicker({ options }: { options: { slug: string; name: str
                 return (
                   <button key={o.slug} type="button" aria-pressed={on} onClick={() => toggle(o.slug)}
                     disabled={!on && ids.length >= 4}
-                    className={`border px-1.5 py-0.5 text-xs disabled:opacity-40 ${on ? "border-granite bg-granite text-pasir" : "border-pasir-3 hover:border-granite"}`}>
+                    className={`border px-1.5 py-0.5 text-xs disabled:opacity-40 ${on ? "border-ink bg-ink text-bg" : "border-line hover:border-ink"}`}>
                     {o.name}
                   </button>
                 );

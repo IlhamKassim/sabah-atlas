@@ -13,10 +13,10 @@ export function Sparkline({ series, width = 96, height = 24 }: { series: Obs[]; 
   const last = series[series.length - 1];
   return (
     <svg width={width} height={height} aria-hidden className="overflow-visible">
-      <path d={p(series) ?? ""} fill="none" stroke="#1e2422" strokeWidth={1.2} />
+      <path d={p(series) ?? ""} fill="none" stroke="var(--ink)" strokeWidth={1.2} />
       {series.map((d) => (
         <circle key={d.period} cx={x(d.period)} cy={y(d.value)} r={d === last ? 2.2 : 1.2}
-          fill={d.quality_flag?.includes("boundary") ? "#a3362b" : "#1e2422"} />
+          fill={d.quality_flag?.includes("boundary") ? "var(--mogah)" : "var(--ink)"} />
       ))}
     </svg>
   );

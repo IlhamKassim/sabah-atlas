@@ -24,15 +24,15 @@ export function DriversChart({ result, format, name, betterWhenHigher }: { resul
       caption={<>How each factor moves the model&apos;s expectation relative to an average district ({result.model === "ridge" ? "ridge regression, exact linear contributions" : "LightGBM, SHAP values"}). Associations, not causes. Cross-validated error ±{fmt(result.cv_mae, format)}.</>}
     >
       <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={`Factors associated with ${result.label} in ${name}`}>
-        <line x1={x(0)} x2={x(0)} y1={0} y2={H} stroke="#1e2422" />
+        <line x1={x(0)} x2={x(0)} y1={0} y2={H} stroke="var(--ink)" />
         {items.map((c, i) => {
           const v = vals[i];
           const y0 = m.t + i * rowH;
           return (
             <g key={c.key}>
-              <text x={m.l - 8} y={y0 + rowH / 2} dy="0.32em" textAnchor="end" fontSize={10.5} fill="#1e2422">{c.feature}</text>
-              <rect x={Math.min(x(0), x(v))} y={y0 + 5} width={Math.abs(x(v) - x(0))} height={rowH - 10} fill={good(v) ? "#0f6b6e" : "#a3362b"} />
-              <text x={W - 2} y={y0 + rowH / 2} dy="0.32em" textAnchor="end" fontSize={9.5} className="font-mono" fill={good(v) ? "#0f6b6e" : "#a3362b"}>
+              <text x={m.l - 8} y={y0 + rowH / 2} dy="0.32em" textAnchor="end" fontSize={10.5} fill="var(--ink)">{c.feature}</text>
+              <rect x={Math.min(x(0), x(v))} y={y0 + 5} width={Math.abs(x(v) - x(0))} height={rowH - 10} fill={good(v) ? "var(--laut)" : "var(--mogah)"} />
+              <text x={W - 2} y={y0 + rowH / 2} dy="0.32em" textAnchor="end" fontSize={9.5} className="font-mono" fill={good(v) ? "var(--laut)" : "var(--mogah)"}>
                 {`${v > 0 ? "+" : ""}${v.toFixed(1)}${unit}`}
               </text>
             </g>

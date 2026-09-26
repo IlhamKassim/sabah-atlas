@@ -1,6 +1,6 @@
-# Atlas Ekonomi Sabah
+# SabahKu
 
-**An evidence atlas of Sabah's 27 district economies.** Official statistics, transparent diagnostics, structural peers across all 160 Malaysian districts, nowcasts and projections with calibrated uncertainty, and a cited AI Analyst, built for planners and researchers who need numbers they can defend.
+**The economic atlas of Sabah's 27 districts.** (Formerly *Atlas Ekonomi Sabah*.) Official statistics, transparent diagnostics, structural peers across all 160 Malaysian districts, nowcasts and projections with calibrated uncertainty, and a cited AI Analyst, built for planners and researchers who need numbers they can defend.
 
 **Public beta: [sabah-ku.com](https://sabah-ku.com)**
 
@@ -13,7 +13,7 @@
 | **Pipeline** (`pipelines/`) | Bulk-downloads OpenDOSM datasets into immutable, checksummed bronze snapshots with the publisher's metadata; harmonises names through a strict alias table; flags boundary changes (Membakut, Kalabakan, Telupid); validates with pandera (including a 27-district completeness gate); writes gold tables and a versioned data release. |
 | **Analytics** (`ml/`) | Rule-based scorecard vs structural peers · shift-share decomposition · PCA + k-means typology with nearest-neighbour peers and positive deviance · ridge/LightGBM driver analysis with SHAP · GDP nowcasts from state sector data with reconciliation · income projections · split-conformal intervals. Every layer has a model card. |
 | **API** (`apps/api/`) | FastAPI, versioned under `/v1`, ETags keyed to the data release, CSV export, OpenAPI docs. |
-| **Web** (`apps/web/`) | Next.js. Explore map, 27 district profiles, compare, forecasts, methodology rendered from live model cards, data downloads, cite-this-view. The *Tenun Data* design system is inspired by the structure of Sabah textiles. |
+| **Web** (`apps/web/`) | Next.js. A full-screen map (pan, zoom, play through the years) with a searchable district list, 27 district profiles, compare, forecasts, methodology rendered from live model cards, data downloads, cite-this-view. Night and day themes in a palette taken from Sabah's landscape. |
 | **Infra** (`infra/`) | Docker Compose for local dev (Postgres + PostGIS + pgvector); Bicep for Azure Container Apps + PostgreSQL Flexible Server. |
 
 ## Quick start

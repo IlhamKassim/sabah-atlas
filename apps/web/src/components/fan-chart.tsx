@@ -75,7 +75,7 @@ export function FanChart({
               role="radio"
               aria-checked={scenario === s}
               onClick={() => setScenario(s)}
-              className={`border px-1.5 py-0.5 text-[0.7rem] ${scenario === s ? "border-laut bg-laut text-pasir" : "border-pasir-3 text-muted hover:border-laut"}`}
+              className={`border px-1.5 py-0.5 text-[0.7rem] ${scenario === s ? "border-laut bg-laut text-bg" : "border-line text-muted hover:border-laut"}`}
             >
               {SCENARIO_LABEL[s] ?? s}
             </button>
@@ -91,39 +91,39 @@ export function FanChart({
         <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={`${title}: official values, nowcast and projection with 80% intervals`}>
           {y.ticks(5).map((t) => (
             <g key={t}>
-              <line x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} stroke="#ded4c0" strokeWidth={0.8} />
-              <text x={m.l - 6} y={y(t)} dy="0.32em" textAnchor="end" fontSize={10} fill="#5b625e" className="font-mono">
+              <line x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} stroke="var(--line)" strokeWidth={0.8} />
+              <text x={m.l - 6} y={y(t)} dy="0.32em" textAnchor="end" fontSize={10} fill="var(--muted)" className="font-mono">
                 {fmtCompact(t, format)}
               </text>
             </g>
           ))}
           {years.filter((v, i, a) => a.indexOf(v) === i).map((t) => (
-            <text key={t} x={x(t)} y={H - 8} textAnchor="middle" fontSize={9.5} fill="#5b625e" className="font-mono">
+            <text key={t} x={x(t)} y={H - 8} textAnchor="middle" fontSize={9.5} fill="var(--muted)" className="font-mono">
               {t % 2 === 0 || years.length < 10 ? t : ""}
             </text>
           ))}
           {segs.slice(1).map((s) => (
-            <line key={s.label} x1={x(s.from)} x2={x(s.from)} y1={m.t - 8} y2={H - m.b} stroke="#1e2422" strokeOpacity={0.35} strokeDasharray="2 3" />
+            <line key={s.label} x1={x(s.from)} x2={x(s.from)} y1={m.t - 8} y2={H - m.b} stroke="var(--ink)" strokeOpacity={0.35} strokeDasharray="2 3" />
           ))}
           {segs.map((s) => (
-            <text key={`t-${s.label}`} x={(x(s.from) + x(s.to)) / 2} y={m.t - 12} textAnchor="middle" fontSize={9} className="font-mono" fill="#5b625e" letterSpacing="0.06em">
+            <text key={`t-${s.label}`} x={(x(s.from) + x(s.to)) / 2} y={m.t - 12} textAnchor="middle" fontSize={9} className="font-mono" fill="var(--muted)" letterSpacing="0.06em">
               {s.label.toUpperCase()}
             </text>
           ))}
-          {nowPts.length > 0 && <path d={band(nowPts) ?? ""} fill="#7cc6be" fillOpacity={0.32} />}
-          {proj.length > 0 && <path d={band(projPts) ?? ""} fill="#7cc6be" fillOpacity={0.22} />}
+          {nowPts.length > 0 && <path d={band(nowPts) ?? ""} fill="var(--karang)" fillOpacity={0.32} />}
+          {proj.length > 0 && <path d={band(projPts) ?? ""} fill="var(--karang)" fillOpacity={0.22} />}
           {proj.length > 0 && <path d={band(projPts) ?? ""} fill="url(#fanhatch)" />}
           <defs>
             <pattern id="fanhatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-              <line x1="0" y1="0" x2="0" y2="6" stroke="#0f6b6e" strokeOpacity="0.18" strokeWidth="1.2" />
+              <line x1="0" y1="0" x2="0" y2="6" stroke="var(--laut)" strokeOpacity="0.18" strokeWidth="1.2" />
             </pattern>
           </defs>
-          <path d={off(series.official) ?? ""} fill="none" stroke="#1e2422" strokeWidth={2} />
-          {series.official.map((d) => <circle key={d.period} cx={x(d.period)} cy={y(d.value)} r={2.6} fill="#1e2422" />)}
-          {nowPts.length > 0 && <path d={mid(nowPts) ?? ""} fill="none" stroke="#0f6b6e" strokeWidth={1.8} strokeDasharray="1.5 3" strokeLinecap="round" />}
-          {proj.length > 0 && <path d={mid(projPts) ?? ""} fill="none" stroke="#0f6b6e" strokeWidth={1.8} strokeDasharray="6 4" />}
+          <path d={off(series.official) ?? ""} fill="none" stroke="var(--ink)" strokeWidth={2} />
+          {series.official.map((d) => <circle key={d.period} cx={x(d.period)} cy={y(d.value)} r={2.6} fill="var(--ink)" />)}
+          {nowPts.length > 0 && <path d={mid(nowPts) ?? ""} fill="none" stroke="var(--laut)" strokeWidth={1.8} strokeDasharray="1.5 3" strokeLinecap="round" />}
+          {proj.length > 0 && <path d={mid(projPts) ?? ""} fill="none" stroke="var(--laut)" strokeWidth={1.8} strokeDasharray="6 4" />}
           {proj.length > 0 && (
-            <text x={x(proj[proj.length - 1].period) - 2} y={y(proj[proj.length - 1].p50) - 6} textAnchor="end" fontSize={10} className="font-mono" fill="#0f6b6e">
+            <text x={x(proj[proj.length - 1].period) - 2} y={y(proj[proj.length - 1].p50) - 6} textAnchor="end" fontSize={10} className="font-mono" fill="var(--laut)">
               {fmtCompact(proj[proj.length - 1].p50, format)}
             </text>
           )}

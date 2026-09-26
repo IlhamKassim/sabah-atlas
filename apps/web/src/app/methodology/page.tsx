@@ -42,10 +42,10 @@ export default async function MethodologyPage() {
   return (
     <Container className="py-8">
       <p className="kicker">Methodology</p>
-      <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl">How the atlas knows what it says</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">How SabahKu knows what it says</h1>
       <div className="mogah-rule mt-3" aria-hidden />
       <p className="mt-4 max-w-3xl text-muted">
-        The plain-language summary comes first in each section, then the technical detail a researcher needs to critique or reproduce it. All numbers on this page are read live from the model cards of data release <strong className="font-mono text-granite">{meta.release?.version}</strong>.
+        The plain-language summary comes first in each section, then the technical detail a researcher needs to critique or reproduce it. All numbers on this page are read live from the model cards of data release <strong className="font-mono text-ink">{meta.release?.version}</strong>.
       </p>
 
       <div className="mt-8 grid gap-10 lg:grid-cols-[200px_minmax(0,1fr)]">
@@ -71,10 +71,10 @@ export default async function MethodologyPage() {
           <p>Official statistics are the ground truth. Each dataset is downloaded in bulk (never queried live), stored as an immutable, checksummed snapshot with the publisher&apos;s own metadata, and cited with its vintage.</p>
           <div className="not-prose overflow-x-auto">
             <table className="w-full min-w-[640px] text-sm">
-              <thead><tr className="border-b border-granite/60 text-left font-mono text-[0.62rem] uppercase text-muted"><th className="py-1">Dataset</th><th>Publisher</th><th>Data as of</th><th>Last updated</th><th>Licence</th></tr></thead>
+              <thead><tr className="border-b border-ink/60 text-left font-mono text-[0.62rem] uppercase text-muted"><th className="py-1">Dataset</th><th>Publisher</th><th>Data as of</th><th>Last updated</th><th>Licence</th></tr></thead>
               <tbody>
                 {meta.sources.map((s) => (
-                  <tr key={s.id} className="border-b border-pasir-3/70 align-top">
+                  <tr key={s.id} className="border-b border-line/70 align-top">
                     <td className="py-1.5 pr-2"><a className="underline decoration-dotted" href={s.url}>{s.title}</a><span className="block font-mono text-[0.62rem] text-muted">{s.dataset_id}</span></td>
                     <td className="pr-2">{s.publisher}</td>
                     <td className="pr-2 font-mono text-xs">{s.data_as_of ?? "—"}</td>
@@ -102,10 +102,10 @@ export default async function MethodologyPage() {
           <p>{meta.indicators.length} indicators. <em>Direction</em> says whether higher is better (↑), worse (↓) or purely descriptive (·). Percentiles are direction-aware so that 100 is always best; descriptive indicators are ranked by value and never called good or bad.</p>
           <div className="not-prose overflow-x-auto">
             <table className="w-full min-w-[640px] text-sm">
-              <thead><tr className="border-b border-granite/60 text-left font-mono text-[0.62rem] uppercase text-muted"><th className="py-1">Indicator</th><th>Unit</th><th>Dir.</th><th>Years</th><th>Source</th></tr></thead>
+              <thead><tr className="border-b border-ink/60 text-left font-mono text-[0.62rem] uppercase text-muted"><th className="py-1">Indicator</th><th>Unit</th><th>Dir.</th><th>Years</th><th>Source</th></tr></thead>
               <tbody>
                 {meta.indicators.map((i) => (
-                  <tr key={i.code} className="border-b border-pasir-3/70 align-top">
+                  <tr key={i.code} className="border-b border-line/70 align-top">
                     <td className="py-1.5 pr-2">{i.label}<span className="block text-xs text-muted">{i.description}</span></td>
                     <td className="pr-2 text-xs">{i.unit}</td>
                     <td className="pr-2 font-mono">{i.direction === "up" ? "↑" : i.direction === "down" ? "↓" : "·"}</td>
@@ -140,10 +140,10 @@ export default async function MethodologyPage() {
           <p>Welfare outcomes (poverty, inequality, unemployment) are deliberately left out of the typology so that peers are structurally similar, and outcomes can then be compared against them.</p>
           <div className="not-prose">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-granite/60 text-left font-mono text-[0.62rem] uppercase text-muted"><th className="py-1">Type (rule-named)</th><th className="text-right">Districts</th><th className="pl-4">Sabah members</th></tr></thead>
+              <thead><tr className="border-b border-ink/60 text-left font-mono text-[0.62rem] uppercase text-muted"><th className="py-1">Type (rule-named)</th><th className="text-right">Districts</th><th className="pl-4">Sabah members</th></tr></thead>
               <tbody>
                 {tyClusters.map((c) => (
-                  <tr key={c.name} className="border-b border-pasir-3/70 align-top">
+                  <tr key={c.name} className="border-b border-line/70 align-top">
                     <td className="py-1.5">{c.name}</td>
                     <td className="text-right font-mono">{c.size}</td>
                     <td className="pl-4 text-xs text-muted">{c.sabah_members.map((m) => m.replace("sbh-", "").replace(/-/g, " ")).join(", ") || "—"}</td>
@@ -160,13 +160,13 @@ export default async function MethodologyPage() {
           <p>How far does a district sit above or below what its structure would typically produce, and which factors are associated with that expectation? Two models are trained on all districts × survey rounds (2019, 2022, 2024) with cross-validation grouped by district. The simpler ridge regression is kept unless LightGBM&apos;s error is at least 5% lower.</p>
           <div className="not-prose">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-granite/60 text-left font-mono text-[0.62rem] uppercase text-muted"><th className="py-1">Target</th><th>Champion</th><th className="text-right">CV R² (ridge / GBM)</th><th className="text-right">CV MAE</th><th className="text-right">MAE, Sabah</th></tr></thead>
+              <thead><tr className="border-b border-ink/60 text-left font-mono text-[0.62rem] uppercase text-muted"><th className="py-1">Target</th><th>Champion</th><th className="text-right">CV R² (ridge / GBM)</th><th className="text-right">CV MAE</th><th className="text-right">MAE, Sabah</th></tr></thead>
               <tbody>
                 {Object.entries(drTargets).map(([t, v]) => {
                   const m = v.metrics as Record<string, { r2?: number; mae?: number; mae_sabah?: number }> & { champion: string };
                   const champ = m[m.champion as unknown as string] as { mae?: number; mae_sabah?: number };
                   return (
-                    <tr key={t} className="border-b border-pasir-3/70">
+                    <tr key={t} className="border-b border-line/70">
                       <td className="py-1.5">{t === "income_median" ? "Median income (log)" : "Absolute poverty (pp)"}</td>
                       <td className="font-mono text-xs">{m.champion as unknown as string}</td>
                       <td className="text-right font-mono text-xs">{num(m.ridge?.r2, 2)} / {num(m.lightgbm?.r2, 2)}</td>
@@ -185,7 +185,7 @@ export default async function MethodologyPage() {
           <div className="not-prose overflow-x-auto">
             <table className="w-full min-w-[520px] text-sm">
               <caption className="pb-1 text-left font-mono text-[0.62rem] uppercase text-muted">Backtest: median absolute % error, nowcasting 2018–2020 from 2017</caption>
-              <thead><tr className="border-b border-granite/60 text-left font-mono text-[0.62rem] uppercase text-muted"><th className="py-1">Model</th><th className="text-right">1 yr</th><th className="text-right">2 yr</th><th className="text-right">3 yr</th></tr></thead>
+              <thead><tr className="border-b border-ink/60 text-left font-mono text-[0.62rem] uppercase text-muted"><th className="py-1">Model</th><th className="text-right">1 yr</th><th className="text-right">2 yr</th><th className="text-right">3 yr</th></tr></thead>
               <tbody>
                 {[
                   ["chosen_model_national", "Atlas model, all districts"],
@@ -193,7 +193,7 @@ export default async function MethodologyPage() {
                   ["industry_mix_only_national", "Industry mix only (λ = 0)"],
                   ["naive_constant_share_national", "Naive: constant share of state GDP"],
                 ].map(([k, label]) => (
-                  <tr key={k} className="border-b border-pasir-3/70">
+                  <tr key={k} className="border-b border-line/70">
                     <td className="py-1.5">{label}</td>
                     {["1", "2", "3"].map((h) => <td key={h} className="text-right font-mono text-xs">{num(gdp.median_ape_by_horizon?.[k]?.[h])}%</td>)}
                   </tr>
@@ -223,7 +223,7 @@ export default async function MethodologyPage() {
 
           <h2 id="reproduce">Reproduce everything</h2>
           <p>The code is open (MIT). One command rebuilds the whole atlas from the public sources:</p>
-          <pre className="not-prose overflow-x-auto bg-malam p-3 font-mono text-xs text-pasir">git clone https://github.com/IlhamKassim/sabah-atlas{"\n"}cd sabah-atlas && docker compose up -d db && uv sync{"\n"}uv run atlas build   # ingest → harmonise → gold → models → publish → load</pre>
+          <pre className="not-prose overflow-x-auto bg-night p-3 font-mono text-xs text-on-night">git clone https://github.com/IlhamKassim/sabah-atlas{"\n"}cd sabah-atlas && docker compose up -d db && uv sync{"\n"}uv run atlas build   # ingest → harmonise → gold → models → publish → load</pre>
           <p>Model versions in this release: {meta.release?.manifest.model_versions.map((v) => <code key={v} className="mr-1">{v}</code>)}</p>
         </div>
       </div>
@@ -234,8 +234,8 @@ export default async function MethodologyPage() {
 function Limits({ card }: { card?: Card }) {
   if (!card?.limitations?.length) return null;
   return (
-    <div className="not-prose mt-3 border-l-4 border-kunyit bg-pasir-2/60 p-3 text-sm">
-      <p className="font-mono text-[0.66rem] uppercase tracking-wider text-[#7a5510]">Known limitations · {card.model_version}</p>
+    <div className="not-prose mt-3 border-l-4 border-kunyit bg-panel/60 p-3 text-sm">
+      <p className="font-mono text-[0.66rem] uppercase tracking-wider text-kunyit-ink">Known limitations · {card.model_version}</p>
       <ul className="mt-1 list-disc space-y-0.5 pl-5">{card.limitations.map((l) => <li key={l}>{l}</li>)}</ul>
     </div>
   );

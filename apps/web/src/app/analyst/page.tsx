@@ -32,7 +32,7 @@ export default async function AnalystPage({ searchParams }: PageProps<"/analyst"
   return (
     <Container className="py-8">
       <p className="kicker">Advise</p>
-      <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl">AI Analyst</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">AI Analyst</h1>
       <div className="mogah-rule mt-3" aria-hidden />
       <p className="mt-4 max-w-3xl text-muted">
         Ask about any Sabah district. The Analyst can only use the atlas&apos;s own data and a curated document library, through read-only tools. Every sentence that states a fact carries a citation, and a validator checks each cited number against the database before you see it. Answers here are <strong>AI-generated and unreviewed</strong>; the brief library below holds briefs that go through human review.
@@ -55,7 +55,7 @@ export default async function AnalystPage({ searchParams }: PageProps<"/analyst"
           </section>
           <section>
             <SectionTitle kicker="Brief library" title="District briefs" />
-            <ul className="divide-y divide-pasir-3 border-y border-pasir-3 text-sm">
+            <ul className="divide-y divide-line border-y border-line text-sm">
               {districts.map((d) => {
                 const b = bySlug[d.slug];
                 return (
@@ -92,10 +92,10 @@ function EvalPanel({ r }: { r: EvalReport }) {
         </div>
       </div>
       <table className="mt-3 w-full text-xs">
-        <thead><tr className="border-b border-granite/50 text-left font-mono text-[0.6rem] uppercase text-muted"><th className="py-1">Category</th><th className="text-right">Qs</th><th className="text-right">Checks</th></tr></thead>
+        <thead><tr className="border-b border-ink/50 text-left font-mono text-[0.6rem] uppercase text-muted"><th className="py-1">Category</th><th className="text-right">Qs</th><th className="text-right">Checks</th></tr></thead>
         <tbody>
           {Object.entries(r.by_category).map(([k, v]) => (
-            <tr key={k} className="border-b border-pasir-3/70"><td className="py-1">{k}</td><td className="text-right font-mono">{v.n}</td><td className="text-right font-mono">{v.checks_passed}/{v.checks_total}</td></tr>
+            <tr key={k} className="border-b border-line/70"><td className="py-1">{k}</td><td className="text-right font-mono">{v.n}</td><td className="text-right font-mono">{v.checks_passed}/{v.checks_total}</td></tr>
           ))}
         </tbody>
       </table>

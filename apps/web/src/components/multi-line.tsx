@@ -6,7 +6,7 @@ import { fmtCompact } from "@/lib/format";
 
 import { ChartFrame } from "./chart-frame";
 
-export const COMPARE_COLORS = ["#0f6b6e", "#a3362b", "#d8a031", "#2e5b3c"];
+export const COMPARE_COLORS = ["var(--laut)", "var(--mogah)", "var(--kunyit)", "var(--hutan)"];
 
 /** Small-multiple trajectory chart for up to four districts. */
 export function MultiLine({ title, series, names, format, filename }: {
@@ -31,12 +31,12 @@ export function MultiLine({ title, series, names, format, filename }: {
       <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={title}>
         {y.ticks(4).map((t) => (
           <g key={t}>
-            <line x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} stroke="#ded4c0" strokeWidth={0.7} />
-            <text x={m.l - 4} y={y(t)} dy="0.32em" textAnchor="end" fontSize={8.5} className="font-mono" fill="#5b625e">{fmtCompact(t, format)}</text>
+            <line x1={m.l} x2={W - m.r} y1={y(t)} y2={y(t)} stroke="var(--line)" strokeWidth={0.7} />
+            <text x={m.l - 4} y={y(t)} dy="0.32em" textAnchor="end" fontSize={8.5} className="font-mono" fill="var(--muted)">{fmtCompact(t, format)}</text>
           </g>
         ))}
         {years.map((t, i) => (i % Math.ceil(years.length / 6) === 0 || i === years.length - 1) && (
-          <text key={t} x={x(t)} y={H - 5} textAnchor="middle" fontSize={8.5} className="font-mono" fill="#5b625e">{t}</text>
+          <text key={t} x={x(t)} y={H - 5} textAnchor="middle" fontSize={8.5} className="font-mono" fill="var(--muted)">{t}</text>
         ))}
         {ids.map((k, i) => (
           <g key={k}>

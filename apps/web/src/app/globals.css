@@ -1,53 +1,102 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------
-   Tenun Data — design tokens (plan §08). Colours are named after
-   Sabah's landscape; meaning is never encoded by colour alone.
+   SabahKu design tokens. Colours are named after Sabah's landscape;
+   meaning is never encoded by colour alone.
+   Default theme is Malam (night); Siang (day) is the light theme.
    ------------------------------------------------------------------ */
 :root {
-  --granite: #1e2422;      /* Kinabalu Granite — text, ink */
-  --malam: #0f1a1f;        /* Malam Borneo — night backgrounds */
-  --pasir: #f3ede1;        /* Pasir — paper */
-  --pasir-2: #ebe3d3;      /* paper, one step down (panels) */
-  --pasir-3: #ded4c0;      /* rules, borders */
-  --laut: #0f6b6e;         /* Laut Sulu — primary, above benchmark */
-  --laut-deep: #0b3a45;
-  --karang: #7cc6be;       /* Karang — light accent */
-  --hutan: #2e5b3c;        /* Hutan — secondary */
-  --mogah: #a3362b;        /* Merah Mogah — below benchmark */
-  --kunyit: #d8a031;       /* Kunyit — highlight, lights */
-  --muted: #5b625e;        /* secondary text on paper (AA on pasir) */
-  --faint: #7d827c;
+  color-scheme: dark;
+  --bg: #0a1614;           /* Malam Borneo: rainforest at night */
+  --panel: #10201d;        /* one step up (sidebars, cards) */
+  --panel-2: #162a26;
+  --line: #22403a;         /* rules, borders */
+  --field: #0d1b19;        /* inputs */
+  --ink: #e6eee8;          /* Kabus: morning mist on Kinabalu */
+  --muted: #95aaa3;
+  --faint: #6c837c;
+  --nodata: #2a3a36;
+  --sea: #0c1d22;          /* map water */
+  --sea-dot: #1d5a63;      /* animated sea texture */
+  --night: #07110f;        /* always dark: tooltips, code */
+  --on-night: #e6eee8;
 
-  --div-west: #1f6f78;
-  --div-interior: #2e5b3c;
-  --div-kudat: #a34a2b;
-  --div-sandakan: #7a5c2e;
-  --div-tawau: #2f5f7a;
+  --laut: #3cc0b4;         /* Laut Semporna: primary, above benchmark */
+  --laut-deep: #8fe0d6;
+  --karang: #7fd6cb;       /* coral shallows: light accent */
+  --hutan: #5fae76;        /* Hutan Crocker: rainforest green */
+  --mogah: #ec6f5a;        /* Rafflesia: below benchmark */
+  --kunyit: #f2c14e;       /* Fajar Kinabalu: dawn gold, highlight */
+  --kunyit-ink: #f2c14e;
+  --senja: #f28c5b;        /* Senja Tanjung Aru: sunset */
+
+  --div-west: #f28c5b;     /* West Coast: Tanjung Aru sunset */
+  --div-interior: #5fae76; /* Interior: Crocker Range rainforest */
+  --div-kudat: #e3c15f;    /* Kudat: Tip of Borneo sand */
+  --div-sandakan: #b58ad6; /* Sandakan: Kinabatangan orchids */
+  --div-tawau: #3cc0b4;    /* Tawau: Semporna sea */
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4efe4;           /* Pasir: Tanjung Aru sand */
+  --panel: #ece5d6;
+  --panel-2: #e3dac7;
+  --line: #d6cbb4;
+  --field: #fbf8f1;
+  --ink: #16241f;
+  --muted: #56645e;        /* AA on bg */
+  --faint: #7b857f;
+  --nodata: #ddd5c4;
+  --sea: #dce9e6;
+  --sea-dot: #a9cdc8;
+  --night: #0f1d1a;
+  --on-night: #eef3ef;
+
+  --laut: #0d7470;
+  --laut-deep: #0a4b4c;
+  --karang: #5fb8ad;
+  --hutan: #2f6b43;
+  --mogah: #b23b2c;
+  --kunyit: #d9a22b;
+  --kunyit-ink: #7a5510;
+  --senja: #c85f2c;
+
+  --div-west: #d9703f;
+  --div-interior: #3f8a57;
+  --div-kudat: #c79b2c;
+  --div-sandakan: #8e62b3;
+  --div-tawau: #1f9a90;
 }
 
 @theme inline {
-  --color-granite: var(--granite);
-  --color-malam: var(--malam);
-  --color-pasir: var(--pasir);
-  --color-pasir-2: var(--pasir-2);
-  --color-pasir-3: var(--pasir-3);
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-line: var(--line);
+  --color-field: var(--field);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-sea: var(--sea);
+  --color-night: var(--night);
+  --color-on-night: var(--on-night);
   --color-laut: var(--laut);
   --color-laut-deep: var(--laut-deep);
   --color-karang: var(--karang);
   --color-hutan: var(--hutan);
   --color-mogah: var(--mogah);
   --color-kunyit: var(--kunyit);
-  --color-muted: var(--muted);
-  --color-faint: var(--faint);
-  --font-serif: var(--font-plex-serif), Georgia, serif;
+  --color-kunyit-ink: var(--kunyit-ink);
+  --color-senja: var(--senja);
+  --font-display: var(--font-grotesk), var(--font-plex-sans), system-ui, sans-serif;
   --font-sans: var(--font-plex-sans), system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 }
 
 html {
-  background: var(--pasir);
-  color: var(--granite);
+  background: var(--bg);
+  color: var(--ink);
 }
 
 body {
@@ -58,7 +107,7 @@ body {
 
 ::selection {
   background: var(--karang);
-  color: var(--malam);
+  color: var(--night);
 }
 
 :focus-visible {
@@ -79,33 +128,28 @@ body {
   color: var(--mogah);
 }
 
-/* Mogah rule — black band with red/yellow pin-stripes, used under section titles. */
+/* Accent rule under section titles: the five division colours. */
 .mogah-rule {
-  height: 7px;
-  width: 236px;
+  height: 3px;
+  width: 120px;
   max-width: 60%;
-  background:
-    linear-gradient(90deg,
-      var(--granite) 0 44px, var(--kunyit) 44px 48px, var(--granite) 48px 56px,
-      var(--mogah) 56px 110px, var(--granite) 110px 118px, var(--pasir) 118px 120px,
-      var(--granite) 120px 128px, var(--laut) 128px 190px, var(--granite) 190px 198px,
-      var(--kunyit) 198px 202px, var(--granite) 202px 236px);
+  background: linear-gradient(90deg,
+    var(--div-west) 0 20%, var(--div-interior) 20% 40%, var(--div-kudat) 40% 60%,
+    var(--div-sandakan) 60% 80%, var(--div-tawau) 80% 100%);
 }
-
 .mogah-rule--full {
   width: 100%;
   max-width: none;
-  height: 5px;
+  height: 2px;
   background: linear-gradient(90deg,
-    var(--mogah) 0 30%, var(--kunyit) 30% 33%, var(--laut) 33% 73%, var(--hutan) 73% 100%);
+    var(--div-west) 0 20%, var(--div-interior) 20% 40%, var(--div-kudat) 40% 60%,
+    var(--div-sandakan) 60% 80%, var(--div-tawau) 80% 100%);
 }
 
-/* Dastar framing: panel with an inset supplementary-weft border. */
+/* Panel: framed card. */
 .dastar {
-  background: color-mix(in oklab, var(--pasir) 70%, white);
-  border: 1px solid var(--pasir-3);
-  box-shadow: inset 0 0 0 3px color-mix(in oklab, var(--pasir) 70%, white),
-    inset 0 0 0 4px color-mix(in oklab, var(--pasir-3) 70%, transparent);
+  background: var(--panel);
+  border: 1px solid var(--line);
 }
 
 /* Source line beneath every headline number. */
@@ -120,14 +164,6 @@ body {
 .modelled-hatch {
   background-image: repeating-linear-gradient(135deg,
     color-mix(in oklab, currentColor 30%, transparent) 0 2px, transparent 2px 6px);
-}
-
-/* Kinabalu contour texture for dark hero panels. */
-.contours {
-  background-color: var(--malam);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Cg fill='none' stroke='%237cc6be' stroke-opacity='0.09'%3E%3Ccircle cx='470' cy='120' r='40'/%3E%3Ccircle cx='470' cy='120' r='80'/%3E%3Ccircle cx='470' cy='120' r='125'/%3E%3Ccircle cx='470' cy='120' r='175'/%3E%3Ccircle cx='470' cy='120' r='230'/%3E%3Ccircle cx='470' cy='120' r='290'/%3E%3Ccircle cx='470' cy='120' r='355'/%3E%3Ccircle cx='470' cy='120' r='425'/%3E%3C/g%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right -120px top -80px;
 }
 
 /* Rungus beadwork dots — loading state. */
@@ -160,16 +196,88 @@ body {
 
 /* Prose for methodology / long-form pages. */
 .prose-atlas p { margin: 0 0 0.9em; line-height: 1.65; }
-.prose-atlas h2 { font-family: var(--font-serif); font-weight: 600; font-size: 1.45rem; margin: 1.6em 0 0.5em; color: var(--laut-deep); }
-.prose-atlas h3 { font-family: var(--font-serif); font-weight: 600; font-size: 1.15rem; margin: 1.3em 0 0.4em; }
+.prose-atlas h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.45rem; margin: 1.6em 0 0.5em; color: var(--laut-deep); }
+.prose-atlas h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.15rem; margin: 1.3em 0 0.4em; }
 .prose-atlas ul { list-style: disc; padding-left: 1.2em; margin: 0 0 1em; }
 .prose-atlas li { margin: 0.25em 0; line-height: 1.55; }
-.prose-atlas code { font-family: var(--font-mono); font-size: 0.85em; background: var(--pasir-2); padding: 0.05em 0.3em; }
+.prose-atlas code { font-family: var(--font-mono); font-size: 0.85em; background: var(--panel); padding: 0.05em 0.3em; }
 .prose-atlas a { color: var(--laut); text-decoration: underline; text-underline-offset: 2px; }
 
 @media print {
+  :root, :root[data-theme] {
+    color-scheme: light;
+    --bg: #f4efe4;           /* Pasir: Tanjung Aru sand */
+    --panel: #ece5d6;
+    --panel-2: #e3dac7;
+    --line: #d6cbb4;
+    --field: #fbf8f1;
+    --ink: #16241f;
+    --muted: #56645e;        /* AA on bg */
+    --faint: #7b857f;
+    --nodata: #ddd5c4;
+    --sea: #dce9e6;
+    --sea-dot: #a9cdc8;
+    --night: #0f1d1a;
+    --on-night: #eef3ef;
+  
+    --laut: #0d7470;
+    --laut-deep: #0a4b4c;
+    --karang: #5fb8ad;
+    --hutan: #2f6b43;
+    --mogah: #b23b2c;
+    --kunyit: #d9a22b;
+    --kunyit-ink: #7a5510;
+    --senja: #c85f2c;
+  
+    --div-west: #d9703f;
+    --div-interior: #3f8a57;
+    --div-kudat: #c79b2c;
+    --div-sandakan: #8e62b3;
+    --div-tawau: #1f9a90;
+  }
   .no-print { display: none !important; }
   html, body { background: white; }
-  .dastar { box-shadow: none; background: white; }
+  .dastar { background: white; }
   a { color: inherit; text-decoration: none; }
+}
+
+/* Explorer controls (a layer, so utilities such as pl-8 still win) */
+@layer components {
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0.22rem 0.5rem;
+    font-size: 0.76rem;
+    color: var(--ink);
+    background: transparent;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .chip:hover { border-color: var(--muted); }
+  .chip--on { border-color: var(--laut); background: color-mix(in oklab, var(--laut) 16%, transparent); }
+  .chip-count { font-family: var(--font-mono); font-size: 0.64rem; color: var(--faint); }
+  .chip--on .chip-count { color: var(--laut); }
+
+  .field {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--field);
+    color: var(--ink);
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+  .field:focus { border-color: var(--laut); outline: none; }
+
+  .map-pill {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: color-mix(in oklab, var(--panel) 88%, transparent);
+    backdrop-filter: blur(6px);
+    padding: 0.2rem 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
 }

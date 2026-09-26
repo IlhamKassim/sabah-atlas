@@ -9,11 +9,11 @@ export default function AboutPage() {
   return (
     <Container className="py-8">
       <p className="kicker">About</p>
-      <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl">Numbers a planner can defend</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Numbers a planner can defend</h1>
       <div className="mogah-rule mt-3" aria-hidden />
       <div className="prose-atlas mt-6 max-w-3xl">
         <p>
-          Sabah is one of Malaysia&apos;s most unequal regions internally, yet the data describing those gaps is scattered across survey reports, spreadsheets and satellite archives. Atlas Ekonomi Sabah brings each district&apos;s structure, trajectory and peers into one place, with the reasoning shown, for state and district planners, researchers, elected representatives&apos; offices, journalists and NGOs.
+          Sabah is one of Malaysia&apos;s most unequal regions internally, yet the data describing those gaps is scattered across survey reports, spreadsheets and satellite archives. SabahKu (&ldquo;my Sabah&rdquo;) brings each district&apos;s structure, trajectory and peers into one place, with the reasoning shown, for state and district planners, researchers, elected representatives&apos; offices, journalists and NGOs.
         </p>
         <h2>What it is, and is not</h2>
         <ul>
@@ -24,7 +24,7 @@ export default function AboutPage() {
         </ul>
         <h2>Design and cultural credits</h2>
         <p>
-          The visual system, <em>Tenun Data</em> (woven data), borrows the <em>structure</em> of Sabah&apos;s textiles, not their patterns. The district <em>jalur</em> and section rules follow the banding of <strong>mogah</strong> sarongs woven by Iranun and Bajau communities; loading states echo the ordered dots of <strong>Rungus beadwork</strong> from Kudat; framed panels recall the supplementary-weft borders of <strong>dastar</strong> weaving; the contour texture on dark panels is drawn from Mount Kinabalu&apos;s topography.
+          The colours come from Sabah&apos;s landscape: the sunset at Tanjung Aru for the West Coast, the Crocker Range rainforest for the Interior, the sand at the Tip of Borneo for Kudat, Kinabatangan orchids for Sandakan and the Semporna sea for Tawau. The mark is Mount Kinabalu&apos;s summit above the sea. The district <em>jalur</em> strips borrow the <em>structure</em> of Sabah&apos;s textiles, not their patterns: their banding follows the <strong>mogah</strong> sarongs woven by Iranun and Bajau communities, and loading states echo the ordered dots of <strong>Rungus beadwork</strong> from Kudat.
         </p>
         <p>
           These are abstracted geometries, not reproductions of specific ceremonial motifs. We credit the communities whose craft informed them, and we intend to have the motif set reviewed by a cultural practitioner or a heritage academic at Universiti Malaysia Sabah before the version 1.0 launch. If you are one, we would value your advice.

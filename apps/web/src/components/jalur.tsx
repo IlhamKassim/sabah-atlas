@@ -1,4 +1,5 @@
 import { JALUR_GROUPS, JALUR_SHORT, type JalurCell, jalurColor } from "@/lib/jalur";
+import { LAUT, MOGAH_LAUT } from "@/lib/scales";
 
 /**
  * Signature visual: a district's jalur — a compact strip of bands, one per indicator,
@@ -25,28 +26,28 @@ export function Jalur({
   const parts: React.ReactNode[] = [];
   JALUR_GROUPS.forEach((g, gi) => {
     if (gi > 0) {
-      parts.push(<rect key={`r-${g.key}`} x={x + gap / 2} y={labelH} width={rule} height={height} fill="#1e2422" />);
+      parts.push(<rect key={`r-${g.key}`} x={x + gap / 2} y={labelH} width={rule} height={height} fill="var(--ink)" />);
       x += rule + gap * 2;
     }
     if (showLabels) {
       parts.push(
-        <text key={`g-${g.key}`} x={x} y={10} fontSize={9} className="font-mono" fill="#a3362b" letterSpacing="0.06em">
+        <text key={`g-${g.key}`} x={x} y={10} fontSize={9} className="font-mono" fill="var(--mogah)" letterSpacing="0.06em">
           {g.label.toUpperCase()}
         </text>,
       );
     }
     g.codes.forEach((code) => {
       const c = cells[code];
-      const fill = c ? jalurColor(c) : "#e4ddcf";
+      const fill = c ? jalurColor(c) : "var(--nodata)";
       parts.push(
         <g key={code}>
-          <rect x={x} y={labelH} width={cellWidth} height={height} fill={fill} stroke="#1e2422" strokeOpacity={0.12}>
+          <rect x={x} y={labelH} width={cellWidth} height={height} fill={fill} stroke="var(--ink)" strokeOpacity={0.12}>
             <title>
               {`${JALUR_SHORT[code]}: ${c?.pct == null ? "no data" : `${Math.round(c.pct)}th percentile in Sabah`}${c?.period ? ` (${c.period})` : ""}${c?.neutral ? " · descriptive" : ""}`}
             </title>
           </rect>
           {c?.flagged && (
-            <circle cx={x + cellWidth - 4} cy={labelH + 4} r={1.8} fill="#1e2422" />
+            <circle cx={x + cellWidth - 4} cy={labelH + 4} r={1.8} fill="var(--ink)" />
           )}
           {showLabels && <CellLabel x={x + cellWidth / 2} y={labelH - 5} text={JALUR_SHORT[code]} />}
         </g>,
@@ -73,7 +74,7 @@ function CellLabel({ x, y, text }: { x: number; y: number; text: string }) {
   const cut = text.length > 8 ? text.lastIndexOf(" ") : -1;
   const lines = cut > 0 ? [text.slice(0, cut), text.slice(cut + 1)] : [text];
   return (
-    <text x={x} y={y} fontSize={8} textAnchor="middle" fill="#5b625e" className="font-mono">
+    <text x={x} y={y} fontSize={8} textAnchor="middle" fill="var(--muted)" className="font-mono">
       {lines.map((l, i) => (
         <tspan key={i} x={x} dy={i === 0 ? -(lines.length - 1) * 8.5 : 8.5}>{l}</tspan>
       ))}
@@ -82,7 +83,7 @@ function CellLabel({ x, y, text }: { x: number; y: number; text: string }) {
 }
 
 export function JalurLegend() {
-  const stops = ["#a3362b", "#d39c8b", "#f3ede1", "#83bbb4", "#0f6b6e"];
+  const stops = [0, 3, 5, 7, 10].map((i) => MOGAH_LAUT[i]);
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[0.66rem] text-muted">
       <span className="flex items-center gap-1.5">
@@ -90,11 +91,11 @@ export function JalurLegend() {
         <span className="ml-1">worse ← percentile in Sabah → better</span>
       </span>
       <span className="flex items-center gap-1.5">
-        {["#d3e3dc", "#6bb3ad", "#16686d", "#0b3a45"].map((s) => <span key={s} className="inline-block h-3 w-4" style={{ background: s }} />)}
+        {[1, 4, 7, 10].map((i) => LAUT[i]).map((s) => <span key={s} className="inline-block h-3 w-4" style={{ background: s }} />)}
         <span className="ml-1">structure: lower → higher (not good/bad)</span>
       </span>
       <span className="flex items-center gap-1.5">
-        <svg width="10" height="10" aria-hidden><circle cx="5" cy="5" r="2" fill="#1e2422" /></svg> boundary change
+        <svg width="10" height="10" aria-hidden><circle cx="5" cy="5" r="2" fill="var(--ink)" /></svg> boundary change
       </span>
     </div>
   );

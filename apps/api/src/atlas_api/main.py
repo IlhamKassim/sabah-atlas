@@ -1,4 +1,4 @@
-"""Atlas Ekonomi Sabah read API (v1).
+"""SabahKu read API (v1).
 
 Every read endpoint is a pure function of the loaded data release, so responses
 carry a strong ETag derived from the release hash and can be cached aggressively.
@@ -19,7 +19,7 @@ from atlas_api import queries as q
 from atlas_api.analyst_routes import router as analyst_router
 
 app = FastAPI(
-    title="Atlas Ekonomi Sabah API",
+    title="SabahKu API",
     version="1.0",
     description=(
         "Open API for district-level economic indicators, diagnostics and projections for "
@@ -145,7 +145,7 @@ def export_csv(key: str) -> StreamingResponse:
         w.writerow([d["id"], d["name"], r["indicator_code"], r["period"], r["value"],
                     r["is_modelled"], r["quality_flag"] or "", r["source_id"]])
     rel = q.release()
-    buf.write(f"# Atlas Ekonomi Sabah data release {rel['version'] if rel else 'dev'}; "
+    buf.write(f"# SabahKu data release {rel['version'] if rel else 'dev'}; "
               "CC BY 4.0; cite sources listed at /v1/meta\n")
     return StreamingResponse(iter([buf.getvalue()]), media_type="text/csv", headers={
         "Content-Disposition": f'attachment; filename="{d["slug"]}.csv"'})
