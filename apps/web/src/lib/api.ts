@@ -177,6 +177,15 @@ export interface Meta {
   errata: { source_id: string; district_id: string; period: number; indicator?: string; found: string; reason: string }[];
 }
 
+export interface BriefSummary { id: string; district_id: string; slug: string; name: string; division: string; status: "draft" | "reviewed" | "rejected"; reviewer: string | null; reviewed_at: string | null; created_at: string; model_version: string; citation_validity: number | null }
+export interface Brief extends BriefSummary { body_md: string; citations: import("@/components/cited-markdown").Citation[]; validation: { citations_total: number; citations_valid: number; citation_validity: number; stripped: { sentence: string; reason: string }[] }; release: string; review_note: string | null }
+export interface EvalReport {
+  run_at: string; model: string; judge: string; release: string; questions: number; citation_validity: number | null; citations: number;
+  target_validity: number; meets_target: boolean; factual_checks: number | null; usefulness_mean: number | null; sentences_stripped: number;
+  median_latency_ms: number; errors: number; by_category: Record<string, { n: number; checks_passed: number; checks_total: number }>;
+  results: { id: string; category: string; question: string; checks_passed: number; checks_total: number; citations_total: number; citations_valid: number; usefulness: number | null; error: string | null }[];
+}
+
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
@@ -207,6 +216,10 @@ export const api = {
     get<{ district_id: string; slug: string; name: string; division: string; payload: NonNullable<Analytics[K]>; model_version: string }[]>(
       `/v1/analytics/${kind}`,
     ),
+  analystStatus: () => get<{ available: boolean; model?: string; reason?: string }>("/v1/analyst/status", 60),
+  briefs: () => get<BriefSummary[]>("/v1/briefs", 60),
+  brief: (key: string) => get<Brief>(`/v1/briefs/${encodeURIComponent(key)}`, 60),
+  analystEval: () => get<EvalReport>("/v1/analyst/eval", 300),
   modelCards: () => get<Record<string, unknown>[]>("/v1/model-cards", 3600),
 };
 

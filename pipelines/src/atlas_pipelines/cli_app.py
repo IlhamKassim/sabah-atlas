@@ -59,6 +59,41 @@ def publish() -> None:
     _show(run())
 
 
+@app.command("corpus")
+def corpus_cmd(embed: bool = True) -> None:
+    """Fetch, extract, chunk and index the Analyst's document corpus."""
+    from atlas_pipelines.corpus import run
+
+    _show(run(embed=embed))
+
+
+@app.command()
+def briefs(district: str = typer.Option(None, help="One district slug; default all 27"),
+           force: bool = False) -> None:
+    """Generate AI Analyst district briefs (stored as drafts for human review)."""
+    from atlas_api.analyst.briefs import generate_all
+
+    _show(generate_all(only=district, force=force))
+
+
+@app.command("review")
+def review_cmd(district: str, approve: bool = typer.Option(True, "--approve/--reject"),
+               reviewer: str = typer.Option(..., help="Reviewer name, recorded with the brief"),
+               note: str = "") -> None:
+    """Mark a district's latest brief reviewed (or rejected)."""
+    from atlas_api.analyst.briefs import review
+
+    _show(review(district, approve=approve, reviewer=reviewer, note=note))
+
+
+@app.command("eval")
+def eval_cmd(limit: int = typer.Option(None, help="Run only the first N questions")) -> None:
+    """Run the Analyst evaluation set and write the report."""
+    from atlas_api.analyst.evaluate import run
+
+    _show(run(limit=limit))
+
+
 @app.command()
 def build(skip_ingest: bool = False) -> None:
     """Run the whole pipeline end to end."""

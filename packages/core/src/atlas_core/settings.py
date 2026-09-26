@@ -3,9 +3,12 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
+# Provider SDKs (Azure OpenAI, Anthropic, Earthdata) read os.environ directly.
+load_dotenv(REPO_ROOT / ".env", override=False)
 
 
 class Settings(BaseSettings):

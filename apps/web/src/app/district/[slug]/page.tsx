@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { CiteButton } from "@/components/cite-button";
+import { CitedMarkdown } from "@/components/cited-markdown";
 import { DriversChart } from "@/components/drivers-chart";
 import { FanChart } from "@/components/fan-chart";
 import { Jalur, JalurLegend } from "@/components/jalur";
@@ -42,7 +43,9 @@ const TABLE_ORDER = ["welfare", "labour", "access", "structure", "demography", "
 
 export default async function DistrictPage({ params }: PageProps<"/district/[slug]">) {
   const { slug } = await params;
-  const [p, cat, national, geo] = await Promise.all([load(slug), catalog(), api.districts("national"), projectSabah(360, 260, 6)]);
+  const [p, cat, national, geo, brief] = await Promise.all([
+    load(slug), catalog(), api.districts("national"), projectSabah(360, 260, 6), api.brief(slug).catch(() => null),
+  ]);
   const { indicators: ind, sources } = cat;
   const names = Object.fromEntries(national.map((d) => [d.id, { name: d.name, state: d.state, slug: d.slug }]));
   const d = p.district;
@@ -285,7 +288,15 @@ export default async function DistrictPage({ params }: PageProps<"/district/[slu
         <section className="mt-12">
           <SectionTitle kicker="Advise" title="AI Analyst brief" />
           <div className="dastar max-w-3xl p-4 text-sm">
-            <p>Reviewed district briefs cite a data point or document for every sentence. <Link className="underline" href={`/analyst?district=${d.slug}`}>Ask the Analyst about {d.name}</Link>.</p>
+            {brief ? (
+              <>
+                <p className="mb-2"><Pill tone={brief.status === "reviewed" ? "good" : "warn"}>{brief.status === "reviewed" ? `Reviewed by ${brief.reviewer}` : "AI-generated · unreviewed draft"}</Pill></p>
+                <CitedMarkdown text={brief.body_md.split("## Strengths")[0]} citations={brief.citations} />
+                <p className="mt-2"><Link className="underline" href={`/district/${d.slug}/brief`}>Read the full brief with sources</Link> · <Link className="underline" href={`/analyst?district=${d.slug}`}>Ask a follow-up</Link></p>
+              </>
+            ) : (
+              <p>No brief has been generated for {d.name} yet. <Link className="underline" href={`/analyst?district=${d.slug}`}>Ask the Analyst about {d.name}</Link>.</p>
+            )}
           </div>
         </section>
       </Container>

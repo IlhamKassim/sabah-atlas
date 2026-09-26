@@ -38,6 +38,10 @@ select = ["E", "F", "I", "B", "UP"]
 [tool.ruff.lint.per-file-ignores]
 "pipelines/scripts/*" = ["B905", "F841"]
 "pipelines/src/atlas_pipelines/cli_app.py" = ["B008"]
+# Long SQL, prompt and fact-label strings read better unwrapped.
+"apps/api/src/atlas_api/analyst/*" = ["E501"]
+"apps/api/src/atlas_api/analyst_routes.py" = ["E501"]
+"pipelines/src/atlas_pipelines/corpus.py" = ["E501"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["atlas_core", "atlas_pipelines", "atlas_ml", "atlas_api"]

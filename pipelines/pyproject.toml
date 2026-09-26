@@ -14,10 +14,12 @@ dependencies = [
     "psycopg[binary]>=3.2",
     "geoalchemy2>=0.16",
     "typer>=0.13",
+    "pypdf>=6.19.0",
+    "beautifulsoup4>=4.15.0",
 ]
 
 [project.scripts]
-atlas = "atlas_pipelines.cli:app"
+atlas = "atlas_pipelines.cli_app:app"
 
 [build-system]
 requires = ["hatchling"]

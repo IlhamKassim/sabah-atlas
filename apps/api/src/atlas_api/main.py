@@ -16,6 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse, StreamingResponse
 
 from atlas_api import queries as q
+from atlas_api.analyst_routes import router as analyst_router
 
 app = FastAPI(
     title="Atlas Ekonomi Sabah API",
@@ -159,3 +160,4 @@ def releases() -> dict:
 
 
 app.include_router(v1)
+app.include_router(analyst_router)
