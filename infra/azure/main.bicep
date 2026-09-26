@@ -24,6 +24,8 @@ param earthdataToken string = ''
 param reviewToken string
 param apiImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
 param webImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
+@description('Custom domains already bound to the web app ([{name, certificateId, bindingType}]); deploy.sh passes the live list so redeploys keep them')
+param webCustomDomains array = []
 param budgetStartDate string = '${utcNow('yyyy-MM')}-01'
 
 var uniq = uniqueString(resourceGroup().id)
@@ -194,7 +196,7 @@ resource web 'Microsoft.App/containerApps@2024-03-01' = {
   properties: {
     managedEnvironmentId: env.id
     configuration: {
-      ingress: { external: true, targetPort: 3000, transport: 'auto' }
+      ingress: { external: true, targetPort: 3000, transport: 'auto', customDomains: webCustomDomains }
       registries: [ { server: acr.properties.loginServer, identity: identity.id } ]
     }
     template: {

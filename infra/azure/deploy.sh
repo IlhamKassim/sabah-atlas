@@ -31,10 +31,13 @@ echo "ACR Basic, Log Analytics + App Insights, weekly pipeline job, budget."
 ask "Proceed?" || exit 0
 
 params() {  # $1 = api image, $2 = web image
-  uv run --quiet python - "$TMP/params.json" "$1" "$2" "$LOC" "$BUDGET" <<'EOF'
+  # Keep custom domains bound outside Bicep (managed certificates need the DNS to exist first).
+  az containerapp show -g "$RG" -n atlas-web --query properties.configuration.ingress.customDomains \
+    -o json 2>/dev/null > "$TMP/domains.json" || echo "[]" > "$TMP/domains.json"
+  uv run --quiet python - "$TMP/params.json" "$1" "$2" "$LOC" "$BUDGET" "$TMP/domains.json" <<'EOF'
 import json, sys
 from dotenv import dotenv_values
-out, api, web, loc, budget = sys.argv[1:]
+out, api, web, loc, budget, domains = sys.argv[1:]
 v = dotenv_values(".env")
 g = lambda k: v.get(k) or ""
 p = {"prefix": "atlas", "location": loc, "alertEmail": g("ATLAS_ALERT_EMAIL"), "monthlyBudget": int(budget),
@@ -43,6 +46,7 @@ p = {"prefix": "atlas", "location": loc, "alertEmail": g("ATLAS_ALERT_EMAIL"), "
      "llmDeployment": g("ATLAS_LLM_DEPLOYMENT"), "routerDeployment": g("ATLAS_LLM_ROUTER_DEPLOYMENT"),
      "briefDeployment": g("ATLAS_BRIEF_DEPLOYMENT"), "embedDeployment": g("ATLAS_EMBED_DEPLOYMENT"),
      "earthdataToken": g("EARTHDATA_TOKEN")}
+p["webCustomDomains"] = json.load(open(domains)) or []
 if api:
     p |= {"apiImage": api, "webImage": web}
 json.dump({"contentVersion": "1.0.0.0", "parameters": {k: {"value": x} for k, x in p.items()}}, open(out, "w"))
@@ -60,6 +64,7 @@ else
 fi
 az deployment group create -g "$RG" -n main -f infra/azure/main.bicep -p @"$TMP/params.json" -o none --only-show-errors
 ACR=$(out acrLoginServer); API_URL=$(out apiUrl); WEB_URL=$(out webUrl); REL=$(out releasesUrl)
+SITE=$(env_get ATLAS_SITE_URL); WEB_URL=${SITE:-$WEB_URL}  # public address, e.g. https://sabah-ku.com
 STORAGE=$(out storageAccount); PG=$(out pgHost)
 
 # Images are built locally: ACR Tasks (az acr build) is unavailable on free-credit subscriptions.

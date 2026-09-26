@@ -2,6 +2,8 @@
 
 **An evidence atlas of Sabah's 27 district economies.** Official statistics, transparent diagnostics, structural peers across all 160 Malaysian districts, nowcasts and projections with calibrated uncertainty, and a cited AI Analyst, built for planners and researchers who need numbers they can defend.
 
+**Public beta: [sabah-ku.com](https://sabah-ku.com)**
+
 > Every number on screen has a source and a year. Every modelled number has an uncertainty range. Every AI sentence has a citation. If the atlas cannot back a claim, it does not make it.
 
 ## What's inside
