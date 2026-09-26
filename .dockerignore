@@ -1,0 +1,13 @@
+.git
+.venv
+**/node_modules
+**/.next
+data/lake
+data/cache
+data/releases
+apps/web/public/data/releases
+.env
+.claude
+.kilo
+**/__pycache__
+**/.pytest_cache

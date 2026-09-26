@@ -59,6 +59,14 @@ def publish() -> None:
     _show(run())
 
 
+@app.command("ntl")
+def ntl_cmd() -> None:
+    """Night lights: download NASA Black Marble VNP46A4 and compute district zonal stats."""
+    from atlas_pipelines.ntl import run
+
+    _show(run())
+
+
 @app.command("corpus")
 def corpus_cmd(embed: bool = True) -> None:
     """Fetch, extract, chunk and index the Analyst's document corpus."""

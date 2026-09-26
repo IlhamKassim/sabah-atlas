@@ -99,6 +99,27 @@ abstract: >-
 """
 
 
+def _upload(folder: Path, archive: Path, manifest: dict) -> int:
+    """In Azure, push the release to Blob Storage (managed identity); a no-op locally."""
+    import os
+
+    container = os.environ.get("ATLAS_RELEASES_CONTAINER_URL")
+    if not container:
+        return 0
+    from azure.identity import DefaultAzureCredential
+    from azure.storage.blob import ContainerClient
+
+    cc = ContainerClient.from_container_url(container, credential=DefaultAzureCredential())
+    n = 0
+    for f in [*folder.iterdir(), archive]:
+        name = f.name if f == archive else f"{manifest['version']}/{f.name}"
+        with f.open("rb") as fh:
+            cc.upload_blob(name, fh, overwrite=True)
+        n += 1
+    cc.upload_blob("latest.json", json.dumps(manifest, indent=2).encode(), overwrite=True)
+    return n
+
+
 def run() -> dict:
     s = get_settings()
     gold = s.gold
@@ -166,4 +187,5 @@ def run() -> dict:
     shutil.copytree(out, rel_web)
     shutil.copy(RELEASES / f"atlas-ekonomi-sabah-{version}.zip", rel_web.parent)
     (web / "releases" / "latest.json").write_text(json.dumps(manifest, indent=2))
-    return {"version": version, "content_hash": content_hash[:16], "files": len(manifest_files)}
+    uploaded = _upload(out, RELEASES / f"atlas-ekonomi-sabah-{version}.zip", manifest)
+    return {"uploaded": uploaded, "version": version, "content_hash": content_hash[:16], "files": len(manifest_files)}

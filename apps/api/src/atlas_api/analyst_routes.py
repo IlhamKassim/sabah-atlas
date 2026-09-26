@@ -16,8 +16,7 @@ from sse_starlette.sse import EventSourceResponse
 from atlas_api.analyst import briefs
 from atlas_api.analyst.engine import ask
 from atlas_api.analyst.llm import LLMNotConfigured, get_llm
-from atlas_api.db import conn
-from atlas_core.settings import get_settings
+from atlas_api.db import conn, fetch_one
 
 router = APIRouter(prefix="/v1")
 
@@ -150,10 +149,10 @@ def brief_review(key: str, body: ReviewBody, authorization: str = Header(default
 
 @router.get("/analyst/eval", summary="Latest evaluation report for the Analyst")
 def eval_report(full: bool = False) -> dict:
-    path = get_settings().gold / "analyst_eval.json"
-    if not path.exists():
+    row = fetch_one("SELECT report FROM analyst_eval ORDER BY run_at DESC LIMIT 1")
+    if not row:
         raise HTTPException(404, "not evaluated yet")
-    r = json.loads(path.read_text())
+    r = row["report"]
     if not full:
         r["results"] = [{k: v for k, v in x.items() if k != "answer"} for x in r["results"]]
     return r

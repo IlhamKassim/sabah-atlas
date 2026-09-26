@@ -37,8 +37,6 @@ def _fetch(client: httpx.Client, doc: dict) -> tuple[bytes, dict] | None:
     ext = "pdf" if doc.get("kind") == "pdf" else "html"
     cached = out / f"{doc['id']}.{ext}"
     meta_path = out / f"{doc['id']}.meta.json"
-    if cached.exists() and meta_path.exists():
-        return cached.read_bytes(), json.loads(meta_path.read_text())
     try:
         r = client.get(doc["url"])
         r.raise_for_status()
@@ -139,6 +137,9 @@ def run(embed: bool = True) -> dict:
                 }
             )
             print(f"  {doc['id']}: {len(pages)} pages, {n} chunks")
+            # Keep checksum metadata, not the raw file: the text is in Postgres and the URL is cited.
+            for ext in ("pdf", "html"):
+                (bronze_dir("corpus") / f"{doc['id']}.{ext}").unlink(missing_ok=True)
 
     vectors: list | None = None
     if embed and rows_chunk:

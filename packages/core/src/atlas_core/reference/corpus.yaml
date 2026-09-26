@@ -1,0 +1,361 @@
+# Tier-3 document corpus for Atlas Ekonomi Sabah.
+#
+# These are full public documents (mostly PDF) retrieved and cited by page
+# and URL by the AI Analyst, as distinct from the Tier-1 structured datasets
+# in sources.yaml. Every `url` below was checked with
+#   curl -sIL -A "Mozilla/5.0" --max-time 30 <url>
+# and returned HTTP 200 with a pdf/html content-type on the `verified` date.
+# Do not add an entry without doing the same. Malay-language documents are
+# tagged language: ms; documents that mix Malay and English (most DOSM
+# releases) are tagged mixed.
+#
+# Fields: id, title, publisher, published, url, kind, language, licence,
+# topics, verified, notes.
+
+# ---------------------------------------------------------------------------
+# DOSM: household income, poverty, GDP, census and socioeconomic publications
+# ---------------------------------------------------------------------------
+
+- id: dosm_hies_sabah_2022
+  title: "Household Income Survey Report, Sabah, 2022"
+  publisher: Department of Statistics Malaysia
+  published: "2023-10-05"
+  url: https://www.dosm.gov.my/uploads/release-content/file_20231005112420.pdf
+  kind: pdf
+  language: mixed
+  licence: "Public document (Government of Malaysia)"
+  topics: [income, poverty, inequality, districts]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Median/mean household income, poverty incidence and Gini by strata and administrative district for Sabah, 2019 vs 2022.
+
+- id: dosm_sosioekonomi_sabah_2021
+  title: "Laporan Sosioekonomi Negeri Sabah 2021"
+  publisher: Department of Statistics Malaysia
+  published: "2022-10-06"
+  url: https://www.dosm.gov.my/uploads/publications/20221006091541.pdf
+  kind: pdf
+  language: ms
+  licence: "Public document (Government of Malaysia)"
+  topics: [socioeconomic, state-overview, gdp, labour]
+  verified: "2026-09-26 200 application/pdf"
+  notes: State-level socioeconomic profile of Sabah for 2021 (GDP, sectoral growth, labour force, trade, CPI).
+
+- id: dosm_gdp_district_2020
+  title: "Gross Domestic Product by Administrative District, 2015-2020"
+  publisher: Department of Statistics Malaysia
+  published: "2022"
+  url: "https://www.dosm.gov.my/site/downloadrelease?admin_view=&id=gross-domestic-product-by-administrative-district--2020&lang=English"
+  kind: pdf
+  language: en
+  licence: "Public document (Government of Malaysia)"
+  topics: [gdp, districts, economic-structure]
+  verified: "2026-09-26 200 application/pdf"
+  notes: First-ever DOSM release of GDP by all 156 Malaysian administrative districts, 2015-2020, including all 27 Sabah districts.
+
+- id: dosm_poverty_malaysia_2024
+  title: "Poverty in Malaysia, 2024 (Kemiskinan di Malaysia 2024)"
+  publisher: Department of Statistics Malaysia
+  published: "2025-10-08"
+  url: https://storage.dosm.gov.my/hies/poverty_2024.pdf
+  kind: pdf
+  language: mixed
+  licence: "Public document (Government of Malaysia)"
+  topics: [poverty, state-comparison, time-series]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Absolute and relative poverty incidence time series by state since 1970; Sabah consistently the highest-poverty state.
+
+- id: dosm_key_findings_census_admin_district_2020
+  title: "Key Findings: Population and Housing Census of Malaysia 2020 - Administrative District"
+  publisher: Department of Statistics Malaysia
+  published: "2022-10-20"
+  url: https://www.dosm.gov.my/uploads/publications/20221020150523.pdf
+  kind: pdf
+  language: mixed
+  licence: "Public document (Government of Malaysia)"
+  topics: [population, census, districts, demographics]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Small-area statistics from Census 2020 down to administrative district / mukim / local authority level, covering Sabah's 27 districts.
+
+- id: dosm_state_socioeconomic_report_2024
+  title: "State Socioeconomic Report 2024"
+  publisher: Department of Statistics Malaysia
+  published: "2025-08-07"
+  url: https://www.dosm.gov.my/uploads/release-content/file_20250807114023.pdf
+  kind: pdf
+  language: mixed
+  licence: "Public document (Government of Malaysia)"
+  topics: [socioeconomic, state-comparison, gdp, labour, poverty]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Latest annual state-by-state socioeconomic scorecard (GDP growth, labour force, poverty) including Sabah.
+
+- id: dosm_sabah_yearbook_2023
+  title: "Sabah Yearbook of Statistics 2023"
+  publisher: Department of Statistics Malaysia
+  published: "2024-12-19"
+  url: https://storage.dosm.gov.my/reviews/yearbook_sabah_2023.pdf
+  kind: pdf
+  language: mixed
+  licence: "Public document (Government of Malaysia)"
+  topics: [state-overview, socioeconomic, districts, reference]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Comprehensive annual statistical yearbook for Sabah state, all sectors, with district breakdowns.
+
+- id: dosm_labour_force_statistics_2023
+  title: "Labour Force Statistics 2023"
+  publisher: Department of Statistics Malaysia
+  published: "2024-07-30"
+  url: https://www.dosm.gov.my/uploads/release-content/file_20240730095701.pdf
+  kind: pdf
+  language: mixed
+  licence: "Public document (Government of Malaysia)"
+  topics: [labour, employment, unemployment, state-comparison]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Annual national labour force report with state-level participation, employment and unemployment tables including Sabah.
+
+- id: dosm_my_local_stats_2023
+  title: "My Local Stats 2023 (Malaysia, State and Administrative District)"
+  publisher: Department of Statistics Malaysia
+  published: "2024-11-22"
+  url: https://www.dosm.gov.my/uploads/content-downloads/file_20241122122735.pdf
+  kind: pdf
+  language: mixed
+  licence: "Public document (Government of Malaysia)"
+  topics: [districts, socioeconomic, reference, population, labour]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Integrated social/economic indicator booklet down to all 156 administrative districts (incl. Sabah's 27), covering 2020-2022 data.
+
+- id: dosm_current_population_estimates_district_2025
+  title: "Current Population Estimates by Administrative District, 2025"
+  publisher: Department of Statistics Malaysia
+  published: "2025-10-02"
+  url: https://www.dosm.gov.my/uploads/release-content/file_20251002115305.pdf
+  kind: pdf
+  language: mixed
+  licence: "Public document (Government of Malaysia)"
+  topics: [population, districts, demographics]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Mid-year population estimates by age, ethnicity and sex for all administrative districts, including Sabah's 27 districts.
+
+# ---------------------------------------------------------------------------
+# Sabah state budgets
+# ---------------------------------------------------------------------------
+
+- id: sabah_budget_speech_2024
+  title: "Sabah State Budget Speech 2024"
+  publisher: Government of Sabah
+  published: "2023"
+  url: https://sabah.gov.my/sites/default/files/uploads/budget/2026-01/budget-speech-2024.pdf
+  kind: pdf
+  language: en
+  licence: "Public document (Government of Sabah)"
+  topics: [state-budget, fiscal-policy, sabah]
+  verified: "2026-09-26 200 application/pdf"
+  notes: English-language edition of the Sabah state budget speech for 2024.
+
+- id: sabah_budget_speech_2025
+  title: "Ucapan Belanjawan Negeri Sabah 2025"
+  publisher: Government of Sabah
+  published: "2024-11"
+  url: "https://sabah.gov.my/sites/default/files/uploads/budget/2024-11/Ucapan%20Belanjawan%20Negeri%20Sabah%202025%20-%20Malay%20Ver.pdf"
+  kind: pdf
+  language: ms
+  licence: "Public document (Government of Sabah)"
+  topics: [state-budget, fiscal-policy, sabah]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Malay-language Sabah state budget speech for 2025.
+
+# ---------------------------------------------------------------------------
+# Federal development plans and budgets
+# ---------------------------------------------------------------------------
+
+- id: rmk12_mtr_main_document
+  title: "Mid-Term Review of the Twelfth Malaysia Plan, 2021-2025: Main Document"
+  publisher: Ministry of Economy, Malaysia (Economic Planning Unit)
+  published: "2023-09-11"
+  url: https://rmke12.ekonomi.gov.my/ksp/storage/fileUpload/2023/09/2023091145_main_document_ksp_rmke_12.pdf
+  kind: pdf
+  language: en
+  licence: "Public document (Government of Malaysia)"
+  topics: [national-plan, regional-development, fiscal-policy]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Full Mid-Term Review of RMK-12, English edition; national development priorities 2023-2025 including regional balance and Sabah/Sarawak-specific commitments.
+
+- id: rmk12_mtr_chapter5_regional_balance
+  title: "Mid-Term Review of the Twelfth Malaysia Plan - Chapter 5: Progressing towards Regional Balance"
+  publisher: Ministry of Economy, Malaysia (Economic Planning Unit)
+  published: "2023-09-11"
+  url: https://rmke12.ekonomi.gov.my/ksp/storage/fileUpload/2023/09/2023091136_6_chapter_5.pdf
+  kind: pdf
+  language: en
+  licence: "Public document (Government of Malaysia)"
+  topics: [regional-development, infrastructure, rural-development]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Standalone chapter on regional balance policy (optimising regional economic potential, rural transformation, infrastructure) directly relevant to Sabah district gaps.
+
+- id: rmk13_buku_utama
+  title: "Rancangan Malaysia Ketiga Belas (RMK13), 2026-2030: Buku Utama"
+  publisher: Ministry of Economy, Malaysia
+  published: "2025-07-31"
+  url: https://rmk13.ekonomi.gov.my/wp-content/uploads/2025/07/Buku_Utama_RMK13-1.pdf
+  kind: pdf
+  language: ms
+  licence: "Public document (Government of Malaysia)"
+  topics: [national-plan, regional-development, fiscal-policy]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Full Thirteenth Malaysia Plan main document (2026-2030), Malay edition; covers regional balance, B40/poverty and infrastructure priorities for the current plan period.
+
+- id: budget_speech_2024_federal_en
+  title: "Budget 2024 Speech (English)"
+  publisher: Ministry of Finance, Malaysia
+  published: "2023-10-13"
+  url: https://belanjawan.mof.gov.my/pdf/belanjawan2024/ucapan/ub24-BI.pdf
+  kind: pdf
+  language: en
+  licence: "Public document (Government of Malaysia)"
+  topics: [federal-budget, fiscal-policy]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Federal Budget 2024 speech, English edition.
+
+- id: budget_speech_2025_federal_en
+  title: "Budget 2025 Speech (English)"
+  publisher: Ministry of Finance, Malaysia
+  published: "2024-10-18"
+  url: https://belanjawan.mof.gov.my/pdf/belanjawan2025/ucapan/ub25-en.pdf
+  kind: pdf
+  language: en
+  licence: "Public document (Government of Malaysia)"
+  topics: [federal-budget, fiscal-policy]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Federal Budget 2025 speech, English edition.
+
+- id: budget_speech_2026_federal_en
+  title: "Budget 2026 Speech (Fourth MADANI Budget)"
+  publisher: Ministry of Finance, Malaysia
+  published: "2025-10-10"
+  url: https://belanjawan.mof.gov.my/pdf/belanjawan2026/ucapan/bs26.pdf
+  kind: pdf
+  language: en
+  licence: "Public document (Government of Malaysia)"
+  topics: [federal-budget, fiscal-policy]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Federal Budget 2026 speech, English edition; latest federal budget as of corpus compilation.
+
+# ---------------------------------------------------------------------------
+# Bank Negara Malaysia
+# ---------------------------------------------------------------------------
+
+- id: bnm_emr_2024_ch1
+  title: "Economic and Monetary Review 2024 - Chapter 1: Economic, Monetary and Financial Developments in 2024"
+  publisher: Bank Negara Malaysia
+  published: "2025-03"
+  url: https://www.bnm.gov.my/documents/20124/17523401/emr2024_en_ch1.pdf
+  kind: pdf
+  language: en
+  licence: "Public document (Bank Negara Malaysia)"
+  topics: [macroeconomy, real-sector, outlook]
+  verified: "2026-09-26 200 application/pdf"
+  notes: National real-sector and macroeconomic developments chapter for 2024, useful macro context for Sabah district analysis.
+
+# ---------------------------------------------------------------------------
+# Sector statistics
+# ---------------------------------------------------------------------------
+
+- id: mpob_overview_2024
+  title: "Overview of the Malaysian Oil Palm Industry 2024"
+  publisher: Malaysian Palm Oil Board (MPOB)
+  published: "2025"
+  url: https://bepi.mpob.gov.my/images/overview/Overview2024.pdf
+  kind: pdf
+  language: en
+  licence: "Public document (Malaysian Palm Oil Board)"
+  topics: [palm-oil, agriculture, sabah, commodities]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Short annual overview of planted area, production and prices for Peninsular Malaysia, Sabah and Sarawak; Sabah is Malaysia's largest palm-oil-producing state.
+
+- id: sabah_tourism_statistics_page
+  title: "Sabah Tourism Board - Visitor Arrival Statistics"
+  publisher: Sabah Tourism Board
+  published: "2026"
+  url: https://sabahtourism.com/statistics/
+  kind: html
+  language: en
+  licence: "Public document (Sabah Tourism Board)"
+  topics: [tourism, sabah, arrivals]
+  verified: "2026-09-26 200 text/html"
+  notes: Landing page hosting downloadable annual and monthly visitor-arrival PDF statistics by nationality/region for Sabah, 2002-present.
+
+# ---------------------------------------------------------------------------
+# Open-access research
+# ---------------------------------------------------------------------------
+
+- id: worldbank_mem_apr2026
+  title: "Malaysia Economic Monitor, April 2026: Raising the Ceiling, Raising the Floor"
+  publisher: World Bank
+  published: "2026-04"
+  url: https://documents1.worldbank.org/curated/en/099051226192580550/pdf/P512647-e2a972de-71e8-4f26-98c0-eb11db9d07c6.pdf
+  kind: pdf
+  language: en
+  licence: "CC BY 3.0 IGO (World Bank open access)"
+  topics: [macroeconomy, poverty, regional-disparity, sabah]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Latest Malaysia Economic Monitor; discusses Sabah's poverty rate (highest of any state) and regional development policy.
+
+- id: worldbank_regional_ethnic_inequality_poverty_dynamics
+  title: "The Interplay of Regional and Ethnic Inequalities in Malaysian Poverty Dynamics"
+  publisher: World Bank (Policy Research Working Paper 9898)
+  published: "2022-01"
+  url: https://openknowledge.worldbank.org/bitstreams/36739b8d-b68d-5139-b305-68c9566a04d4/download
+  kind: pdf
+  language: en
+  licence: "CC BY 3.0 IGO (World Bank open access)"
+  topics: [poverty, inequality, regional-disparity, east-malaysia]
+  verified: "2026-09-26 206 application/pdf"
+  notes: Synthetic-panel analysis (2004-2016) of poverty mobility; highlights the gap between affluent Peninsular Malaysia and poorer East Malaysia including Sabah.
+
+- id: worldbank_multidimensional_poverty_malaysia_2021
+  title: "Multidimensional Poverty in Malaysia: Improving Measurement and Policies in the 2020s"
+  publisher: World Bank
+  published: "2021"
+  url: https://openknowledge.worldbank.org/bitstreams/3027819e-c4ce-5c98-a2f7-7c9f6bbde18d/download
+  kind: pdf
+  language: en
+  licence: "CC BY 3.0 IGO (World Bank open access)"
+  topics: [poverty, methodology, living-standards]
+  verified: "2026-09-26 206 application/pdf"
+  notes: Assesses and proposes improvements to Malaysia's Multidimensional Poverty Index methodology, relevant to interpreting Sabah's non-monetary deprivation gaps.
+
+- id: isis_nature_positive_economy_malaysia_2024
+  title: "Shaping a Nature-Positive Economy in Malaysia"
+  publisher: Institute of Strategic and International Studies (ISIS) Malaysia
+  published: "2024-07-15"
+  url: https://www.isis.org.my/wp-content/uploads/2024/07/Shaping-a-nature-positive-economy-in-Malaysia.pdf
+  kind: pdf
+  language: en
+  licence: "© ISIS Malaysia; open access download"
+  topics: [environment, forestry, carbon, sabah, natural-resources]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Discusses nature-based financing and forest-carbon projects including Sabah's Kuamut Rainforest conservation project and state land-revenue incentive structures.
+
+- id: ijarbss_digital_poverty_sabah_2023
+  title: "Digital Poverty in Sabah: Socioeconomic Factors Shaping Digital Accessibility During the Post-Covid-19 Era"
+  publisher: International Journal of Academic Research in Business and Social Sciences (HRMARS); authors from Universiti Malaysia Sabah
+  published: "2023-12-09"
+  url: https://hrmars.com/papers_submitted/19881/digital-poverty-in-sabah-socioeconomic-factors-shaping-digital-accessibility-during-the-post-covid-19-era.pdf
+  kind: pdf
+  language: en
+  licence: "Public document; open-access journal, reuse terms unverified"
+  topics: [digital-divide, poverty, rural, sabah]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Survey of 724 respondents across Sabah on digital access; finds a stark urban-rural divide tied to education and income.
+
+- id: ojtp_poverty_unemployment_sabah_job_matching_2025
+  title: "Assessing Poverty and Unemployment in Sabah: The Role of Mobile Job Matching Platforms in Reducing Economic Disparities"
+  publisher: Online Journal for TVET Practitioners (Universiti Tun Hussein Onn Malaysia)
+  published: "2025"
+  url: "https://publisher.uthm.edu.my/ojs/index.php/oj-tp/article/download/20704/7626/111232"
+  kind: pdf
+  language: en
+  licence: "CC BY-NC-SA 4.0"
+  topics: [poverty, unemployment, labour-market, sabah]
+  verified: "2026-09-26 200 application/pdf"
+  notes: Discusses structural drivers of poverty and unemployment in Sabah (incl. Kota Marudu) and digital job-matching as a mitigation.

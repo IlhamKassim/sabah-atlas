@@ -22,6 +22,7 @@ import yaml
 from atlas_api import queries as q
 from atlas_api.analyst.engine import ask
 from atlas_api.analyst.llm import get_llm
+from atlas_api.db import conn
 from atlas_core.settings import get_settings
 
 REFUSAL = re.compile(
@@ -174,5 +175,10 @@ def run(limit: int | None = None) -> dict:
         "results": results,
     }
     path = get_settings().gold / "analyst_eval.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(report, indent=2, ensure_ascii=False))
+    with conn() as c:
+        c.execute("INSERT INTO analyst_eval (model, report) VALUES (%s, %s)",
+                  (llm.name, json.dumps(report, ensure_ascii=False)))
+        c.commit()
     return {k: v for k, v in report.items() if k != "results"}
