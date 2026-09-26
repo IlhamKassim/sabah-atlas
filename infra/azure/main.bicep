@@ -15,6 +15,8 @@ param dbPassword string
 param azureOpenAiKey string = ''
 param azureOpenAiEndpoint string = ''
 param llmDeployment string = ''
+param routerDeployment string = ''
+param briefDeployment string = ''
 param embedDeployment string = ''
 @secure()
 param earthdataToken string = ''
@@ -151,6 +153,8 @@ var commonEnv = [
   { name: 'AZURE_OPENAI_ENDPOINT', value: azureOpenAiEndpoint }
   { name: 'AZURE_OPENAI_API_KEY', secretRef: 'aoai-key' }
   { name: 'ATLAS_LLM_DEPLOYMENT', value: llmDeployment }
+  { name: 'ATLAS_LLM_ROUTER_DEPLOYMENT', value: routerDeployment }
+  { name: 'ATLAS_BRIEF_DEPLOYMENT', value: briefDeployment }
   { name: 'ATLAS_EMBED_DEPLOYMENT', value: embedDeployment }
   { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', secretRef: 'appinsights' }
 ]
@@ -201,6 +205,7 @@ resource web 'Microsoft.App/containerApps@2024-03-01' = {
         env: [
           { name: 'ATLAS_API_URL', value: 'https://${api.properties.configuration.ingress.fqdn}' }
           { name: 'NEXT_PUBLIC_ATLAS_API_URL', value: 'https://${api.properties.configuration.ingress.fqdn}' }
+          { name: 'ATLAS_RELEASES_BASE_URL', value: '${storage.properties.primaryEndpoints.blob}releases' }
         ]
       } ]
       scale: { minReplicas: 0, maxReplicas: 2 }
@@ -233,6 +238,7 @@ resource pipeline 'Microsoft.App/jobs@2024-03-01' = {
         env: concat(commonEnv, [
           { name: 'EARTHDATA_TOKEN', secretRef: 'earthdata' }
           { name: 'ATLAS_RELEASES_CONTAINER_URL', value: '${storage.properties.primaryEndpoints.blob}releases' }
+          { name: 'ATLAS_LAKE_CONTAINER_URL', value: '${storage.properties.primaryEndpoints.blob}lake' }
           { name: 'AZURE_CLIENT_ID', value: identity.properties.clientId }
         ])
       } ]
@@ -259,4 +265,6 @@ resource budget 'Microsoft.Consumption/budgets@2023-11-01' = {
 output apiUrl string = 'https://${api.properties.configuration.ingress.fqdn}'
 output webUrl string = 'https://${web.properties.configuration.ingress.fqdn}'
 output acrLoginServer string = acr.properties.loginServer
+output storageAccount string = storage.name
+output pgHost string = pg.properties.fullyQualifiedDomainName
 output releasesUrl string = '${storage.properties.primaryEndpoints.blob}releases'

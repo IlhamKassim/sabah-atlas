@@ -1,5 +1,7 @@
 # Atlas API (FastAPI) — also used by the pipeline job (same image, different command).
 FROM python:3.12-slim AS base
+# Native runtimes the Linux wheels expect: OpenMP (LightGBM), expat (rasterio/GDAL)
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 libexpat1 && rm -rf /var/lib/apt/lists/*
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 COPY --from=ghcr.io/astral-sh/uv:0.11 /uv /usr/local/bin/uv
 WORKDIR /app
