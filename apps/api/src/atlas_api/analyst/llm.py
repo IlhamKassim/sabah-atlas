@@ -118,7 +118,9 @@ class OpenAIChat:
             return None
         out: list[list[float]] = []
         for i in range(0, len(texts), 64):
-            r = self.client.embeddings.create(model=self.embed_model, input=texts[i : i + 64])
+            # doc_chunk.embedding is vector(1536); text-embedding-3-* can be shortened to fit
+            extra = {"dimensions": 1536} if "embedding-3" in self.embed_model else {}
+            r = self.client.embeddings.create(model=self.embed_model, input=texts[i : i + 64], **extra)
             out += [d.embedding for d in r.data]
         return out
 
@@ -172,7 +174,8 @@ class AnthropicChat:
 
 def get_llm(role: str = "main") -> LLM:
     """role: 'main' for final answers, 'router' for cheaper routing/evaluation calls."""
-    env = os.environ
+    # Blank values, and stray inline comments dotenv keeps on empty keys, count as unset.
+    env = {k: v for k, v in os.environ.items() if v.strip() and not v.lstrip().startswith("#")}
     provider = env.get("ATLAS_LLM_PROVIDER")
     if not provider:
         if env.get("AZURE_OPENAI_ENDPOINT") and env.get("AZURE_OPENAI_API_KEY"):
@@ -190,15 +193,20 @@ def get_llm(role: str = "main") -> LLM:
     router = env.get("ATLAS_LLM_ROUTER_DEPLOYMENT") or main
     model = router if role == "router" else main
     if provider == "azure":
-        from openai import AzureOpenAI
+        from openai import AzureOpenAI, OpenAI
 
         if not model:
             raise LLMNotConfigured("Set ATLAS_LLM_DEPLOYMENT to your Azure deployment name.")
-        client = AzureOpenAI(
-            azure_endpoint=env["AZURE_OPENAI_ENDPOINT"],
-            api_key=env["AZURE_OPENAI_API_KEY"],
-            api_version=env.get("AZURE_OPENAI_API_VERSION", "2024-10-21"),
-        )
+        endpoint = env["AZURE_OPENAI_ENDPOINT"].rstrip("/")
+        if endpoint.endswith("/openai/v1"):
+            # Foundry's v1 API: OpenAI-compatible, deployment name goes in `model`, no api-version
+            client = OpenAI(base_url=endpoint, api_key=env["AZURE_OPENAI_API_KEY"])
+        else:
+            client = AzureOpenAI(
+                azure_endpoint=endpoint,
+                api_key=env["AZURE_OPENAI_API_KEY"],
+                api_version=env.get("AZURE_OPENAI_API_VERSION", "2024-10-21"),
+            )
         return OpenAIChat(client, model, env.get("ATLAS_EMBED_DEPLOYMENT"), f"azure:{model}")
     if provider == "anthropic":
         return AnthropicChat(model or "claude-sonnet-5")

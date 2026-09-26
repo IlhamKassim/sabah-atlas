@@ -141,14 +141,6 @@ def run(embed: bool = True) -> dict:
             for ext in ("pdf", "html"):
                 (bronze_dir("corpus") / f"{doc['id']}.{ext}").unlink(missing_ok=True)
 
-    vectors: list | None = None
-    if embed and rows_chunk:
-        from atlas_api.analyst.llm import embedder
-
-        emb = embedder()
-        if emb:
-            vectors = emb.embed([c["text"] for c in rows_chunk])
-
     dsn = s.database_url.replace("postgresql+psycopg://", "postgresql://")
     with psycopg.connect(dsn) as conn:
         conn.execute("TRUNCATE doc CASCADE")
@@ -176,19 +168,43 @@ def run(embed: bool = True) -> dict:
         with conn.cursor().copy("COPY doc_chunk (id, doc_id, page, text) FROM STDIN") as cp:
             for c in rows_chunk:
                 cp.write_row([c["id"], c["doc_id"], c["page"], c["text"]])
-        if vectors:
-            with conn.cursor() as cur:
-                cur.executemany(
-                    "UPDATE doc_chunk SET embedding = %s::vector WHERE id = %s",
-                    [
-                        ("[" + ",".join(f"{x:.6f}" for x in v) + "]", c["id"])
-                        for v, c in zip(vectors, rows_chunk, strict=True)
-                    ],
-                )
         conn.commit()
     return {
         "documents": len(rows_doc),
         "chunks": len(rows_chunk),
-        "embedded": bool(vectors),
+        "embedded": embed_missing()["embedded"] if embed else 0,
         "skipped": len(docs) - len(rows_doc),
     }
+
+
+def embed_missing(batch: int = 256) -> dict:
+    """Embed chunks that have no vector yet, committing per batch so an interrupted run
+    resumes where it stopped. Without an embedding deployment this is a no-op and
+    retrieval stays full-text only."""
+    from atlas_api.analyst.llm import embedder
+
+    emb = embedder()
+    if not emb:
+        return {"embedded": 0, "note": "no embedding deployment configured"}
+    dsn = get_settings().database_url.replace("postgresql+psycopg://", "postgresql://")
+    done = 0
+    with psycopg.connect(dsn) as conn:
+        while True:
+            rows = conn.execute(
+                "SELECT id, text FROM doc_chunk WHERE embedding IS NULL ORDER BY id LIMIT %s", (batch,)
+            ).fetchall()
+            if not rows:
+                break
+            vectors = emb.embed([t for _, t in rows])
+            with conn.cursor() as cur:
+                cur.executemany(
+                    "UPDATE doc_chunk SET embedding = %s::vector WHERE id = %s",
+                    [
+                        ("[" + ",".join(f"{x:.6f}" for x in v) + "]", cid)
+                        for v, (cid, _) in zip(vectors, rows, strict=True)
+                    ],
+                )
+            conn.commit()
+            done += len(rows)
+            print(f"  embedded {done}")
+    return {"embedded": done, "model": emb.embed_model}

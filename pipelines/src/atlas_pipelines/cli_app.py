@@ -76,8 +76,17 @@ def corpus_cmd(embed: bool = True) -> None:
 
 
 @app.command()
-def briefs(district: str = typer.Option(None, help="One district slug; default all 27"),
-           force: bool = False) -> None:
+def embed() -> None:
+    """Embed corpus chunks that have no vector yet (resumable; needs ATLAS_EMBED_DEPLOYMENT)."""
+    from atlas_pipelines.corpus import embed_missing
+
+    _show(embed_missing())
+
+
+@app.command()
+def briefs(
+    district: str = typer.Option(None, help="One district slug; default all 27"), force: bool = False
+) -> None:
     """Generate AI Analyst district briefs (stored as drafts for human review)."""
     from atlas_api.analyst.briefs import generate_all
 
@@ -85,9 +94,12 @@ def briefs(district: str = typer.Option(None, help="One district slug; default a
 
 
 @app.command("review")
-def review_cmd(district: str, approve: bool = typer.Option(True, "--approve/--reject"),
-               reviewer: str = typer.Option(..., help="Reviewer name, recorded with the brief"),
-               note: str = "") -> None:
+def review_cmd(
+    district: str,
+    approve: bool = typer.Option(True, "--approve/--reject"),
+    reviewer: str = typer.Option(..., help="Reviewer name, recorded with the brief"),
+    note: str = "",
+) -> None:
     """Mark a district's latest brief reviewed (or rejected)."""
     from atlas_api.analyst.briefs import review
 
