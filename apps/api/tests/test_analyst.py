@@ -23,6 +23,33 @@ def test_valid_citations_and_numbers_kept():
     assert v.numeric_verified == 2
 
 
+def test_modelled_value_always_carries_its_interval():
+    reg = _reg()
+    reg.fact("fc", label="Tongod · income_median 2027 projection: p50 RM 3,733", kind="analytics",
+             values=[3120.0, 3733.0, 4410.0], interval="80% interval RM 3,120–RM 4,410")
+    v = validate("Median income in Tongod is projected at RM 3,733 in 2027 [D3].", reg)
+    assert "RM 3,733 in 2027 (80% interval RM 3,120–RM 4,410) [D3]." in v.text
+    assert v.intervals_added == 1
+    # already stated: left alone
+    v = validate("It is projected at RM 3,733 (RM 3,120 to RM 4,410) in 2027 [D3].", reg)
+    assert v.intervals_added == 0 and v.text.count("3,120") == 1
+    # several modelled values in one sentence: each range sits beside its own citation
+    reg.fact("fc2", label="Tongod · income_median 2028", kind="analytics",
+             values=[3200.0, 3850.0, 4600.0], interval="80% interval RM 3,200–RM 4,600")
+    v = validate("It reaches RM 3,733 in 2027 [D3] and RM 3,850 in 2028 [D4].", reg)
+    assert "2027 (80% interval RM 3,120–RM 4,410) [D3] and" in v.text
+    assert "2028 (80% interval RM 3,200–RM 4,600) [D4]." in v.text
+
+
+def test_interval_phrase_and_question_numbers_are_not_claims():
+    reg = _reg()
+    reg.fact("fc", label="Tongod 2027", kind="analytics", values=[3232.0, 3733.0, 4329.0],
+             interval="80% interval RM 3,232–RM 4,329")
+    v = validate("It is RM 3,733, with an 80% interval of RM 3,232 to RM 4,329 [D3]. "
+                 "The upper bound exceeds RM 4,000 [D3].", reg, given=[4000.0])
+    assert v.stripped == []
+
+
 def test_uncited_number_is_stripped():
     v = validate("Median income was RM 2,785 [D1]. Unemployment is 12.3%.", _reg())
     assert "12.3" not in v.text

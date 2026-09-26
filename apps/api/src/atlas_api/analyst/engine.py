@@ -8,7 +8,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from atlas_api.analyst import tools
-from atlas_api.analyst.citations import Registry, validate
+from atlas_api.analyst.citations import Registry, numbers_in_text, validate
 from atlas_api.analyst.llm import LLM, get_llm
 from atlas_api.analyst.prompts import BRIEF_INSTRUCTIONS, SYSTEM
 
@@ -82,7 +82,8 @@ def ask(
     on_event("status", {"stage": "thinking"})
     raw, tin, tout, trace = _loop(llm, reg, messages, on_event, max_tokens)
     on_event("status", {"stage": "validating"})
-    v = validate(raw, reg)
+    given = numbers_in_text(question)
+    v = validate(raw, reg, given)
     if len(v.stripped) >= REPAIR_THRESHOLD:
         on_event("status", {"stage": "repairing", "stripped": len(v.stripped)})
         problems = "\n".join(f'- "{s["sentence"]}" ({s["reason"]})' for s in v.stripped[:12])
@@ -101,9 +102,15 @@ def ask(
         turn = llm.chat(SYSTEM, messages, None, max_tokens=max_tokens)
         tin += turn.tokens_in
         tout += turn.tokens_out
-        v2 = validate(turn.text, reg)
+        v2 = validate(turn.text, reg, given)
         if len(v2.stripped) <= len(v.stripped):
             raw, v = turn.text, v2
+    if not v.text.strip():
+        # Everything failed verification: say so rather than return a blank answer.
+        v.text = (
+            "I couldn't produce an answer whose numbers all match the atlas's sources, so I've "
+            "withheld it. Try asking about one district or indicator at a time."
+        )
     return Answer(
         text=v.text,
         citations=reg.export(v.used),

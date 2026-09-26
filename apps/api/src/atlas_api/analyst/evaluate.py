@@ -26,7 +26,7 @@ from atlas_api.db import conn
 from atlas_core.settings import get_settings
 
 REFUSAL = re.compile(
-    r"\b(can(?:no|')t|unable|won't|will not|do not|don't|decline|not able|outside|only cover|does not cover|not (?:in|within) (?:the )?(?:atlas|scope))\b",
+    r"\b(can(?:no|')t|unable|won't|will not|do not|don't|does not (?:provide|attribute)|decline|not able|outside|only (?:cover|answer)|does not cover|not (?:in|within) (?:the )?(?:atlas|scope))\b",
     re.I,
 )
 TARGET_VALIDITY = 0.95

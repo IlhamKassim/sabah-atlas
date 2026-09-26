@@ -6,7 +6,9 @@ validator:
   1. drops references that do not exist in this session's registry;
   2. checks every number in a sentence against the values of the facts it cites
      (or the text of the cited document passage);
-  3. strips sentences that make numeric claims without a valid, matching citation.
+  3. strips sentences that make numeric claims without a valid, matching citation;
+  4. adds the 80% interval to any sentence that quotes a modelled central value
+     without its range, so no model output reaches the reader as a bare point.
 """
 
 from __future__ import annotations
@@ -19,6 +21,8 @@ NUM = re.compile(
     r"(?<![\w.])(?:RM\s?)?[-−+]?\d{1,3}(?:,\d{3})+(?:\.\d+)?%?|(?<![\w.])(?:RM\s?)?[-−+]?\d+(?:\.\d+)?%?"
 )
 YEAR = re.compile(r"^(19|20)\d{2}$")
+# "80% interval" names the interval's coverage; it is not a claim about the data.
+INTERVAL_PHRASE = re.compile(r"\b80\s?%\s+(?:prediction\s+|uncertainty\s+)?(?:interval|range)", re.I)
 
 
 @dataclass
@@ -33,6 +37,7 @@ class Fact:
     vintage: str | None = None
     kind: str = "observation"  # observation | analytics
     model_version: str | None = None
+    interval: str | None = None  # e.g. "80% interval RM 3,120–RM 4,410"; values = [p10, p50, p90]
 
 
 @dataclass
@@ -129,7 +134,7 @@ def _matches(value: float, decimals: int, candidates: list[float]) -> bool:
     return False
 
 
-def _numbers_in_text(text: str) -> list[float]:
+def numbers_in_text(text: str) -> list[float]:
     out = []
     for tok in NUM.findall(text):
         p = _parse_number(tok)
@@ -145,6 +150,30 @@ def _is_exempt(tok: str, v: float) -> bool:
     return "%" not in tok and "RM" not in tok and "." not in raw and "," not in raw and 0 <= v <= 30
 
 
+def _ensure_intervals(sent: str, body: str, ids: list[str], reg: Registry) -> tuple[str, int]:
+    nums = [p for t in NUM.findall(body) if (p := _parse_number(t))]
+
+    def quoted(x: float) -> bool:
+        return any(_matches(v, d, [x]) for v, d in nums)
+
+    added = 0
+    for i in ids:
+        f = reg.facts.get(i)
+        if not f or not f.interval or len(f.values) != 3:
+            continue
+        lo, mid, hi = f.values
+        if quoted(mid) and not (quoted(lo) and quoted(hi)):
+            # Insert just before this fact's own citation group, e.g. "... 2021 [D2]" →
+            # "... 2021 (80% interval …) [D2]", so lists of years keep each range in place.
+            m = re.search(rf"(?:\[[DR]\d+\]\s*)*\[{re.escape(i)}\]", sent)
+            if not m:
+                continue
+            pos = m.start()
+            sent = f"{sent[:pos].rstrip()} ({f.interval}) {sent[pos:]}"
+            added += 1
+    return sent, added
+
+
 _SPLIT = re.compile(r"(?<=[.!?])\s+(?=[A-Z(\[])|\n+")
 
 
@@ -157,6 +186,7 @@ class Validation:
     numeric_verified: int
     stripped: list[dict]
     used: set[str]
+    intervals_added: int = 0
 
     @property
     def validity(self) -> float:
@@ -170,11 +200,15 @@ class Validation:
             "numeric_claims": self.numeric_claims,
             "numeric_verified": self.numeric_verified,
             "stripped": self.stripped,
+            "intervals_added": self.intervals_added,
         }
 
 
-def validate(answer: str, reg: Registry) -> Validation:
-    total = valid = claims = verified = 0
+def validate(answer: str, reg: Registry, given: list[float] | None = None) -> Validation:
+    """`given`: numbers from the user's own question (e.g. a threshold such as RM 4,000),
+    which the answer may repeat without a citation."""
+    given = given or []
+    total = valid = claims = verified = added = 0
     stripped: list[dict] = []
     used: set[str] = set()
     kept_lines: list[str] = []
@@ -194,8 +228,12 @@ def validate(answer: str, reg: Registry) -> Validation:
             # drop invalid references from the sentence text
             clean = REF.sub(lambda m, good=good: m.group(0) if f"{m.group(1)}{m.group(2)}" in good else "", sent)
             clean = re.sub(r"\s+([.,;:])", r"\1", clean)
-            body = REF.sub("", clean)
-            toks = [t for t in NUM.findall(body) if (p := _parse_number(t)) and not _is_exempt(t, p[0])]
+            body = INTERVAL_PHRASE.sub("", REF.sub("", clean))
+            toks = [
+                t
+                for t in NUM.findall(body)
+                if (p := _parse_number(t)) and not _is_exempt(t, p[0]) and p[0] not in given
+            ]
             if not toks:
                 kept.append(clean)
                 used.update(good)
@@ -205,7 +243,7 @@ def validate(answer: str, reg: Registry) -> Validation:
                 if i in reg.facts:
                     candidates += reg.facts[i].values
                 else:
-                    candidates += _numbers_in_text(reg.docs[i].text)
+                    candidates += numbers_in_text(reg.docs[i].text)
             ok = True
             for t in toks:
                 claims += 1
@@ -215,6 +253,8 @@ def validate(answer: str, reg: Registry) -> Validation:
                 else:
                     ok = False
             if ok:
+                clean, n = _ensure_intervals(clean, body, good, reg)
+                added += n
                 kept.append(clean)
                 used.update(good)
             else:
@@ -223,4 +263,4 @@ def validate(answer: str, reg: Registry) -> Validation:
         kept_lines.append(" ".join(s for s in kept if s.strip()))
     text = "\n".join(kept_lines)
     text = re.sub(r"\n{3,}", "\n\n", text).strip()
-    return Validation(text, total, valid, claims, verified, stripped, used)
+    return Validation(text, total, valid, claims, verified, stripped, used, added)

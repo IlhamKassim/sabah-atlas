@@ -136,6 +136,15 @@ def get_district_profile(reg: Registry, district: str) -> str:
         lines.append(_obs_fact(reg, d, code, s[-1]))
         if code in ("income_median", "poverty_absolute", "unemployment_rate") and len(s) > 1:
             lines.append(_obs_fact(reg, d, code, s[0]))
+    flagged = [
+        (code, o)
+        for code, obs in p["indicators"].items()
+        for o in obs
+        if o.get("quality_flag") and str(o["quality_flag"]).startswith("boundary_break")
+    ]
+    if flagged:
+        lines.append("Data notes (values flagged for boundary changes):")
+        lines += [_obs_fact(reg, d, code, o) for code, o in flagged[:12]]
     return "\n".join(lines)
 
 
@@ -254,7 +263,7 @@ def get_forecast(
         model_version=fc["model_version"],
     )
     lines.append(f"[{f.id}] {f.label}")
-    pts = [("nowcast", p) for p in s["nowcast"][-1:]] + [
+    pts = [("nowcast", p) for p in s["nowcast"]] + [
         (f"projection ({scenario})", p) for p in s["projection"].get(scenario, [])
     ]
     for seg, p in pts:
@@ -271,6 +280,7 @@ def get_forecast(
             period=p["period"],
             kind="analytics",
             model_version=fc["model_version"],
+            interval=f"80% interval {fmt(p['p10'], fmt_)}–{fmt(p['p90'], fmt_)}",
         )
         lines.append(f"[{f.id}] {label} — MODELLED")
     bt = s.get("backtest", {}).get("abs_pct_error_by_h", {})
@@ -374,13 +384,29 @@ def compare_districts(reg: Registry, districts: list[str], indicators: list[str]
     return "\n".join(lines)
 
 
+def get_indicator_series(reg: Registry, district: str, indicator: str) -> str:
+    d = _need(district)
+    if indicator not in _cat():
+        return f"Unknown indicator {indicator!r}. Known: {', '.join(sorted(_cat()))}"
+    s = q.profile(d["id"])["indicators"].get(indicator, [])
+    if not s:
+        return f"No {indicator} values for {d['name']}."
+    return "\n".join(_obs_fact(reg, d, indicator, o) for o in s)
+
+
 def rank_districts(reg: Registry, indicator: str, period: int | None = None, top: int = 5) -> str:
     if indicator not in _cat():
         return f"Unknown indicator {indicator!r}. Known: {', '.join(sorted(_cat()))}"
     r = q.indicator_values(indicator, period, "sabah")
     vals = sorted([v for v in r["values"] if v.get("rank_sabah")], key=lambda v: v["rank_sabah"])
+    note = ""
+    if not vals and period is not None:
+        # Growth rates are stamped on their end year, so "since 2019" lives at the latest period.
+        r = q.indicator_values(indicator, None, "sabah")
+        vals = sorted([v for v in r["values"] if v.get("rank_sabah")], key=lambda v: v["rank_sabah"])
+        note = f"No {indicator} values for {period}; showing the latest period, {r['period']}. "
     ind = _cat()[indicator]
-    lines = [
+    lines = [note +
         f"Sabah ranking for {ind['label']} ({r['period']}), best first "
         f"({'higher is better' if ind['direction'] == 'up' else 'lower is better' if ind['direction'] == 'down' else 'descriptive: highest first'})."
     ]
@@ -419,7 +445,7 @@ TOOLS: dict[str, tuple[Callable, dict]] = {
     "get_district_profile": (
         get_district_profile,
         {
-            "description": "Latest official values (with sources and vintages) for every indicator of a district, plus typology and boundary notes.",
+            "description": "Latest official values (with sources and vintages) for every indicator of a district, plus typology, boundary changes and data-quality flags. Use it for questions about why data is flagged.",
             "parameters": {
                 "type": "object",
                 "properties": {"district": {**_S, "description": "District name or slug, e.g. 'Pitas'"}},
@@ -487,10 +513,21 @@ TOOLS: dict[str, tuple[Callable, dict]] = {
             },
         },
     ),
+    "get_indicator_series": (
+        get_indicator_series,
+        {
+            "description": "Every published year of one indicator for one district (e.g. income_median 2019, 2022, 2024), with flags. Use it when a question names a specific year.",
+            "parameters": {
+                "type": "object",
+                "properties": {"district": _S, "indicator": _S},
+                "required": ["district", "indicator"],
+            },
+        },
+    ),
     "rank_districts": (
         rank_districts,
         {
-            "description": "Top and bottom Sabah districts for an indicator (codes such as income_median, poverty_absolute, unemployment_rate, gdp_per_capita, access_piped_water, gini, income_growth, gdp_growth).",
+            "description": "Top and bottom Sabah districts for an indicator (codes such as income_median, poverty_absolute, unemployment_rate, gdp_per_capita, access_piped_water, gini, income_growth, gdp_growth, ntl_growth). Omit period for the latest year; growth rates (income_growth = 2019 to latest survey) are stamped on their end year.",
             "parameters": {
                 "type": "object",
                 "properties": {"indicator": _S, "period": {"type": "integer"}, "top": {"type": "integer"}},
