@@ -6,6 +6,7 @@ export const JALUR_GROUPS: { key: string; label: string; codes: string[] }[] = [
   { key: "structure", label: "Structure", codes: ["share_services", "share_agriculture", "share_manufacturing", "pop_density"] },
   { key: "momentum", label: "Momentum", codes: ["income_growth", "gdp_growth", "lfpr", "unemployment_rate"] },
   { key: "access", label: "Access", codes: ["access_piped_water", "access_electricity"] },
+  { key: "lights", label: "Lights", codes: ["ntl_radiance_mean", "ntl_lit_share", "ntl_growth"] },
 ];
 
 export const JALUR_SHORT: Record<string, string> = {
@@ -23,6 +24,9 @@ export const JALUR_SHORT: Record<string, string> = {
   unemployment_rate: "Jobless",
   access_piped_water: "Water",
   access_electricity: "Power",
+  ntl_radiance_mean: "Radiance",
+  ntl_lit_share: "Lit area",
+  ntl_growth: "Lights growth",
 };
 
 export interface JalurCell {

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import atexit
 from collections.abc import Iterator
 from contextlib import contextmanager
 from functools import lru_cache
@@ -14,8 +15,9 @@ from atlas_core.settings import get_settings
 @lru_cache
 def pool() -> ConnectionPool:
     dsn = get_settings().database_url.replace("postgresql+psycopg://", "postgresql://")
-    return ConnectionPool(dsn, min_size=1, max_size=8, kwargs={"row_factory": dict_row},
-                          open=True)
+    p = ConnectionPool(dsn, min_size=1, max_size=8, kwargs={"row_factory": dict_row}, open=True)
+    atexit.register(p.close)  # close before interpreter shutdown (threads can't join after)
+    return p
 
 
 @contextmanager

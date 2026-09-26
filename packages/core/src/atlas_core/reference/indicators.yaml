@@ -283,3 +283,44 @@
   source: derived
   derived_from: [population]
   description: Compound annual growth of mid-year population from 2020 to the latest estimate.
+- code: ntl_radiance_mean
+  label: Average night-time light radiance
+  short: Night lights
+  unit: nW·cm⁻²·sr⁻¹
+  format: number2
+  direction: neutral
+  category: lights
+  jalur: lights
+  source: nasa_vnp46a4
+  description: Mean annual snow-free radiance over the district's land pixels with good-quality retrievals (NASA Black Marble VNP46A4, ≈500 m). Water is masked and pixels are capped at 500 to limit gas flares. A satellite proxy for settlement and economic activity, not a measure of output.
+- code: ntl_lit_share
+  label: Share of land that is lit at night
+  short: Lit area
+  unit: "% of land area"
+  format: pct
+  direction: neutral
+  category: lights
+  jalur: lights
+  source: nasa_vnp46a4
+  description: Share of the district's clear-sky land area with annual radiance above 0.5 nW·cm⁻²·sr⁻¹, a rough footprint of settlement and infrastructure.
+- code: ntl_radiance_total
+  label: Total night-time light (gap-filled)
+  short: Total lights
+  unit: radiance × km² (index)
+  format: number0
+  direction: neutral
+  category: lights
+  jalur: null
+  source: nasa_vnp46a4
+  description: Mean radiance of clear-sky land pixels multiplied by the district's land area, so years with more cloud-masked pixels are not mechanically darker. Used for growth rates and the GDP nowcast challenger.
+- code: ntl_growth
+  label: Night-light growth, 2015 to latest year
+  short: Lights growth
+  unit: "% / year"
+  format: pct
+  direction: up
+  category: momentum
+  jalur: lights
+  source: derived
+  derived_from: [ntl_radiance_total]
+  description: Compound annual growth of gap-filled total night-time light from 2015 to the latest annual composite. Tracks electrified settlement and activity; unlike district GDP it runs past 2020.

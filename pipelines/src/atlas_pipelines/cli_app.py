@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 
 import typer
 
@@ -119,6 +120,8 @@ def build(skip_ingest: bool = False) -> None:
     """Run the whole pipeline end to end."""
     if not skip_ingest:
         ingest(None)
+        if os.environ.get("EARTHDATA_TOKEN"):
+            ntl_cmd()
     harmonise()
     gold()
     model()

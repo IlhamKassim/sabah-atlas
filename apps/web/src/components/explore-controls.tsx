@@ -9,7 +9,7 @@ interface Opt { code: string; label: string; category: string }
 
 const CATEGORY_LABEL: Record<string, string> = {
   welfare: "Welfare", structure: "Economic structure", labour: "Labour market", access: "Access to services",
-  momentum: "Momentum", demography: "Population",
+  momentum: "Momentum", demography: "Population", lights: "Night lights (satellite)",
 };
 
 export function ExploreControls({ options, periods, current }: { options: Opt[]; periods: number[]; current: { indicator: string; period: number } }) {

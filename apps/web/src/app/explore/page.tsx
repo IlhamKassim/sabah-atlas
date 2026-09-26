@@ -11,7 +11,7 @@ import { api } from "@/lib/api";
 import { catalog } from "@/lib/data";
 import { explainFlag, fmt, ordinal } from "@/lib/format";
 import { projectSabah } from "@/lib/geo";
-import { LAUT, percentileColor, sequential } from "@/lib/scales";
+import { percentileColor, sequentialQuantiles } from "@/lib/scales";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Explore the map" };
@@ -29,7 +29,7 @@ export default async function ExplorePage({ searchParams }: PageProps<"/explore"
   const onMap = new Map(values.map((v) => [v.district_id, v]));
   const directional = ind.direction !== "neutral";
   const vals = values.map((v) => v.value);
-  const seq = sequential([Math.min(...vals), Math.max(...vals)]);
+  const seq = sequentialQuantiles(vals);
 
   const data: Record<string, MapDatum> = {};
   for (const d of geo.districts) {
@@ -74,7 +74,8 @@ export default async function ExplorePage({ searchParams }: PageProps<"/explore"
               min={Math.min(...vals)}
               max={Math.max(...vals)}
               format={ind.format}
-              steps={LAUT.slice(1)}
+              steps={seq.range()}
+              breaks={seq.quantiles()}
             />
           </div>
         </aside>

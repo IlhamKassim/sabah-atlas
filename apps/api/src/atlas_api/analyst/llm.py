@@ -55,6 +55,10 @@ class OpenAIChat:
 
     def __init__(self, client, model: str, embed_model: str | None, name: str):
         self.client, self.model, self.embed_model, self.name = client, model, embed_model, name
+        # Reasoning models (o-series, gpt-5) reject `temperature` and spend completion
+        # tokens on hidden reasoning. Deployment names can be anything, so learn it from
+        # the first rejection rather than guessing from the name.
+        self.reasoning = False
 
     def chat(self, system, messages, tools=None, max_tokens=2000, temperature=0.1) -> Turn:
         msgs: list[dict] = [{"role": "system", "content": system}]
@@ -78,12 +82,7 @@ class OpenAIChat:
                 msgs.append({"role": "tool", "tool_call_id": m["tool_call_id"], "content": m["content"]})
             else:
                 msgs.append({"role": m["role"], "content": m["content"]})
-        kwargs: dict = {
-            "model": self.model,
-            "messages": msgs,
-            "temperature": temperature,
-            "max_completion_tokens": max_tokens,
-        }
+        kwargs: dict = {"model": self.model, "messages": msgs}
         if tools:
             kwargs["tools"] = [
                 {
@@ -96,7 +95,7 @@ class OpenAIChat:
                 }
                 for t in tools
             ]
-        r = self.client.chat.completions.create(**kwargs)
+        r = self._create(kwargs, max_tokens, temperature)
         msg = r.choices[0].message
         calls = []
         for c in msg.tool_calls or []:
@@ -112,6 +111,23 @@ class OpenAIChat:
             getattr(u, "prompt_tokens", 0) or 0,
             getattr(u, "completion_tokens", 0) or 0,
         )
+
+    def _create(self, kwargs: dict, max_tokens: int, temperature: float):
+        from openai import BadRequestError
+
+        def params() -> dict:
+            if self.reasoning:
+                effort = os.environ.get("ATLAS_REASONING_EFFORT", "low")
+                return {"max_completion_tokens": max_tokens * 4, "reasoning_effort": effort}
+            return {"max_completion_tokens": max_tokens, "temperature": temperature}
+
+        try:
+            return self.client.chat.completions.create(**kwargs, **params())
+        except BadRequestError as e:
+            if self.reasoning or "temperature" not in str(e):
+                raise
+            self.reasoning = True
+            return self.client.chat.completions.create(**kwargs, **params())
 
     def embed(self, texts):
         if not self.embed_model:

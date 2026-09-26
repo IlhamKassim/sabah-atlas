@@ -64,6 +64,11 @@ def validate_gold(df: pd.DataFrame) -> dict:
                      df.district_id.isin(sabah)].district_id.nunique()
             if got != expected:
                 errors.append(f"completeness: {code} {period} has {got}/{expected} Sabah districts")
+    # Night lights (optional source) come from 2020 polygons: every year needs all 27.
+    ntl = df[(df.indicator == "ntl_radiance_mean") & df.district_id.isin(sabah)]
+    for period, g in ntl.groupby("period"):
+        if g.district_id.nunique() != 27:
+            errors.append(f"completeness: ntl_radiance_mean {period} has {g.district_id.nunique()}/27")
     if errors:
         raise ValueError("gold validation failed:\n  " + "\n  ".join(errors))
     return {"validated": True, "checks": len(COMPLETENESS)}

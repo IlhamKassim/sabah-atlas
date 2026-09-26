@@ -78,3 +78,9 @@
   parquet: https://storage.dosm.gov.my/hies/hh_income_state.parquet
   page: https://open.dosm.gov.my/data-catalogue/hh_income_state
   licence: CC BY 4.0
+- id: nasa_vnp46a4
+  publisher: NASA LAADS DAAC (Black Marble)
+  dataset_id: VNP46A4.002
+  title: VIIRS/NPP Lunar BRDF-Adjusted Nighttime Lights Yearly L3 Global 15 arc-second Linear Lat Lon Grid
+  page: https://doi.org/10.5067/VIIRS/VNP46A4.002
+  licence: NASA open data (no restrictions on use; cite Román et al. 2018, doi:10.1016/j.rse.2018.03.017)

@@ -1,6 +1,6 @@
 import { format as d3format } from "d3-format";
 
-export type Fmt = "currency" | "pct" | "decimal3" | "number0" | "number1" | string;
+export type Fmt = "currency" | "pct" | "decimal3" | "number0" | "number1" | "number2" | string;
 
 const rm0 = d3format(",.0f");
 const n1 = d3format(",.1f");
@@ -18,6 +18,8 @@ export function fmt(value: number | null | undefined, kind: Fmt, opts: { unit?: 
       return rm0(value);
     case "number1":
       return n1(value);
+    case "number2":
+      return value.toFixed(2);
     default:
       return n1(value);
   }

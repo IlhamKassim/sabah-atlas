@@ -16,6 +16,9 @@
 
 ## Quick start
 
+Needs Docker, [uv](https://docs.astral.sh/uv/) and pnpm. On macOS LightGBM also needs OpenMP: `brew install libomp`.
+Night lights need a free NASA Earthdata token (`EARTHDATA_TOKEN` in `.env`); without one they are skipped.
+
 ```bash
 docker compose up -d db          # Postgres 16 + PostGIS + pgvector on :5433
 uv sync                          # Python workspace

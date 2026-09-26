@@ -183,7 +183,12 @@ def run() -> dict[str, int]:
 
     src_rows = []
     for sid, s in sources().items():
-        _, meta = latest_bronze(sid)
+        try:
+            _, meta = latest_bronze(sid)
+        except FileNotFoundError:
+            if s.parquet or s.geojson:
+                raise
+            continue  # optional raster source not fetched yet (atlas ntl)
         pm = meta.get("publisher_meta", {})
         src_rows.append({
             "source_id": sid, "publisher": s.publisher, "dataset_id": s.dataset_id,

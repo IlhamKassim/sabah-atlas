@@ -2,7 +2,7 @@ import { JALUR_GROUPS, JALUR_SHORT, type JalurCell, jalurColor } from "@/lib/jal
 
 /**
  * Signature visual: a district's jalur — a compact strip of bands, one per indicator,
- * coloured by its percentile within Sabah, grouped welfare / structure / momentum / access
+ * coloured by its percentile within Sabah, grouped welfare / structure / momentum / access / lights
  * and separated by dark rules like the black bands of a mogah sarong.
  */
 export function Jalur({
@@ -48,11 +48,7 @@ export function Jalur({
           {c?.flagged && (
             <circle cx={x + cellWidth - 4} cy={labelH + 4} r={1.8} fill="#1e2422" />
           )}
-          {showLabels && (
-            <text x={x + cellWidth / 2} y={labelH - 5} fontSize={8} textAnchor="middle" fill="#5b625e" className="font-mono">
-              {JALUR_SHORT[code]}
-            </text>
-          )}
+          {showLabels && <CellLabel x={x + cellWidth / 2} y={labelH - 5} text={JALUR_SHORT[code]} />}
         </g>,
       );
       x += cellWidth + gap;
@@ -69,6 +65,19 @@ export function Jalur({
     >
       {parts}
     </svg>
+  );
+}
+
+/** Labels longer than a cell wraps onto two lines at the last space ("Lights / growth"). */
+function CellLabel({ x, y, text }: { x: number; y: number; text: string }) {
+  const cut = text.length > 8 ? text.lastIndexOf(" ") : -1;
+  const lines = cut > 0 ? [text.slice(0, cut), text.slice(cut + 1)] : [text];
+  return (
+    <text x={x} y={y} fontSize={8} textAnchor="middle" fill="#5b625e" className="font-mono">
+      {lines.map((l, i) => (
+        <tspan key={i} x={x} dy={i === 0 ? -(lines.length - 1) * 8.5 : 8.5}>{l}</tspan>
+      ))}
+    </text>
   );
 }
 

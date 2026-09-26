@@ -1,6 +1,6 @@
 // Map colour scales from the design system (plan §08). Validated for CVD: the diverging
 // scale is red–teal (not red–green), and meaning is always paired with text/arrows.
-import { scaleQuantize } from "d3-scale";
+import { scaleQuantile, scaleQuantize } from "d3-scale";
 
 export const LAUT = [
   "#f3ede1", "#d3e3dc", "#b0d6cf", "#8fc9c1", "#6bb3ad", "#4a9796",
@@ -38,6 +38,13 @@ export const DIVISIONS = ["West Coast", "Interior", "Kudat", "Sandakan", "Tawau"
 /** Sequential scale for levels; diverging (percentile) scale for 'better/worse' readings. */
 export function sequential(domain: [number, number]) {
   return scaleQuantize<string>().domain(domain).range(LAUT.slice(1));
+}
+
+/** Equal-count classes for descriptive maps: skewed indicators (density, night lights)
+ *  would otherwise put almost every district in the palest class. */
+export function sequentialQuantiles(values: number[]) {
+  // Quintiles: with 27 districts, finer classes would hold only two or three each.
+  return scaleQuantile<string>().domain(values).range([LAUT[1], LAUT[3], LAUT[5], LAUT[7], LAUT[10]]);
 }
 
 /** Percentile (0 = worst, 100 = best) -> diverging Mogah–Laut. */

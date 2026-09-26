@@ -2,7 +2,7 @@ import { fmt } from "@/lib/format";
 import { MOGAH_LAUT } from "@/lib/scales";
 
 export function MapLegend({
-  directional, direction, min, max, format, steps,
+  directional, direction, min, max, format, steps, breaks,
 }: {
   directional: boolean;
   direction: "up" | "down" | "neutral";
@@ -10,6 +10,8 @@ export function MapLegend({
   max: number;
   format: string;
   steps: string[];
+  /** Class boundaries between `steps` (length steps.length - 1), for quantile maps. */
+  breaks?: number[];
 }) {
   if (directional) {
     return (
@@ -25,6 +27,23 @@ export function MapLegend({
         <p className="mt-2 text-xs text-muted">
           Coloured by percentile within Sabah. {direction === "down" ? "Lower values are better for this indicator, so the scale is inverted: teal always means better." : "Higher values are better."}
         </p>
+      </div>
+    );
+  }
+  if (breaks?.length === steps.length - 1) {
+    const edges = [min, ...breaks, max];
+    return (
+      <div>
+        <p className="kicker text-muted">Colour</p>
+        <ul className="mt-1 space-y-0.5 font-mono text-[0.66rem] text-muted">
+          {steps.map((c, i) => (
+            <li key={c} className="flex items-center gap-2">
+              <span className="inline-block h-3 w-5" style={{ background: c }} aria-hidden />
+              {fmt(edges[i], format)} – {fmt(edges[i + 1], format)}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 text-xs text-muted">Descriptive indicator: darker means higher, not better or worse. Classes hold roughly equal numbers of districts.</p>
       </div>
     );
   }

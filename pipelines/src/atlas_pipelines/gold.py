@@ -99,9 +99,46 @@ def derive(obs: pd.DataFrame, sect: pd.DataFrame, geo: pd.DataFrame) -> pd.DataF
     growth("gdp_growth", "gdp_real", 2015)
     growth("income_growth", "income_median", 2019)
     growth("population_growth", "population", 2020)
+    growth("ntl_growth", "ntl_radiance_total", 2015)
 
     derived = pd.concat(rows, ignore_index=True)
     return derived
+
+
+# Below this share of clear-sky land pixels a district-year's lights are flagged.
+NTL_MIN_VALID = 0.5
+
+
+def lights(ntl: pd.DataFrame) -> pd.DataFrame:
+    """Night-light observations (silver shape) from per-district zonal sums."""
+    n = ntl[ntl.valid_px > 0].copy()
+    mean = n.radiance_sum / n.valid_px
+    flag = pd.Series(pd.NA, index=n.index, dtype="object")
+    low = n.valid_share < NTL_MIN_VALID
+    flag[low] = n.valid_share[low].map(
+        lambda v: f"note:only {v:.0%} of land pixels had clear-sky retrievals this year"
+    )
+    vals = {
+        "ntl_radiance_mean": mean,
+        "ntl_lit_share": 100 * n.lit_area_km2 / n.valid_area_km2,
+        "ntl_radiance_total": mean * n.land_area_km2,
+    }
+    return pd.concat(
+        [
+            pd.DataFrame(
+                {
+                    "district_id": n.district_id.values,
+                    "indicator": code,
+                    "period": n.year.astype(int).values,
+                    "value": v.astype(float).values,
+                    "source_id": "nasa_vnp46a4",
+                    "quality_flag": flag.values,
+                }
+            )
+            for code, v in vals.items()
+        ],
+        ignore_index=True,
+    )
 
 
 def rank(obs: pd.DataFrame) -> pd.DataFrame:
@@ -129,6 +166,8 @@ def rank(obs: pd.DataFrame) -> pd.DataFrame:
 
 def run() -> dict:
     obs = read_table("silver", "observation")
+    if (get_settings().silver / "ntl_annual.parquet").exists():
+        obs = pd.concat([obs, lights(read_table("silver", "ntl_annual"))], ignore_index=True)
     sect = read_table("silver", "gdp_sector")
     geo = gpd.read_parquet(get_settings().silver / "geometry.parquet")
     derived = derive(obs, sect, geo)

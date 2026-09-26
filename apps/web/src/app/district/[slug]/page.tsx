@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: PageProps<"/district/[slug]">
 }
 
 const KPIS = ["income_median", "poverty_absolute", "gdp_per_capita", "unemployment_rate"];
-const TABLE_ORDER = ["welfare", "labour", "access", "structure", "demography", "momentum"];
+const TABLE_ORDER = ["welfare", "labour", "access", "structure", "demography", "momentum", "lights"];
 
 export default async function DistrictPage({ params }: PageProps<"/district/[slug]">) {
   const { slug } = await params;

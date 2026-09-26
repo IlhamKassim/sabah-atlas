@@ -72,5 +72,7 @@ def ingest_all(only: list[str] | None = None) -> list[dict]:
         for src in sources().values():
             if only and src.id not in only:
                 continue
+            if not (src.parquet or src.geojson):
+                continue  # raster sources (night lights) have their own pipeline
             results.append(ingest_source(client, src))
     return results

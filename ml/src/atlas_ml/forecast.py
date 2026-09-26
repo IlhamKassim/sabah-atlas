@@ -12,6 +12,10 @@ District GDP (published to 2020)
              1–3) in *other* states (leave-one-state-out); widened by sqrt(h) beyond 3
   projection 2026–2028 extends state sector growth at its non-pandemic median, with
              transparent scenario shifts; state-path uncertainty is added in quadrature
+  lights     challenger: tilt each district's share of its state's nowcast by its night-light
+             growth relative to the state's, Y_d *= (L_d(t)/L_d(b))^beta, renormalised so
+             state totals are unchanged. beta is chosen on other states' backtests and the
+             challenger is adopted only if it cuts median error by at least 5%
 
 Median household income (survey rounds 2019, 2022, 2024)
   log y(T+h) = log y(T) + h * (g_state + rho * r_d)
@@ -36,6 +40,8 @@ NOWCAST_TO = 2025
 PROJ_YEARS = [2026, 2027, 2028]
 GROWTH_YEARS = [2016, 2017, 2018, 2019, 2023, 2024, 2025]  # skip pandemic distortion 2020–22
 ALPHA = 0.2  # 80% interval: p10–p90
+BETAS = [0.0, 0.1, 0.2, 0.3, 0.5, 0.75, 1.0]
+CHALLENGER_MARGIN = 0.05  # same adoption rule as the drivers models
 # Mondrian conformal: Sabah intervals are calibrated on East Malaysian backtest errors,
 # whose volatility matches Sabah's better than the peninsula's. Out-of-sample coverage
 # (calibrated without Sabah) is reported separately in the model card.
@@ -141,6 +147,44 @@ def _gdp_backtest(P, S, ratio) -> tuple[pd.DataFrame, float]:
     return bt, float(score.idxmin())
 
 
+def _lights_tilt(y: pd.Series, L: pd.DataFrame, base: int, t: int, beta: float) -> pd.Series:
+    """Tilt district totals by lights growth relative to their state, holding each state's
+    total (over districts with lights) fixed. Supra units and districts without lights keep
+    their value."""
+    if beta == 0 or base not in L or t not in L:
+        return y
+    ids = y.index
+    rel = (L[t] / L[base]).reindex(ids)
+    ok = rel.notna() & (rel > 0) & ~ids.str.endswith("-supra")
+    out = y.copy()
+    st = _state_of(ids[ok])
+    for _, idx in st.groupby(st).groups.items():
+        tilted = y.loc[idx] * rel.loc[idx] ** beta
+        out.loc[idx] = tilted * y.loc[idx].sum() / tilted.sum()
+    return out
+
+
+def _lights_backtest(P, S, ratio, lam: float, L: pd.DataFrame) -> pd.DataFrame:
+    """Backtest errors of the lights-tilted nowcast for each beta (base 2017, h = 1–3)."""
+    units = [u for u in modelling_units() if u in P.index.get_level_values(0)]
+    base = 2017
+    actual = {t: P.xs(t, level="period").sum(axis=1) * ratio for t in (2018, 2019, 2020)}
+    Pb = P.loc[pd.IndexSlice[units + [u for u in P.index.levels[0] if u.endswith("supra")], :], :]
+    pred = _allocate(Pb, S, base, [2018, 2019, 2020], lam)
+    rows = []
+    for beta in BETAS:
+        for t, Y in pred.items():
+            yhat = _lights_tilt(Y.sum(axis=1) * ratio.reindex(Y.index), L, base, t, beta)
+            for d in units:
+                a, p = actual[t].get(d), yhat.get(d)
+                if a and p and a > 0 and p > 0:
+                    rows.append({"beta": beta, "district_id": d, "h": t - base,
+                                 "log_err": float(np.log(a / p))})
+    bt = pd.DataFrame(rows)
+    bt["state"] = _state_of(bt.district_id).values
+    return bt
+
+
 def _conformal(errors: pd.Series) -> tuple[float, float]:
     """Split-conformal quantiles of log errors for an 80% two-sided interval."""
     n = len(errors)
@@ -170,6 +214,38 @@ def gdp_forecast(g: Gold) -> tuple[dict, dict]:
     bt, lam = _gdp_backtest(P, S, ratio)
     sab = sabah_ids()
     chosen = bt[bt["lambda"] == lam]
+
+    # Night-lights challenger (only when the optional NASA source has been loaded).
+    L = g.wide("ntl_radiance_total")
+    beta, lights_card = 0.0, {"available": False}
+    if not L.empty:
+        lb = _lights_backtest(P, S, ratio, lam, L)
+        other = lb[lb.state != "Sabah"]
+        grid = other.groupby("beta").log_err.apply(lambda e: np.median(np.abs(e)))
+        best = float(grid.idxmin())
+        adopted = best > 0 and grid[best] <= (1 - CHALLENGER_MARGIN) * grid[0.0]
+        shown = best if best > 0 else BETAS[1]  # report a real challenger even when it loses
+
+        def mdape(frame):
+            return {int(h): float(100 * np.median(np.exp(np.abs(e)) - 1))
+                    for h, e in frame.groupby("h").log_err}
+
+        lights_card = {
+            "available": True, "years": [int(min(L.columns)), int(max(L.columns))],
+            "beta_grid": {float(k): float(v) for k, v in grid.items()}, "best_beta": best,
+            "challenger_beta": shown,
+            "adopted": bool(adopted), "margin_required": CHALLENGER_MARGIN,
+            "median_ape_by_horizon": {
+                "champion_other_states": mdape(other[other.beta == 0.0]),
+                "challenger_other_states": mdape(other[other.beta == shown]),
+                "champion_sabah": mdape(lb[(lb.state == "Sabah") & (lb.beta == 0.0)]),
+                "challenger_sabah": mdape(lb[(lb.state == "Sabah") & (lb.beta == shown)]),
+            },
+        }
+        if adopted:
+            beta = best
+            chosen = lb[lb.beta == beta].assign(**{"lambda": lam})
+    last_light = int(max(L.columns)) if not L.empty else LAST_GDP
     cal = chosen[chosen.state.isin(CAL_GROUP)]
     q = {h: _conformal(cal[cal.h == h].log_err) for h in (1, 2, 3)}
     loso = chosen[chosen.state != "Sabah"]
@@ -202,23 +278,29 @@ def gdp_forecast(g: Gold) -> tuple[dict, dict]:
     ss = S.xs("Sabah", level="state").sum(axis=1)
     sd_total = float(np.log(ss).diff().loc[GROWTH_YEARS].std())
 
+    def tilt(Y: pd.DataFrame, t: int) -> pd.Series:
+        tot = Y.sum(axis=1) * ratio.reindex(Y.index).fillna(1.0)
+        return _lights_tilt(tot, L, LAST_GDP, min(t, last_light), beta)
+
+    tilted_now = {t: tilt(nowcast[t], t) for t in now_years}
+    tilted_proj = {k: {t: tilt(v[t], t) for t in PROJ_YEARS} for k, v in projections.items()}
+
     out = {}
     official = g.wide("gdp_real")
     for d in sab:
         if d not in nowcast[now_years[0]].index:
             continue
-        r = ratio.get(d, 1.0)
         off = [{"period": int(t), "value": float(v)} for t, v in official.loc[d].dropna().items()]
         now = []
         for t in now_years:
-            p50 = float(nowcast[t].loc[d].sum() * r)
+            p50 = float(tilted_now[t].loc[d])
             lo, hi = q_at(t - LAST_GDP)
             now.append({"period": t, "p10": p50 * np.exp(lo), "p50": p50, "p90": p50 * np.exp(hi)})
         proj = {}
         for key in SCENARIOS:
             pts = []
             for t in PROJ_YEARS:
-                p50 = float(projections[key][t].loc[d].sum() * r)
+                p50 = float(tilted_proj[key][t].loc[d])
                 lo, hi = q_at(t - LAST_GDP)
                 extra = 1.2816 * sd_total * np.sqrt(t - NOWCAST_TO)  # z(0.9) * state path sd
                 lo_t = -np.sqrt(lo ** 2 + extra ** 2)
@@ -226,7 +308,7 @@ def gdp_forecast(g: Gold) -> tuple[dict, dict]:
                 pts.append({"period": t, "p10": p50 * np.exp(lo_t), "p50": p50,
                             "p90": p50 * np.exp(hi_t)})
             proj[key] = pts
-        own = bt[(bt["lambda"] == lam) & (bt.district_id == d)]
+        own = chosen[chosen.district_id == d]
         out[d] = {
             "unit": "RM million (2015 prices)", "official": off, "nowcast": now,
             "projection": proj,
@@ -259,6 +341,7 @@ def gdp_forecast(g: Gold) -> tuple[dict, dict]:
         "sabah_coverage_out_of_sample": loso_cov,
         "state_path_log_sd": sd_total,
         "scenarios": {k: {kk: vv for kk, vv in v.items()} for k, v in SCENARIOS.items()},
+        "lights_challenger": lights_card,
     }
     return out, card
 
@@ -366,6 +449,18 @@ def income_forecast(g: Gold) -> tuple[dict, dict]:
     return out, card
 
 
+def _lights_note(c: dict) -> str:
+    if not c.get("available"):
+        return "Night lights (NASA Black Marble) were not loaded for this release."
+    if c["adopted"]:
+        return (f"The night-lights tilt (beta={c['best_beta']}) beat the sector-only nowcast by "
+                "at least 5% in other states' backtests and is used. Lights track settlement "
+                "and electrification, so they say little about offshore or plantation output.")
+    return ("The night-lights challenger did not beat the sector-only nowcast by the required 5% "
+            "in other states' backtests (any positive weight on lights raised the error), so it "
+            "is reported but not used. Night lights stay in the atlas as a descriptive indicator.")
+
+
 def fit(g: Gold) -> dict:
     gdp, gdp_card = gdp_forecast(g)
     inc, inc_card = income_forecast(g)
@@ -389,8 +484,7 @@ def fit(g: Gold) -> dict:
             "27 Sabah districts, out-of-sample coverage estimates are noisy (about ±8 points).",
             "Income projections are nominal and rest on one backtest round; treat as indicative.",
             "Scenarios are transparent sensitivities, not predictions of commodity prices.",
-            "Night-lights nowcasting (NASA Black Marble) is not yet included; it needs a NASA "
-            "Earthdata token.",
+            _lights_note(gdp_card["lights_challenger"]),
         ],
     }
     return {"model_version": mv, "per_district": per, "card": card}

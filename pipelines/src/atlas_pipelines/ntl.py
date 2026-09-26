@@ -7,7 +7,10 @@ h28v08 and h29v08 (Sabah lies entirely in h29v08).
 Per district and year:
   radiance_sum     sum of snow-free all-angle radiance (nW·cm⁻²·sr⁻¹) over valid land pixels
   lit_area_km2     area of valid land pixels with radiance > LIT_THRESHOLD
-  valid_share      share of the district's land pixels with good-quality retrievals
+  valid_area_km2   area of land pixels with good-quality retrievals
+  land_area_km2    area of all land pixels in the district
+  land_px, valid_px  the same as pixel counts
+  valid_share      valid_px / land_px (cloud-heavy years in Sabah can fall well below 1)
 Masks: water/sea pixels (Land_Water_Mask) are dropped, so offshore platforms and
 fishing fleets do not count; pixel radiance is capped at FLARE_CAP to limit the pull of
 gas flares and industrial point sources; poor-quality retrievals are excluded.
@@ -15,8 +18,10 @@ gas flares and industrial point sources; poor-quality retrievals are excluded.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+from datetime import UTC, datetime
 from pathlib import Path
 
 import geopandas as gpd
@@ -82,7 +87,12 @@ def download(gs: list[dict]) -> list[Path]:
         raise NoToken("Set EARTHDATA_TOKEN in .env (https://urs.earthdata.nasa.gov → Generate Token).")
     out_dir = bronze_dir("ntl_vnp46a4")
     paths = []
-    with httpx.Client(headers={"Authorization": f"Bearer {token}"}, follow_redirects=True, timeout=600) as c:
+    with httpx.Client(
+        headers={"Authorization": f"Bearer {token}"},
+        follow_redirects=True,
+        timeout=httpx.Timeout(600, connect=60),
+        transport=httpx.HTTPTransport(retries=3),  # retries connection failures only
+    ) as c:
         for g in gs:
             p = out_dir / g["name"]
             if not p.exists():
@@ -153,6 +163,7 @@ def zonal(paths: list[Path]) -> pd.DataFrame:
         r = np.where(ok, rad[use], 0.0)
         a = area[use]
         n = len(ids) + 1
+        okf = ok.astype(float)
         rows.append(
             pd.DataFrame(
                 {
@@ -161,43 +172,62 @@ def zonal(paths: list[Path]) -> pd.DataFrame:
                     "lit_area_km2": np.bincount(
                         z, weights=a * (ok & (rad[use] > LIT_THRESHOLD)), minlength=n
                     ),
+                    "valid_area_km2": np.bincount(z, weights=a * okf, minlength=n),
+                    "land_area_km2": np.bincount(z, weights=a, minlength=n),
                     "land_px": np.bincount(z, minlength=n),
-                    "valid_px": np.bincount(z, weights=ok.astype(float), minlength=n),
+                    "valid_px": np.bincount(z, weights=okf, minlength=n),
                 }
             )
             .query("zone > 0 and land_px > 0")
             .assign(year=year, tile=tile)
         )
+    if not rows:
+        return pd.DataFrame(columns=["district_id", "year", *SUMS])
     df = pd.concat(rows)
-    # districts spanning tile edges: sum across tiles
-    df = df.groupby(["zone", "year"], as_index=False)[
-        ["radiance_sum", "lit_area_km2", "land_px", "valid_px"]
-    ].sum()
     df["district_id"] = df.zone.map(lambda i: ids[i - 1])
-    df["valid_share"] = df.valid_px / df.land_px
-    return df[["district_id", "year", "radiance_sum", "lit_area_km2", "valid_share"]]
+    return df[["district_id", "year", *SUMS]]
+
+
+SUMS = ["radiance_sum", "lit_area_km2", "valid_area_km2", "land_area_km2", "land_px", "valid_px"]
 
 
 def run(keep_raw: bool = False) -> dict:
     """Stream granules one at a time (download → zonal stats → delete), so peak disk use
-    is one ~75 MB tile rather than ~3 GB for the full 2012–2025 archive."""
+    is one ~75 MB tile rather than ~3 GB for the full 2012–2025 archive. Per-granule
+    results are cached, so an interrupted run resumes and a weekly run only fetches
+    new years."""
     gs = granules()
+    cache = bronze_dir("ntl_vnp46a4") / "zonal"
+    cache.mkdir(exist_ok=True)
     frames = []
-    for g in gs:
-        [path] = download([g])
-        frames.append(zonal([path]))
-        if not keep_raw:
-            path.unlink(missing_ok=True)
-    df = (
-        pd.concat(frames)
-        .groupby(["district_id", "year"], as_index=False)
-        .agg(
-            radiance_sum=("radiance_sum", "sum"),
-            lit_area_km2=("lit_area_km2", "sum"),
-            valid_share=("valid_share", "mean"),
-        )
-    )
+    for i, g in enumerate(gs, 1):
+        part = cache / (g["name"].rsplit(".", 1)[0] + ".parquet")
+        if not part.exists():
+            [path] = download([g])
+            zonal([path]).to_parquet(part, index=False)
+            if not keep_raw:
+                path.unlink(missing_ok=True)
+            print(f"  [{i}/{len(gs)}] {g['year']} {g['tile']}", flush=True)
+        frames.append(pd.read_parquet(part))
+    # districts spanning tile edges: sum across tiles
+    df = pd.concat(frames).groupby(["district_id", "year"], as_index=False)[SUMS].sum()
+    df["valid_share"] = df.valid_px / df.land_px
     write_table("silver", "ntl_annual", df)
+    # Bronze metadata in the same shape as tabular sources, for the source registry.
+    names = sorted(g["name"] for g in gs)
+    digest = hashlib.sha256("\n".join(names).encode()).hexdigest()
+    now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    meta = {
+        "source_id": "nasa_vnp46a4",
+        "url": f"{CMR}?short_name=VNP46A4&bounding_box=99.5,0.8,119.5,7.5",
+        "sha256": digest,
+        "retrieved_at": now,
+        "licence": "NASA open data",
+        "file": "zonal",
+        "granules": names,
+    }
+    out = bronze_dir("nasa_vnp46a4") / f"{now[:10]}_{digest[:12]}.meta.json"
+    out.write_text(json.dumps(meta, indent=2))
     return {
         "granules": len(gs),
         "district_years": len(df),

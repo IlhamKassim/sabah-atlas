@@ -4,6 +4,7 @@ Values are DOSM's own published numbers; update only with a new source vintage a
 a changelog entry.
 """
 
+import pandas as pd
 import pytest
 
 from atlas_core.registry import sabah_districts
@@ -48,3 +49,26 @@ def test_sabah_percentiles_direction_aware(gold):
                gold.district_id.isin(sabah_districts().district_id)]
     worst = pov.sort_values("value").iloc[-1]
     assert worst.pct_sabah == 0 and worst.rank_sabah == worst.n_sabah
+
+
+def test_night_lights_derivation():
+    from atlas_pipelines.gold import lights
+
+    ntl = pd.DataFrame({
+        "district_id": ["sbh-pitas", "sbh-tongod"], "year": [2024, 2024],
+        "radiance_sum": [20.0, 0.0], "lit_area_km2": [30.0, 0.0], "valid_area_km2": [600.0, 900.0],
+        "land_area_km2": [1200.0, 1000.0], "land_px": [4000, 3000], "valid_px": [2000, 2700],
+        "valid_share": [0.5, 0.9],
+    })
+    out = lights(ntl).set_index(["district_id", "indicator"]).value
+    assert out["sbh-pitas", "ntl_radiance_mean"] == pytest.approx(0.01)  # 20 / 2000 valid px
+    assert out["sbh-pitas", "ntl_lit_share"] == pytest.approx(5.0)  # 30 / 600 km² clear
+    assert out["sbh-pitas", "ntl_radiance_total"] == pytest.approx(12.0)  # mean × land area
+    assert out["sbh-tongod", "ntl_radiance_mean"] == 0.0
+
+
+def test_night_lights_cover_sabah(gold):
+    n = gold[(gold.indicator == "ntl_radiance_mean") & gold.district_id.str.startswith("sbh-")]
+    if n.empty:
+        pytest.skip("night lights not loaded")
+    assert n.groupby("period").district_id.nunique().eq(27).all()

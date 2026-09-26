@@ -19,13 +19,23 @@ const TOC = [
   ["analyst", "AI Analyst"], ["errata", "Errata"], ["reproduce", "Reproduce everything"],
 ];
 
+interface LightsCard {
+  available: boolean;
+  years?: number[];
+  best_beta?: number;
+  challenger_beta?: number;
+  adopted?: boolean;
+  beta_grid?: Record<string, number>;
+  median_ape_by_horizon?: Record<string, Record<string, number>>;
+}
+
 export default async function MethodologyPage() {
   const [{ meta }, cardsRaw] = await Promise.all([catalog(), api.modelCards()]);
   const cards = Object.fromEntries((cardsRaw as Card[]).map((c) => [c.task, c])) as Record<string, Card>;
   const sc = cards.scorecard, ss = cards.shift_share, ty = cards.typology, dr = cards.drivers, fc = cards.forecast;
   const tyClusters = (ty?.clusters ?? []) as { name: string; size: number; sabah_members: string[] }[];
   const drTargets = (dr?.targets ?? {}) as Record<string, { metrics: Record<string, { r2?: number; mae?: number; mae_sabah?: number } | string | number>; importance: { feature: string; mean_abs_shap: number }[] }>;
-  const gdp = (fc?.gdp ?? {}) as { lambda?: number; lambda_grid?: Record<string, number>; median_ape_by_horizon?: Record<string, Record<string, number>>; median_ape_by_division_h3?: Record<string, number>; sabah_coverage_out_of_sample?: Record<string, number>; calibration_group?: string[]; scenarios?: Record<string, { label: string; description: string }> };
+  const gdp = (fc?.gdp ?? {}) as { lambda?: number; lambda_grid?: Record<string, number>; median_ape_by_horizon?: Record<string, Record<string, number>>; median_ape_by_division_h3?: Record<string, number>; sabah_coverage_out_of_sample?: Record<string, number>; calibration_group?: string[]; scenarios?: Record<string, { label: string; description: string }>; lights_challenger?: LightsCard };
   const inc = (fc?.income ?? {}) as { rho?: number; median_ape?: Record<string, number>; sabah_coverage_out_of_sample_h2?: number };
   const thresholds = (sc?.thresholds ?? {}) as Record<string, string>;
 
@@ -85,6 +95,8 @@ export default async function MethodologyPage() {
             <li><strong>Telupid</strong> is absent from the 2018–19 Labour Force Survey and 2016 amenities data, when it was within Beluran.</li>
             <li>DOSM reports offshore oil &amp; gas output in a separate <strong>“Supra”</strong> row not attributable to any district. It is excluded from district rankings and shift-share, and carried separately in forecasts.</li>
           </ul>
+
+          <p><strong>Night lights.</strong> NASA&apos;s Black Marble annual composites (VNP46A4, ≈500 m) are summarised on the same 2020 polygons: water pixels are masked so offshore platforms and fishing fleets don&apos;t count, radiance is capped at 500 nW·cm⁻²·sr⁻¹ to limit gas flares, and only good-quality retrievals are used. The atlas reports <em>mean</em> radiance over land pixels with a good-quality retrieval, and flags any district-year where fewer than half the land pixels have one. Lights are a proxy for settlement and electrification, not a measure of output: plantations, mines and offshore fields are dark.</p>
 
           <h2 id="indicators">Indicators</h2>
           <p>{meta.indicators.length} indicators. <em>Direction</em> says whether higher is better (↑), worse (↓) or purely descriptive (·). Percentiles are direction-aware so that 100 is always best; descriptive indicators are ranked by value and never called good or bad.</p>
@@ -189,6 +201,7 @@ export default async function MethodologyPage() {
               </tbody>
             </table>
           </div>
+          <LightsChallenger c={gdp.lights_challenger} />
           <p className="mt-3"><strong>Intervals</strong> are 80% split-conformal intervals from backtest errors, calibrated on East Malaysian districts ({gdp.calibration_group?.join(", ")}) because Sabah is more volatile than the peninsula. <strong>Honest check:</strong> calibrated <em>without</em> Sabah, the intervals covered {pct(gdp.sabah_coverage_out_of_sample?.["1"])}, {pct(gdp.sabah_coverage_out_of_sample?.["2"])} and {pct(gdp.sabah_coverage_out_of_sample?.["3"])} of Sabah outcomes at 1–3 years, below the nominal 80%. That is why the regional calibration is used; with 27 districts these coverage figures are themselves uncertain by about ±8 points. Beyond 3 years, intervals widen with √h and add state-path uncertainty.</p>
           <p><strong>Median income.</strong> Projection = latest survey value × the state&apos;s long-run median-income trend, plus ρ × the district&apos;s recent excess growth. The backtest chose ρ = {String(inc.rho ?? "")}: a district&apos;s recent excess growth did <em>not</em> help predict its next round (it mean-reverts), so projections follow the state trend. Median error predicting 2024 from 2022: {num(inc.median_ape?.h2_national)}% nationally, {num(inc.median_ape?.h2_sabah_loso)}% in Sabah (out-of-sample coverage {pct(inc.sabah_coverage_out_of_sample_h2)}). The 2019→2022 backtest spans the pandemic ({num(inc.median_ape?.h3_state_trend_only_national)}% error) and is reported, not used.</p>
           {gdp.scenarios && (
@@ -225,5 +238,17 @@ function Limits({ card }: { card?: Card }) {
       <p className="font-mono text-[0.66rem] uppercase tracking-wider text-[#7a5510]">Known limitations · {card.model_version}</p>
       <ul className="mt-1 list-disc space-y-0.5 pl-5">{card.limitations.map((l) => <li key={l}>{l}</li>)}</ul>
     </div>
+  );
+}
+
+function LightsChallenger({ c }: { c?: LightsCard }) {
+  if (!c?.available) return <p className="mt-3"><strong>Night-lights challenger.</strong> Not run for this release (the NASA source was not loaded).</p>;
+  const m = c.median_ape_by_horizon ?? {};
+  const row = (k: string) => ["1", "2", "3"].map((h) => `${num(m[k]?.[h])}%`).join(" / ");
+  return (
+    <p className="mt-3">
+      <strong>Night-lights challenger.</strong> A second nowcast tilts each district&apos;s share of the state total by how fast its night lights grew relative to the state&apos;s, with elasticity β chosen on other states&apos; backtests. With β = {c.challenger_beta}, median error at 1/2/3 years is {row("challenger_other_states")} against {row("champion_other_states")} for the sector-only model in other states, and {row("challenger_sabah")} against {row("champion_sabah")} in Sabah.{" "}
+      {c.adopted ? <>It clears the 5% improvement bar, so the published nowcasts use it.</> : <>Every positive β raised the error (year-to-year noise in the lights outweighs their signal at these horizons), so it is reported here but <strong>not used</strong>; lights remain a descriptive indicator.</>}
+    </p>
   );
 }
