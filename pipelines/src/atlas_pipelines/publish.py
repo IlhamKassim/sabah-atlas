@@ -188,4 +188,5 @@ def run() -> dict:
     shutil.copy(RELEASES / f"atlas-ekonomi-sabah-{version}.zip", rel_web.parent)
     (web / "releases" / "latest.json").write_text(json.dumps(manifest, indent=2))
     uploaded = _upload(out, RELEASES / f"atlas-ekonomi-sabah-{version}.zip", manifest)
-    return {"uploaded": uploaded, "version": version, "content_hash": content_hash[:16], "files": len(manifest_files)}
+    return {"uploaded": uploaded, "version": version, "content_hash": content_hash[:16],
+            "files": len(manifest_files)}
