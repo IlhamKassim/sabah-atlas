@@ -27,7 +27,7 @@ uv run uvicorn atlas_api.main:app --port 8000
 pnpm --dir apps/web install && pnpm --dir apps/web dev   # http://localhost:3000
 ```
 
-Run the checks with `uv run pytest`, `uv run ruff check .`, and `pnpm --dir apps/web lint`.
+Run the checks with `uv run pytest`, `uv run ruff check .`, `pnpm --dir apps/web lint` and `pnpm --dir apps/web typecheck`.
 
 ## Data and licences
 
