@@ -99,7 +99,7 @@ function EvalPanel({ r }: { r: EvalReport }) {
           ))}
         </tbody>
       </table>
-      <p className="source-note mt-2">Run {r.run_at.slice(0, 10)} · {r.model} · data release {r.release} · {r.sentences_stripped} sentences removed by the validator{r.citations_recovered ? `, ${r.citations_recovered} missing citations restored (only where a number matched exactly one fact on the same topic)` : ""}{r.intervals_added ? `, ${r.intervals_added} uncertainty ranges added to modelled figures` : ""}. Citation validity counts only the model's own citations. Re-run on every prompt or model change.</p>
+      <p className="source-note mt-2">Run {r.run_at.slice(0, 10)} · {r.model} · data release {r.release} · {r.sentences_stripped} sentences removed by the validator{r.citations_recovered ? `, ${r.citations_recovered} missing citations restored (only where a number matched exactly one fact on the same topic)` : ""}{r.intervals_added ? `, ${r.intervals_added} uncertainty ranges added to modelled figures` : ""}. Citation validity counts only the model&apos;s own citations. Re-run on every prompt or model change.</p>
     </div>
   );
 }
