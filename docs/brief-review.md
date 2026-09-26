@@ -26,10 +26,16 @@ So **you do not need to re-check arithmetic or transcription.** Spend your time 
 
 ## How to record the decision
 
+On the live atlas (needs `ATLAS_REVIEW_TOKEN` in `.env`; the decision is recorded in Azure):
+
 ```bash
-uv run atlas review pitas --reviewer "Full Name, Organisation" --note "Checked framing; downgraded option 2 to limited."
-uv run atlas review pitas --reject --reviewer "Full Name, Organisation" --note "Situation misreads the sector mix; regenerate."
+uv run atlas review pitas --api https://atlas-api.ashymoss-d65781bb.southeastasia.azurecontainerapps.io \
+  --reviewer "Full Name, Organisation" --note "Checked framing; downgraded option 2 to limited."
+uv run atlas review pitas --reject --api https://atlas-api.ashymoss-d65781bb.southeastasia.azurecontainerapps.io \
+  --reviewer "Full Name, Organisation" --note "Situation misreads the sector mix; regenerate."
 ```
+
+Without `--api` the decision goes to your local database instead.
 
 Approving publishes the brief as **Reviewed by …** with your name and note. The site always prefers a reviewed brief over a newer draft, so a new data release does not push reviewed work off the page.
 

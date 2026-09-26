@@ -102,8 +102,24 @@ def review_cmd(
     approve: bool = typer.Option(True, "--approve/--reject"),
     reviewer: str = typer.Option(..., help="Reviewer name, recorded with the brief"),
     note: str = "",
+    api: str = typer.Option(None, help="Record the decision on a deployed atlas, e.g. its API URL"),
 ) -> None:
     """Mark a district's latest brief reviewed (or rejected)."""
+    if api:
+        import httpx
+
+        token = os.environ.get("ATLAS_REVIEW_TOKEN")
+        if not token:
+            raise typer.BadParameter("set ATLAS_REVIEW_TOKEN in .env")
+        r = httpx.post(
+            f"{api.rstrip('/')}/v1/briefs/{district}/review",
+            json={"approve": approve, "reviewer": reviewer, "note": note},
+            headers={"Authorization": f"Bearer {token}"},
+            timeout=60,
+        )
+        r.raise_for_status()
+        _show(r.json())
+        return
     from atlas_api.analyst.briefs import review
 
     _show(review(district, approve=approve, reviewer=reviewer, note=note))

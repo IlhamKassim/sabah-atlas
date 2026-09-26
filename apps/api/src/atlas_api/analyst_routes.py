@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import hmac
 import json
 import os
 import time
@@ -142,7 +143,7 @@ class ReviewBody(BaseModel):
 @router.post("/briefs/{key}/review", include_in_schema=False)
 def brief_review(key: str, body: ReviewBody, authorization: str = Header(default="")) -> dict:
     token = os.environ.get("ATLAS_REVIEW_TOKEN")
-    if not token or authorization != f"Bearer {token}":
+    if not token or not hmac.compare_digest(authorization.encode(), f"Bearer {token}".encode()):
         raise HTTPException(401, "review requires authorisation")
     return briefs.review(key, approve=body.approve, reviewer=body.reviewer, note=body.note)
 
