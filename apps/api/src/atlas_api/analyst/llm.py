@@ -189,7 +189,8 @@ class AnthropicChat:
 
 
 def get_llm(role: str = "main") -> LLM:
-    """role: 'main' for final answers, 'router' for cheaper routing/evaluation calls."""
+    """role: 'main' for answers, 'router' for cheaper routing/evaluation calls, 'brief' for
+    district briefs (rare, long, human-reviewed: worth a stronger model)."""
     # Blank values, and stray inline comments dotenv keeps on empty keys, count as unset.
     env = {k: v for k, v in os.environ.items() if v.strip() and not v.lstrip().startswith("#")}
     provider = env.get("ATLAS_LLM_PROVIDER")
@@ -207,7 +208,8 @@ def get_llm(role: str = "main") -> LLM:
             )
     main = env.get("ATLAS_LLM_DEPLOYMENT") or env.get("ATLAS_LLM_MODEL")
     router = env.get("ATLAS_LLM_ROUTER_DEPLOYMENT") or main
-    model = router if role == "router" else main
+    brief = env.get("ATLAS_BRIEF_DEPLOYMENT") or main
+    model = {"router": router, "brief": brief}.get(role, main)
     if provider == "azure":
         from openai import AzureOpenAI, OpenAI
 

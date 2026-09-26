@@ -13,7 +13,12 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: PageProps<"/district/[slug]/brief">): Promise<Metadata> {
   const { slug } = await params;
-  return { title: `${slug.replace(/-/g, " ")} district brief` };
+  try {
+    const p = await api.district(slug);
+    return { title: `${p.district.name} district brief` };
+  } catch {
+    return { title: "District brief" };
+  }
 }
 
 export default async function BriefPage({ params }: PageProps<"/district/[slug]/brief">) {

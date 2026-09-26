@@ -86,12 +86,14 @@ def embed() -> None:
 
 @app.command()
 def briefs(
-    district: str = typer.Option(None, help="One district slug; default all 27"), force: bool = False
+    district: str = typer.Option(None, help="One district slug; default all 27"),
+    force: bool = typer.Option(False, help="Regenerate drafts for this release"),
+    replace_reviewed: bool = typer.Option(False, help="Also overwrite briefs a person has reviewed"),
 ) -> None:
     """Generate AI Analyst district briefs (stored as drafts for human review)."""
     from atlas_api.analyst.briefs import generate_all
 
-    _show(generate_all(only=district, force=force))
+    _show(generate_all(only=district, force=force, replace_reviewed=replace_reviewed))
 
 
 @app.command("review")

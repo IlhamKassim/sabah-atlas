@@ -16,15 +16,24 @@ def _release() -> str:
     return r["version"] if r else "dev"
 
 
-def generate(district_id: str, force: bool = False) -> dict:
+# Which brief a district shows: a reviewed one first, then the newest draft; a rejected
+# brief only if nothing else exists (the site marks it withdrawn).
+_PREFER = "(i.status = 'reviewed') DESC, (i.status = 'rejected') ASC, i.created_at DESC"
+
+
+def generate(district_id: str, force: bool = False, replace_reviewed: bool = False) -> dict:
     d = q.resolve_district(district_id)
     if not d:
         raise ValueError(district_id)
     rel = _release()
     bid = f"brief:{d['id']}:{rel}"
-    if not force and fetch_one("SELECT 1 FROM insight WHERE id=%s", (bid,)):
+    existing = fetch_one("SELECT status FROM insight WHERE id=%s", (bid,))
+    if existing and existing["status"] == "reviewed" and not replace_reviewed:
+        # Human review is the expensive part: a batch --force must never erase it.
+        return {"id": bid, "status": "kept (reviewed)"}
+    if existing and not force:
         return {"id": bid, "status": "exists"}
-    llm = get_llm()
+    llm = get_llm("brief")
     a = ask("", district=d["name"], brief=True, llm=llm)
     with conn() as c:
         c.execute(
@@ -60,12 +69,12 @@ def generate(district_id: str, force: bool = False) -> dict:
     }
 
 
-def generate_all(only: str | None = None, force: bool = False) -> list[dict]:
+def generate_all(only: str | None = None, force: bool = False, replace_reviewed: bool = False) -> list[dict]:
     targets = [only] if only else [d["id"] for d in q.districts("sabah") if d["kind"] == "district"]
     out = []
     for t in targets:
         try:
-            out.append({"district": t, **generate(t, force=force)})
+            out.append({"district": t, **generate(t, force=force, replace_reviewed=replace_reviewed)})
         except Exception as e:  # noqa: BLE001 — one failure must not stop the batch
             out.append({"district": t, "error": str(e)})
         print(out[-1])
@@ -94,7 +103,7 @@ def list_briefs() -> list[dict]:
                           d.division, i.status, i.reviewer, i.reviewed_at, i.created_at, i.model_version,
                           (i.validation->>'citation_validity')::float AS citation_validity
                    FROM insight i JOIN district d ON d.id=i.district_id
-                   WHERE i.kind='brief' ORDER BY i.district_id, i.created_at DESC""")
+                   WHERE i.kind='brief' ORDER BY i.district_id, """ + _PREFER)
 
 
 def get_brief(key: str) -> dict | None:
@@ -102,6 +111,6 @@ def get_brief(key: str) -> dict | None:
     did = d["id"] if d else key
     return fetch_one(
         """SELECT i.*, d.slug, d.display_name AS name FROM insight i JOIN district d ON d.id=i.district_id
-                        WHERE i.district_id=%s AND i.kind='brief' ORDER BY i.created_at DESC LIMIT 1""",
+                        WHERE i.district_id=%s AND i.kind='brief' ORDER BY """ + _PREFER + " LIMIT 1",
         (did,),
     )

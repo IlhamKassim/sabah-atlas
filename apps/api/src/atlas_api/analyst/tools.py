@@ -67,7 +67,11 @@ def _obs_fact(reg: Registry, d: dict, code: str, o: dict) -> str:
     src_txt = f"{src['publisher']} {src['dataset_id']}" if src else "derived by the atlas from DOSM data"
     extra = ""
     if o.get("rank_sabah"):
-        extra = f"; rank {o['rank_sabah']} of {o['n_sabah']} in Sabah"
+        if ind["direction"] == "neutral":
+            # Descriptive: rank 1 = highest value, not "best". Say so, or models read it as a strength.
+            extra = f"; {o['rank_sabah']} of {o['n_sabah']} in Sabah by size, 1 = highest (descriptive, not good or bad)"
+        else:
+            extra = f"; rank {o['rank_sabah']} of {o['n_sabah']} in Sabah, 1 = best"
     flag = f"; note: {o['quality_flag']}" if o.get("quality_flag") else ""
     label = f"{d['name']} · {ind['label']} · {o['period']} = {fmt(o['value'], ind['format'])} ({src_txt}{extra}{flag})"
     vals = [o["value"]] + ([o["rank_sabah"], o["n_sabah"]] if o.get("rank_sabah") else [])
@@ -280,7 +284,11 @@ def get_forecast(
             period=p["period"],
             kind="analytics",
             model_version=fc["model_version"],
-            interval=f"80% interval {fmt(p['p10'], fmt_)}–{fmt(p['p90'], fmt_)}",
+            interval=(
+                f"80% interval RM {fmt(p['p10'], fmt_)}–{fmt(p['p90'], fmt_)} million"
+                if indicator == "gdp_real"
+                else f"80% interval {fmt(p['p10'], fmt_)}–{fmt(p['p90'], fmt_)}"
+            ),
         )
         lines.append(f"[{f.id}] {label} — MODELLED")
     bt = s.get("backtest", {}).get("abs_pct_error_by_h", {})

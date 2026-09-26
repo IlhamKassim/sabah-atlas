@@ -181,7 +181,7 @@ export interface BriefSummary { id: string; district_id: string; slug: string; n
 export interface Brief extends BriefSummary { body_md: string; citations: import("@/components/cited-markdown").Citation[]; validation: { citations_total: number; citations_valid: number; citation_validity: number; stripped: { sentence: string; reason: string }[] }; release: string; review_note: string | null }
 export interface EvalReport {
   run_at: string; model: string; judge: string; release: string; questions: number; citation_validity: number | null; citations: number;
-  target_validity: number; meets_target: boolean; factual_checks: number | null; usefulness_mean: number | null; sentences_stripped: number;
+  target_validity: number; meets_target: boolean; factual_checks: number | null; usefulness_mean: number | null; sentences_stripped: number; citations_recovered?: number; intervals_added?: number;
   median_latency_ms: number; errors: number; by_category: Record<string, { n: number; checks_passed: number; checks_total: number }>;
   results: { id: string; category: string; question: string; checks_passed: number; checks_total: number; citations_total: number; citations_valid: number; usefulness: number | null; error: string | null }[];
 }

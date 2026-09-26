@@ -8,7 +8,10 @@ validator:
      (or the text of the cited document passage);
   3. strips sentences that make numeric claims without a valid, matching citation;
   4. adds the 80% interval to any sentence that quotes a modelled central value
-     without its range, so no model output reaches the reader as a bare point.
+     without its range, so no model output reaches the reader as a bare point;
+  5. recovers a missing citation only when every number in an uncited sentence matches
+     exactly one retrieved fact on the same topic. Ambiguous sentences are still stripped,
+     and recovered citations are counted separately from the model's own.
 """
 
 from __future__ import annotations
@@ -163,15 +166,66 @@ def _ensure_intervals(sent: str, body: str, ids: list[str], reg: Registry) -> tu
             continue
         lo, mid, hi = f.values
         if quoted(mid) and not (quoted(lo) and quoted(hi)):
-            # Insert just before this fact's own citation group, e.g. "... 2021 [D2]" →
-            # "... 2021 (80% interval …) [D2]", so lists of years keep each range in place.
-            m = re.search(rf"(?:\[[DR]\d+\]\s*)*\[{re.escape(i)}\]", sent)
-            if not m:
+            # Insert right after the quoted central value ("RM 3,733 (80% interval …)"),
+            # so a sentence with several modelled values keeps each range beside its number.
+            pos = None
+            for m in NUM.finditer(sent):
+                p = _parse_number(m.group(0))
+                if p and _matches(p[0], p[1], [mid]):
+                    unit = re.match(r"\s+(?:million|billion|thousand)\b", sent[m.end():])
+                    pos = m.end() + (unit.end() if unit else 0)
+                    break
+            if pos is None:
                 continue
-            pos = m.start()
-            sent = f"{sent[:pos].rstrip()} ({f.interval}) {sent[pos:]}"
+            sent = f"{sent[:pos]} ({f.interval}){sent[pos:]}"
             added += 1
     return sent, added
+
+
+# Words too generic to show that a sentence and a fact are about the same thing.
+_GENERIC = {
+    "sabah", "district", "districts", "latest", "official", "derived", "atlas", "projection",
+    "baseline", "interval", "modelled", "nowcast", "percentile", "median", "value", "prices",
+    "constant", "highest", "descriptive", "total", "about", "since", "which", "their",
+}
+
+
+_SHORT_TOPICS = {"gdp", "gini", "lfpr"}
+
+
+def _words(text: str) -> set[str]:
+    t = text.lower()
+    return set(re.findall(r"[a-z]{5,}", t)) | (set(re.findall(r"[a-z]+", t)) & _SHORT_TOPICS)
+
+
+def _topic(label: str, name: str | None) -> set[str]:
+    skip = _GENERIC | set(re.findall(r"[a-z]+", (name or "").lower()))
+    return {w for w in _words(label) if w not in skip}
+
+
+def _recover(body: str, toks: list[str], reg: Registry) -> list[str] | None:
+    """Citations for an uncited sentence, or None unless every number is unambiguous."""
+    words = _words(body)
+    chosen: list[str] = []
+    for t in toks:
+        v, d = _parse_number(t)
+        tol = 0.5 * 10 ** (-d) + 1e-9
+        hits = [
+            f
+            for f in reg.facts.values()
+            if any(abs(round(c, d) - v) <= tol for c in f.values)
+            and words & _topic(f.label, f.label.split(" · ")[0])
+        ]
+        # The same datum often appears as several facts (profile, scorecard, forecast
+        # baseline): same district, indicator and year. Treat those as one, cite the
+        # official observation.
+        keys = {(f.district_id, f.indicator, f.period) for f in hits}
+        if not hits or len(keys) != 1 or None in next(iter(keys)):
+            if len(hits) != 1:
+                return None
+        hits.sort(key=lambda f: (f.kind != "observation", int(f.id[1:])))
+        chosen.append(hits[0].id)
+    return list(dict.fromkeys(chosen))
 
 
 _SPLIT = re.compile(r"(?<=[.!?])\s+(?=[A-Z(\[])|\n+")
@@ -187,6 +241,7 @@ class Validation:
     stripped: list[dict]
     used: set[str]
     intervals_added: int = 0
+    citations_recovered: int = 0
 
     @property
     def validity(self) -> float:
@@ -201,14 +256,53 @@ class Validation:
             "numeric_verified": self.numeric_verified,
             "stripped": self.stripped,
             "intervals_added": self.intervals_added,
+            "citations_recovered": self.citations_recovered,
         }
+
+
+_GROUP = re.compile(r"\[((?:[DR]\d+\s*(?:[,;]|[-–—]|and)\s*)+[DR]?\d+)\]")
+_RANGE = re.compile(r"([DR])(\d+)\s*[-–—]\s*(?:[DR])?(\d+)")
+
+
+def normalise_refs(text: str) -> str:
+    """Split grouped references into single ones: "[D1, D3]" → "[D1][D3]",
+    "[D4–D6]" → "[D4][D5][D6]", so each is validated, counted and linked."""
+
+    def expand(m: re.Match) -> str:
+        out: list[str] = []
+        for part in re.split(r"\s*(?:[,;]|and)\s*", m.group(1)):
+            r = _RANGE.fullmatch(part.strip())
+            if r and int(r.group(3)) >= int(r.group(2)) and int(r.group(3)) - int(r.group(2)) <= 30:
+                out += [f"[{r.group(1)}{n}]" for n in range(int(r.group(2)), int(r.group(3)) + 1)]
+            elif re.fullmatch(r"[DR]\d+", part.strip()):
+                out.append(f"[{part.strip()}]")
+        return "".join(out) or m.group(0)
+
+    text = _GROUP.sub(expand, text)
+    # Citations placed after the full stop belong to the sentence before it:
+    # "… by income. [D1]" → "… by income [D1]."
+    text = re.sub(
+        r"(?<=[\w%)\]])([.!?])[ \t]*((?:\[[DR]\d+\][ \t]*)+)",
+        lambda m: f" {m.group(2).strip()}{m.group(1)}" + (" " if m.group(2)[-1] in " \t" else ""),
+        text,
+    )
+    # Repeated references in one run: "[D1][D4][D1]" → "[D1][D4]"
+    def dedupe(m: re.Match) -> str:
+        return "".join(dict.fromkeys(re.findall(r"\[[DR]\d+\]", m.group(0))))
+
+    return re.sub(
+        r"(?:\[[DR]\d+\][ \t]*){2,}",
+        lambda m: dedupe(m) + (" " if m.group(0)[-1] in " \t" else ""),
+        text,
+    )
 
 
 def validate(answer: str, reg: Registry, given: list[float] | None = None) -> Validation:
     """`given`: numbers from the user's own question (e.g. a threshold such as RM 4,000),
     which the answer may repeat without a citation."""
     given = given or []
-    total = valid = claims = verified = added = 0
+    answer = normalise_refs(answer)
+    total = valid = claims = verified = added = recovered = 0
     stripped: list[dict] = []
     used: set[str] = set()
     kept_lines: list[str] = []
@@ -220,6 +314,8 @@ def validate(answer: str, reg: Registry, given: list[float] | None = None) -> Va
         parts = _SPLIT.split(line)
         kept: list[str] = []
         for sent in parts:
+            if not REF.sub("", sent).strip(" .;,-*•"):
+                continue  # a bare citation left over from a removed sentence
             refs = REF.findall(sent)
             ids = [f"{k}{n}" for k, n in refs]
             good = [i for i in ids if i in reg.facts or i in reg.docs]
@@ -238,6 +334,13 @@ def validate(answer: str, reg: Registry, given: list[float] | None = None) -> Va
                 kept.append(clean)
                 used.update(good)
                 continue
+            if not good and (rec := _recover(body, toks, reg)):
+                good = rec
+                recovered += len(rec)
+                refs_txt = "".join(f"[{i}]" for i in rec)
+                clean = re.sub(
+                    r"\s*([.!?]?)\s*$", lambda m, r=refs_txt: f" {r}{m.group(1)}", clean, count=1
+                )
             candidates: list[float] = []
             for i in good:
                 if i in reg.facts:
@@ -263,4 +366,4 @@ def validate(answer: str, reg: Registry, given: list[float] | None = None) -> Va
         kept_lines.append(" ".join(s for s in kept if s.strip()))
     text = "\n".join(kept_lines)
     text = re.sub(r"\n{3,}", "\n\n", text).strip()
-    return Validation(text, total, valid, claims, verified, stripped, used, added)
+    return Validation(text, total, valid, claims, verified, stripped, used, added, recovered)

@@ -39,6 +39,10 @@ Run the checks with `uv run pytest`, `uv run ruff check .`, and `pnpm --dir apps
 
 District-level survey data starts in 2019 and arrives every two to three years; district GDP is published only to 2020. The atlas trains on all 160 districts, nowcasts from published state data, shows intervals, and says plainly when evidence is thin. See `/methodology` for backtests, coverage checks and known limitations.
 
+## AI briefs and review
+
+`uv run atlas briefs` drafts one brief per district; drafts are labelled unreviewed on the site until someone approves them with `uv run atlas review`. See [docs/brief-review.md](docs/brief-review.md) for what the validator already guarantees and what a reviewer should check.
+
 ## Corrections
 
 Open an issue. Errata are logged in `packages/core/src/atlas_core/reference/errata.yaml` and published on the methodology page.
