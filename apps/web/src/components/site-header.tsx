@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { useHomeDistrict } from "@/lib/home-district";
+
 import { LogoMark, Wordmark } from "./logo";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -18,6 +20,7 @@ const NAV = [
 
 export function SiteHeader() {
   const path = usePathname();
+  const home = useHomeDistrict();
   const active = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
   return (
     <header className="no-print sticky top-0 z-40 border-b border-line bg-bg/90 backdrop-blur">
@@ -40,6 +43,11 @@ export function SiteHeader() {
               </Link>
             ))}
           </nav>
+          {home && (
+            <Link href={`/?d=${home.slug}`} className="ml-1 hidden items-center gap-1 whitespace-nowrap rounded-md border border-kunyit/40 px-2 py-1 font-mono text-[0.66rem] uppercase tracking-wider text-kunyit hover:bg-kunyit/10 sm:inline-flex" title="Your district">
+              ★ {home.name}
+            </Link>
+          )}
           <ThemeToggle />
         </div>
       </div>

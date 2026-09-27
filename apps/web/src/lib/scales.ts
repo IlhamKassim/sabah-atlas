@@ -20,6 +20,9 @@ export const MALAM = [
   "#b58f31", "#d8a735", "#ecc158", "#f6dc93", "#fdf1cf",
 ];
 
+/** At night the map's fills sit at this opacity over near-black, so the glow of the towns shows. */
+export const NIGHT_FILL_OPACITY = 0.55;
+
 /** Division colours: West Coast sunset, Crocker rainforest, Kudat sand, Kinabatangan orchid, Semporna sea. */
 export const DIVISION_COLOR: Record<string, string> = {
   "West Coast": "var(--div-west)",

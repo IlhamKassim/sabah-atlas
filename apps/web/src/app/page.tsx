@@ -16,7 +16,13 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const ind = indicators[code];
   const periods = ind.periods ?? [];
   // Every release of the indicator at once, so the timeline can play without round trips.
-  const results = await Promise.all(periods.map((p) => api.indicator(code, p)));
+  // The map's night style (night-lights indicators only) sizes each district's glow by total light.
+  const night = ind.category === "lights";
+  const [results, ntlTotal] = await Promise.all([
+    Promise.all(periods.map((p) => api.indicator(code, p))),
+    night ? Promise.all(periods.map((p) => api.indicator("ntl_radiance_total", p))) : Promise.resolve([]),
+  ]);
+  const lights = Object.fromEntries(ntlTotal.map((r) => [r.period, Object.fromEntries(r.values.map((v) => [v.district_id, v.value]))]));
   const src = results.at(-1)?.sources[0] ?? sources[ind.source];
 
   const data: ExplorerData = {
@@ -43,6 +49,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     source: src ? { publisher: src.publisher, dataset: src.dataset_id, url: src.url, updated: src.last_updated?.slice(0, 10) ?? null } : null,
     release: meta.release?.version ?? null,
     geo,
+    lights,
   };
 
   return <Explorer data={data} />;

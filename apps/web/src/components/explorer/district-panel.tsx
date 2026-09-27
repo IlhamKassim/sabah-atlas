@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { HomeStar } from "@/components/home-star";
 import { explainFlag, fmt, ordinal } from "@/lib/format";
 
 import { DivisionTag, type ExplorerData, type ExplorerDistrict, type Value } from "./explorer";
@@ -31,7 +32,10 @@ export function DistrictPanel({
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-laut" aria-hidden />
           {d.division ? <DivisionTag division={d.division} /> : "Sabah"}
         </span>
+        <span className="flex items-center gap-1">
+        {d.kind === "district" && <HomeStar slug={d.slug} name={d.name} compact />}
         <button type="button" onClick={onClose} className="grid h-6 w-6 place-items-center rounded text-muted hover:bg-panel-2 hover:text-ink" aria-label="Close">×</button>
+        </span>
       </div>
       <div className="px-3 pb-3 pt-2">
         <h2 className="font-display text-xl font-bold leading-tight sm:text-2xl">{d.name}</h2>

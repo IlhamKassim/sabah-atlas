@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { CiteButton } from "@/components/cite-button";
+import { HomeStar } from "@/components/home-star";
 import { CitedMarkdown } from "@/components/cited-markdown";
 import { DriversChart } from "@/components/drivers-chart";
 import { FanChart } from "@/components/fan-chart";
@@ -73,7 +74,10 @@ export default async function DistrictPage({ params }: PageProps<"/district/[slu
           </nav>
           <div className="mt-2 grid gap-6 md:grid-cols-[minmax(0,1fr)_300px]">
             <div>
-              <h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">{d.name}</h1>
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">{d.name}</h1>
+                {d.kind === "district" && <HomeStar slug={d.slug} name={d.name} />}
+              </div>
               <p className="mt-2 text-sm text-muted">
                 Typology: <strong className="font-medium text-ink">{a.typology?.cluster ?? "—"}</strong>
                 {peerIds.length > 0 && (

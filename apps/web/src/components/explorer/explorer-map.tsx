@@ -5,7 +5,9 @@ import "d3-transition";
 import { zoom, zoomIdentity, type ZoomBehavior } from "d3-zoom";
 import { useEffect, useRef, useState } from "react";
 
+import { GlowLayer } from "@/components/after-dark/glow-layer";
 import type { ProjectedDistrict } from "@/lib/geo";
+import { NIGHT_FILL_OPACITY } from "@/lib/scales";
 
 interface Props {
   geo: { width: number; height: number; districts: ProjectedDistrict[]; context: string; contextLabels: { name: string; x: number; y: number }[] };
@@ -18,10 +20,12 @@ interface Props {
   onHover: (id: string | null) => void;
   onSelect: (slug: string) => void;
   ariaLabel: string;
+  /** Total light per district: draws the map at night, with each district glowing. */
+  glow?: Record<string, number> | null;
 }
 
 /** Pan-and-zoom SVG map of Sabah's districts over neighbouring land. Paths are projected on the server. */
-export function ExplorerMap({ geo, fillOf, labelOf, hatched, dimmed, selected, hover, onHover, onSelect, ariaLabel }: Props) {
+export function ExplorerMap({ geo, fillOf, labelOf, hatched, dimmed, selected, hover, onHover, onSelect, ariaLabel, glow }: Props) {
   const { width: W, height: H } = geo;
   const svgRef = useRef<SVGSVGElement>(null);
   const gRef = useRef<SVGGElement>(null);
@@ -101,14 +105,14 @@ export function ExplorerMap({ geo, fillOf, labelOf, hatched, dimmed, selected, h
           </filter>
         </defs>
         <g ref={gRef}>
-          <path d={geo.context} fill="var(--nodata)" fillOpacity={0.55} stroke="var(--nodata)" strokeWidth={0.6} />
+          <path d={geo.context} fill={glow ? "#0a1214" : "var(--nodata)"} fillOpacity={glow ? 1 : 0.55} stroke={glow ? "#15201f" : "var(--nodata)"} strokeWidth={0.6} />
           {geo.contextLabels.map((l) => (
             <text key={l.name} x={l.x} y={l.y} textAnchor="middle" fontSize={11 / Math.sqrt(k)} className="pointer-events-none select-none font-mono uppercase" fill="var(--faint)" letterSpacing="0.14em">
               {l.name}
             </text>
           ))}
-          {/* Soft coastal glow under Sabah. */}
-          <g filter="url(#map-glow)" opacity={0.35} aria-hidden>
+          {/* Soft coastal glow under Sabah (day style only). */}
+          <g filter="url(#map-glow)" opacity={glow ? 0 : 0.35} aria-hidden>
             {geo.districts.map((d) => <path key={`glow-${d.id}`} d={d.d} fill="var(--laut)" />)}
           </g>
           {geo.districts.map((d) => {
@@ -118,7 +122,8 @@ export function ExplorerMap({ geo, fillOf, labelOf, hatched, dimmed, selected, h
                 <path
                   d={d.d}
                   fill={fillOf(d.id)}
-                  stroke="var(--bg)"
+                  fillOpacity={glow ? NIGHT_FILL_OPACITY : 1}
+                  stroke={glow ? "#050a0b" : "var(--bg)"}
                   strokeWidth={sw(0.9)}
                   strokeLinejoin="round"
                   tabIndex={0}
@@ -138,11 +143,12 @@ export function ExplorerMap({ geo, fillOf, labelOf, hatched, dimmed, selected, h
                     }
                   }}
                 />
-                <path d={d.d} fill="url(#map-grain)" pointerEvents="none" />
+                {!glow && <path d={d.d} fill="url(#map-grain)" pointerEvents="none" />}
                 {hatched(d.id) && <path d={d.d} fill="url(#map-hatch)" pointerEvents="none" />}
               </g>
             );
           })}
+          {glow && <GlowLayer uid="night" land={geo.districts} points={geo.districts} total={glow} scale={k} />}
           {/* Outlines for hover and selection drawn last so they sit above neighbours. */}
           {[hover, selected].filter((id, i, a) => id && a.indexOf(id) === i).map((id) => {
             const d = geo.districts.find((x) => x.id === id);

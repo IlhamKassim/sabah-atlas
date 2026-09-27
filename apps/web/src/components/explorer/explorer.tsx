@@ -6,6 +6,7 @@ import { useCallback, useMemo, useRef, useState, useTransition } from "react";
 
 import { Wordmark } from "@/components/logo";
 import { explainFlag, fmt, ordinal } from "@/lib/format";
+import { useHomeDistrict } from "@/lib/home-district";
 import type { ProjectedDistrict } from "@/lib/geo";
 import { DIVISION_HEX, DIVISIONS, percentileColor, sequentialQuantiles } from "@/lib/scales";
 
@@ -30,6 +31,8 @@ export interface ExplorerData {
   source: { publisher: string; dataset: string; url: string; updated: string | null } | null;
   release: string | null;
   geo: { width: number; height: number; districts: ProjectedDistrict[]; context: string; contextLabels: { name: string; x: number; y: number }[] };
+  /** Total night-time radiance by year and district, for the map's night style. */
+  lights: Record<number, Record<string, number>>;
 }
 
 export const CATEGORY_LABEL: Record<string, string> = {
@@ -49,6 +52,7 @@ export function Explorer({ data }: { data: ExplorerData }) {
   const [sort, setSort] = useState<"rank" | "name" | "division">("rank");
   const [hover, setHover] = useState<string | null>(null);
   const mapRef = useRef<HTMLElement>(null);
+  const home = useHomeDistrict();
 
   const latest = periods.at(-1)!;
   const year = q.year && periods.includes(q.year) ? q.year : latest;
@@ -64,6 +68,8 @@ export function Explorer({ data }: { data: ExplorerData }) {
     [byPeriod, ind.category],
   );
   const directional = ind.direction !== "neutral";
+  // Night-lights indicators draw the map at night, glowing with each district's total light.
+  const night = ind.category === "lights";
   const colorOf = useCallback((v: Value | undefined) => (!v ? "var(--nodata)" : directional ? percentileColor(v.pct) : seq(v.value)), [directional, seq]);
 
   const setIndicator = (code: string) => void setQ({ indicator: code === "income_median" ? null : code, year: null }, { shallow: false, startTransition: start });
@@ -199,6 +205,7 @@ export function Explorer({ data }: { data: ExplorerData }) {
                   <span className="min-w-0">
                     <span className="flex items-center gap-2">
                       <span className="truncate font-display text-[0.98rem] font-semibold">{d.name}</span>
+                      {home?.slug === d.slug && <span className="text-kunyit" title="Your district">★</span>}
                       {d.division && <DivisionTag division={d.division} />}
                     </span>
                     <span className="block truncate text-[0.7rem] text-muted">
@@ -230,8 +237,8 @@ export function Explorer({ data }: { data: ExplorerData }) {
       </aside>
 
       {/* Map */}
-      <section ref={mapRef} className="relative order-1 h-[64vh] min-h-[420px] overflow-hidden bg-sea lg:order-2 lg:h-auto lg:flex-1" aria-label="Map">
-        <SeaCanvas />
+      <section ref={mapRef} className={`relative order-1 h-[64vh] min-h-[420px] overflow-hidden lg:order-2 lg:h-auto lg:flex-1 ${night ? "bg-[#05090b]" : "bg-sea"}`} aria-label="Map">
+        {!night && <SeaCanvas />}
         <ExplorerMap
           geo={geo}
           fillOf={(id) => colorOf(byId.get(id))}
@@ -246,11 +253,17 @@ export function Explorer({ data }: { data: ExplorerData }) {
           onHover={setHover}
           onSelect={(slug) => select(slug === q.d ? null : slug)}
           ariaLabel={`Map of ${ind.label} by district, ${year}`}
+          glow={night ? data.lights[year] ?? null : null}
         />
 
         <div className="pointer-events-none absolute left-3 top-3 flex flex-wrap gap-1.5">
           <span className="map-pill"><span className="text-laut">{mapped}</span> on the map</span>
           <span className="map-pill max-w-[60vw] truncate">{ind.label} · {year}</span>
+          {!night && (
+            <button type="button" onClick={() => setIndicator("ntl_radiance_mean")} className="map-pill pointer-events-auto hover:text-kunyit" title="See Sabah at night: satellite night-time lights, 2012–2025">
+              ✦ After dark
+            </button>
+          )}
         </div>
 
         {selected && (
@@ -268,7 +281,7 @@ export function Explorer({ data }: { data: ExplorerData }) {
 
         <div className="absolute inset-x-3 bottom-3 flex flex-col items-stretch gap-2 sm:flex-row sm:items-end">
           <Timeline periods={periods} year={year} byPeriod={byPeriod} onYear={(y) => setQ({ year: y === latest ? null : y })} />
-          <Legend directional={directional} direction={ind.direction} seq={seq} format={ind.format} />
+          <Legend directional={directional} direction={ind.direction} seq={seq} format={ind.format} night={night} />
         </div>
       </section>
     </div>
