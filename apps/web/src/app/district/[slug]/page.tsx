@@ -15,9 +15,9 @@ import { Container, Pill, SectionTitle, SourceNote } from "@/components/ui";
 import { api, ApiError, type Indicator, type Obs, publicApiUrl, type ScoreItem, type Source } from "@/lib/api";
 import { catalog, jalurCells, latest } from "@/lib/data";
 import { explainFlag, fmt, ordinal, signed } from "@/lib/format";
-import { projectSabah } from "@/lib/geo";
+import { projectSabahInContext } from "@/lib/geo";
 import { scoreSentence, VERDICT_LABEL } from "@/lib/narrative";
-import { DIVISION_HEX } from "@/lib/scales";
+import { DIVISION_HEX, sequentialQuantiles } from "@/lib/scales";
 
 export const dynamic = "force-dynamic";
 
@@ -44,9 +44,11 @@ const TABLE_ORDER = ["welfare", "labour", "access", "structure", "demography", "
 
 export default async function DistrictPage({ params }: PageProps<"/district/[slug]">) {
   const { slug } = await params;
-  const [p, cat, national, geo, brief] = await Promise.all([
-    load(slug), catalog(), api.districts("national"), projectSabah(360, 260, 6), api.brief(slug).catch(() => null),
+  const [p, cat, national, geo, brief, lightsNow] = await Promise.all([
+    load(slug), catalog(), api.districts("national"), projectSabahInContext(1000, 820), api.brief(slug).catch(() => null),
+    api.indicator("ntl_radiance_total").catch(() => null),
   ]);
+  const lightsFirst = lightsNow ? await api.indicator("ntl_radiance_total", lightsNow.periods[0]).catch(() => null) : null;
   const { indicators: ind, sources } = cat;
   const names = Object.fromEntries(national.map((d) => [d.id, { name: d.name, state: d.state, slug: d.slug }]));
   const d = p.district;
@@ -106,10 +108,14 @@ export default async function DistrictPage({ params }: PageProps<"/district/[slu
                 width={geo.width}
                 height={geo.height}
                 districts={geo.districts}
-                data={Object.fromEntries(geo.districts.map((g) => [g.id, { fill: g.id === d.id ? divColor : "var(--nodata)" }]))}
+                context={{ path: geo.context, labels: geo.contextLabels }}
+                data={Object.fromEntries(geo.districts.map((g) => [g.id, { fill: g.id === d.id ? divColor : "var(--nodata)", label: g.id === d.id ? "Open on the map" : "Open profile" }]))}
                 highlight={[d.id]}
+                zoomTo={d.id}
+                hrefFor={{ [d.slug]: `/?d=${d.slug}` }}
                 ariaLabel={`Location of ${d.name} in Sabah`}
               />
+              <Link href={`/?d=${d.slug}`} className="mt-1.5 block text-right font-mono text-[0.66rem] uppercase tracking-wider text-muted hover:text-kunyit">Open on the map →</Link>
             </div>
           </div>
           <div className="no-print mt-4 flex flex-wrap gap-2">
@@ -283,6 +289,9 @@ export default async function DistrictPage({ params }: PageProps<"/district/[slu
           </section>
         )}
 
+        {/* After dark */}
+        {lightsNow && lightsFirst && <AfterDark name={d.name} id={d.id} geo={geo} first={lightsFirst} last={lightsNow} format={ind.ntl_radiance_total?.format ?? "number1"} />}
+
         {/* All indicators */}
         <section className="mt-12">
           <SectionTitle kicker="Data" title="Every indicator, with its source" />
@@ -367,5 +376,49 @@ function IndicatorTable({ indicators, ind, sources }: { indicators: Record<strin
         </tbody>
       </table>
     </div>
+  );
+}
+
+type LightsYear = Awaited<ReturnType<typeof api.indicator>>;
+
+/** The district at night, first year of satellite lights against the latest, zoomed on it. */
+function AfterDark({ name, id, geo, first, last, format }: {
+  name: string; id: string; geo: Awaited<ReturnType<typeof projectSabahInContext>>; first: LightsYear; last: LightsYear; format: string;
+}) {
+  const tint = sequentialQuantiles([...first.values, ...last.values].map((v) => v.value), "lights");
+  const own = (y: LightsYear) => y.values.find((v) => v.district_id === id);
+  const a = own(first), b = own(last);
+  if (!a || !b) return null;
+  const change = a.value ? (100 * (b.value - a.value)) / a.value : null;
+  const panel = (y: LightsYear) => (
+    <figure key={y.period}>
+      <SabahMap
+        width={geo.width}
+        height={geo.height}
+        districts={geo.districts}
+        context={{ path: geo.context }}
+        data={Object.fromEntries(y.values.map((v) => [v.district_id, { fill: tint(v.value), label: `${fmt(v.value, format)} total light`, sub: String(y.period) }]))}
+        glow={Object.fromEntries(y.values.map((v) => [v.district_id, v.value]))}
+        highlight={[id]}
+        zoomTo={id}
+        href="/?indicator=ntl_radiance_mean&d={slug}"
+        ariaLabel={`${name} at night, ${y.period}`}
+      />
+      <figcaption className="mt-1.5 flex items-baseline justify-between font-mono text-xs">
+        <span className="text-lg text-ink">{y.period}</span>
+        <span className="text-muted">{fmt(own(y)!.value, format)} · {ordinal(own(y)!.rank_sabah ?? 0)} of {own(y)!.n_sabah}</span>
+      </figcaption>
+    </figure>
+  );
+  return (
+    <section className="mt-12">
+      <SectionTitle kicker="Lights" title={`${name} after dark`}>
+        Total night-time light seen by NASA&apos;s Black Marble satellite product, {first.period} against {last.period}
+        {change != null && <>: <strong className="font-medium text-ink">{signed(change, 0, "%")}</strong> over {last.period - first.period} years</>}.
+        Lights track where people, roads and industry are; they are a proxy, not a measure of output.{" "}
+        <Link className="underline decoration-dotted underline-offset-2 hover:text-laut" href={`/?indicator=ntl_radiance_mean&d=${last.values.find((v) => v.district_id === id)?.slug ?? ""}`}>Play every year on the map</Link>.
+      </SectionTitle>
+      <div className="grid max-w-3xl grid-cols-2 gap-3">{[first, last].map(panel)}</div>
+    </section>
   );
 }

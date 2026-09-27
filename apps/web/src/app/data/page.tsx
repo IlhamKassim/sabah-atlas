@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { AboutTabs } from "@/components/about-tabs";
 import { Container, SectionTitle } from "@/components/ui";
 import { publicApiUrl } from "@/lib/api";
 import { catalog } from "@/lib/data";
@@ -38,6 +39,7 @@ export default async function DataPage() {
 
   return (
     <Container className="py-8">
+      <AboutTabs />
       <p className="kicker">Data</p>
       <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Download everything</h1>
       <div className="mogah-rule mt-3" aria-hidden />

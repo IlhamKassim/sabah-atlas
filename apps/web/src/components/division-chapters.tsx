@@ -19,7 +19,7 @@ export interface Chapter {
  * Scrollytelling: five chapters, one per division. A sticky map highlights the
  * division whose chapter is in view (IntersectionObserver; no scroll listeners).
  */
-export function DivisionChapters({ chapters, map }: { chapters: Chapter[]; map: { width: number; height: number; districts: ProjectedDistrict[] } }) {
+export function DivisionChapters({ chapters, map }: { chapters: Chapter[]; map: { width: number; height: number; districts: ProjectedDistrict[]; context: string; contextLabels: { name: string; x: number; y: number }[] } }) {
   const [active, setActive] = useState(0);
   const refs = useRef<(HTMLElement | null)[]>([]);
 
@@ -39,7 +39,7 @@ export function DivisionChapters({ chapters, map }: { chapters: Chapter[]; map: 
   const ch = chapters[active];
   const inDiv = new Set(ch.districts.map((d) => d.id));
   const data = Object.fromEntries(
-    map.districts.map((d) => [d.id, { fill: inDiv.has(d.id) ? ch.color : "#2a3533", label: d.division ?? "" }]),
+    map.districts.map((d) => [d.id, { fill: inDiv.has(d.id) ? ch.color : "var(--nodata)", label: d.division ?? "" }]),
   );
 
   return (
@@ -50,9 +50,9 @@ export function DivisionChapters({ chapters, map }: { chapters: Chapter[]; map: 
             width={map.width}
             height={map.height}
             districts={map.districts}
+            context={{ path: map.context }}
             data={data}
-            stroke="var(--night)"
-            highlight={[...inDiv]}
+            dim={map.districts.filter((d) => !inDiv.has(d.id)).map((d) => d.id)}
             ariaLabel={`Map highlighting the ${ch.division} Division`}
           />
           <p className="mt-2 text-center font-mono text-xs uppercase tracking-widest" style={{ color: ch.color }}>

@@ -24,7 +24,7 @@ function cagr(a: number, b: number, years: number) {
   return 100 * (Math.pow(b / a, 1 / years) - 1);
 }
 
-export function ForecastTable({ rows, map }: { rows: Row[]; map: { width: number; height: number; districts: ProjectedDistrict[] } }) {
+export function ForecastTable({ rows, map }: { rows: Row[]; map: { width: number; height: number; districts: ProjectedDistrict[]; context: string; contextLabels: { name: string; x: number; y: number }[] } }) {
   const [scenario, setScenario] = useState<string>("baseline");
   const computed = useMemo(() => rows.map((r) => {
     const g = r.gdp;
@@ -73,7 +73,7 @@ export function ForecastTable({ rows, map }: { rows: Row[]; map: { width: number
           rows={computed.map((c) => ({ district_id: c.id, district: c.name, scenario, gdp_2025_nowcast_p50: c.now?.p50, gdp_2028_p10: c.proj?.p10, gdp_2028_p50: c.proj?.p50, gdp_2028_p90: c.proj?.p90, growth_2025_2028_pct: c.projGrowth }))}
           caption={<>Hatched: every value on this map is modelled. Colour is relative to the median district ({signed(med, 1, "%/yr")}): teal faster, red slower. Scenarios shift Sabah&apos;s sector growth transparently; see methodology.</>}
         >
-          <SabahMap width={map.width} height={map.height} districts={map.districts} data={data} ariaLabel="Map of projected GDP growth by district" />
+          <SabahMap width={map.width} height={map.height} districts={map.districts} context={{ path: map.context, labels: map.contextLabels }} data={data} zoomable labels={false} ariaLabel="Map of projected GDP growth by district" />
         </ChartFrame>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-sm">

@@ -8,11 +8,14 @@ import { Container, SectionTitle } from "@/components/ui";
 import { api, type District } from "@/lib/api";
 import { allJalur, catalog } from "@/lib/data";
 import { fmt } from "@/lib/format";
-import { projectSabah } from "@/lib/geo";
-import { DIVISION_HEX, DIVISIONS } from "@/lib/scales";
+import { projectSabahInContext } from "@/lib/geo";
+import { DIVISION_HEX, DIVISIONS, sequentialQuantiles } from "@/lib/scales";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Overview" };
+export const metadata: Metadata = {
+  title: "Sabah at a glance",
+  description: "Sabah's 27 districts in one read: the income and poverty gaps, each district's signature strip, and the five divisions chapter by chapter.",
+};
 
 // Every clause below is checked against the data release (medians across the division's
 // districts; GDP structure 2020, HIES 2024). Update alongside the data.
@@ -33,11 +36,12 @@ function range(ds: District[], code: string, format: string) {
 }
 
 export default async function Overview() {
-  const [ds, cat, hero, chapterMap] = await Promise.all([
+  const [ds, cat, hero, chapterMap, lights] = await Promise.all([
     api.districts("sabah"),
     catalog(),
-    projectSabah(640, 470, 8),
-    projectSabah(560, 420, 8),
+    projectSabahInContext(640, 520, 16),
+    projectSabahInContext(560, 460, 14),
+    api.indicator("ntl_radiance_total"),
   ]);
   const jalur = await allJalur(cat.indicators);
   const districts = ds.filter((d) => d.kind === "district");
@@ -72,7 +76,13 @@ export default async function Overview() {
   const minInc = districts.reduce((m, d) => ((d.headline?.income_median?.value ?? Infinity) < (m.headline?.income_median?.value ?? Infinity) ? d : m), districts[0]);
   const maxInc = districts.reduce((m, d) => ((d.headline?.income_median?.value ?? 0) > (m.headline?.income_median?.value ?? 0) ? d : m), districts[0]);
   const maxPov = districts.reduce((m, d) => ((d.headline?.poverty_absolute?.value ?? 0) > (m.headline?.poverty_absolute?.value ?? 0) ? d : m), districts[0]);
-  const heroData = Object.fromEntries(hero.districts.map((d) => [d.id, { fill: DIVISION_HEX[d.division ?? ""] ?? "#333", label: `${d.division} Division` }]));
+  // Hero: Sabah after dark, the latest year of satellite night-time light.
+  const glow = Object.fromEntries(lights.values.map((v) => [v.district_id, v.value]));
+  const lightFmt = cat.indicators.ntl_radiance_total?.format ?? "number1";
+  const tint = sequentialQuantiles(lights.values.map((v) => v.value), "lights");
+  const heroData = Object.fromEntries(
+    lights.values.map((v) => [v.district_id, { fill: tint(v.value), label: `${fmt(v.value, lightFmt)} total light`, sub: v.rank_sabah ? `${v.rank_sabah} of ${v.n_sabah} in Sabah · ${lights.period}` : String(lights.period) }]),
+  );
 
   return (
     <>
@@ -93,14 +103,21 @@ export default async function Overview() {
               <a href="#portrait" className="rounded-md border border-line px-4 py-2 font-mono text-sm uppercase tracking-wider text-ink hover:border-laut hover:text-laut">27 districts at a glance</a>
             </div>
           </div>
-          <div>
-            <SabahMap width={hero.width} height={hero.height} districts={hero.districts} data={heroData} stroke="var(--bg)" labels={false} ariaLabel="Sabah's 27 districts coloured by division" />
-            <ul className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1 font-mono text-[0.66rem] uppercase tracking-wider text-muted">
-              {DIVISIONS.map((dv) => (
-                <li key={dv} className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-[2px]" style={{ background: DIVISION_HEX[dv] }} />{dv}</li>
-              ))}
-            </ul>
-          </div>
+          <figure>
+            <SabahMap
+              width={hero.width}
+              height={hero.height}
+              districts={hero.districts}
+              context={{ path: hero.context }}
+              data={heroData}
+              glow={glow}
+              ariaLabel={`Sabah at night, ${lights.period}: each district glows with its satellite night-time light`}
+            />
+            <figcaption className="mt-2 flex flex-wrap items-baseline justify-between gap-2 text-xs text-muted">
+              <span>Sabah after dark, {lights.period}. Each glow is a district&apos;s total night-time light (NASA Black Marble).</span>
+              <Link href="/?indicator=ntl_radiance_mean" className="font-mono uppercase tracking-wider text-kunyit hover:underline">Night lights on the map →</Link>
+            </figcaption>
+          </figure>
         </Container>
       </section>
 
