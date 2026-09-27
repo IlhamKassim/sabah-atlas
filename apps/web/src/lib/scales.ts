@@ -22,6 +22,8 @@ export const MALAM = [
 
 /** At night the map's fills sit at this opacity over near-black, so the glow of the towns shows. */
 export const NIGHT_FILL_OPACITY = 0.55;
+/** Fainter still when NASA's picture is drawn over them, so the real lights read first. */
+export const NIGHT_FILL_OPACITY_PICTURE = 0.3;
 
 /** Division colours: West Coast sunset, Crocker rainforest, Kudat sand, Kinabatangan orchid, Semporna sea. */
 export const DIVISION_COLOR: Record<string, string> = {

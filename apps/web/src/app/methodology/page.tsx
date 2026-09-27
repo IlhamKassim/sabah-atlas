@@ -99,6 +99,7 @@ export default async function MethodologyPage() {
           </ul>
 
           <p><strong>Night lights.</strong> NASA&apos;s Black Marble annual composites (VNP46A4, ≈500 m) are summarised on the same 2020 polygons: water pixels are masked so offshore platforms and fishing fleets don&apos;t count, radiance is capped at 500 nW·cm⁻²·sr⁻¹ to limit gas flares, and only good-quality retrievals are used. The atlas reports <em>mean</em> radiance over land pixels with a good-quality retrieval, and flags any district-year where fewer than half the land pixels have one. Lights are a proxy for settlement and electrification, not a measure of output: plantations, mines and offshore fields are dark.</p>
+          <p><strong>The night map.</strong> When the map shows night lights, the picture under the districts is the same masked composite for that year, cropped to Sabah and drawn on one fixed brightness scale (a log scale topping out at 60 nW·cm⁻²·sr⁻¹) so years compare fairly. The district colours and figures come from the table; the picture only shows where inside each district the light is. The pictures are served at <code>/v1/lights</code>.</p>
 
           <h2 id="indicators">Indicators</h2>
           <p>{meta.indicators.length} indicators. <em>Direction</em> says whether higher is better (↑), worse (↓) or purely descriptive (·). Percentiles are direction-aware so that 100 is always best; descriptive indicators are ranked by value and never called good or bad.</p>

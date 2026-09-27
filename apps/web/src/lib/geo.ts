@@ -100,3 +100,11 @@ export async function projectSabahInContext(width: number, height: number, pad =
   };
 }
 
+/** Where a lon/lat box ([west, south, east, north]) lands on a map fitted like projectSabah. */
+export async function projectBox(width: number, height: number, pad: number, box: [number, number, number, number]) {
+  const fc = await sabahGeo();
+  const projection = geoMercator().fitExtent([[pad, pad], [width - pad, height - pad]], fc);
+  const [x0, y0] = projection([box[0], box[3]]) ?? [0, 0];
+  const [x1, y1] = projection([box[2], box[1]]) ?? [0, 0];
+  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+}

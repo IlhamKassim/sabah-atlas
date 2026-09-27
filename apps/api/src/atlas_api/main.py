@@ -159,5 +159,24 @@ def releases() -> dict:
     return r
 
 
+@v1.get("/lights", summary="Sabah at night: years with a picture, and its bounds")
+def lights() -> dict:
+    """Pictures of Sabah's night-time light (NASA Black Marble VNP46A4), one per year: gold
+    on transparent, cropped to Sabah's districts, on one fixed brightness scale. `bounds` is
+    [west, south, east, north] in degrees (a plain lon/lat grid)."""
+    idx = q.lights_index()
+    if not idx:
+        raise HTTPException(404, "no night-light pictures loaded")
+    return {**idx, "source_id": "nasa_vnp46a4", "url": "/v1/lights/{year}.png"}
+
+
+@v1.get("/lights/{year}.png", summary="Sabah at night, one year (PNG)", response_class=Response)
+def lights_png(year: int) -> Response:
+    png = q.lights_png(year)
+    if png is None:
+        raise HTTPException(404, f"no night-light picture for {year}")
+    return Response(png, media_type="image/png")
+
+
 app.include_router(v1)
 app.include_router(analyst_router)

@@ -8,6 +8,7 @@ import { Wordmark } from "@/components/logo";
 import { explainFlag, fmt, ordinal } from "@/lib/format";
 import { useHomeDistrict } from "@/lib/home-district";
 import type { ProjectedDistrict } from "@/lib/geo";
+import type { NightImagery } from "@/lib/lights";
 import { DIVISION_HEX, DIVISIONS, percentileColor, sequentialQuantiles } from "@/lib/scales";
 
 import { DistrictPanel } from "./district-panel";
@@ -33,6 +34,8 @@ export interface ExplorerData {
   geo: { width: number; height: number; districts: ProjectedDistrict[]; context: string; contextLabels: { name: string; x: number; y: number }[] };
   /** Total night-time radiance by year and district, for the map's night style. */
   lights: Record<number, Record<string, number>>;
+  /** NASA's yearly pictures of Sabah at night, when the API has them. */
+  imagery: NightImagery | null;
 }
 
 export const CATEGORY_LABEL: Record<string, string> = {
@@ -254,6 +257,9 @@ export function Explorer({ data }: { data: ExplorerData }) {
           onSelect={(slug) => select(slug === q.d ? null : slug)}
           ariaLabel={`Map of ${ind.label} by district, ${year}`}
           glow={night ? data.lights[year] ?? null : null}
+          imagery={night ? data.imagery : null}
+          year={year}
+          home={districts.find((d) => d.slug === home?.slug)?.id ?? null}
         />
 
         <div className="pointer-events-none absolute left-3 top-3 flex flex-wrap gap-1.5">
@@ -281,7 +287,7 @@ export function Explorer({ data }: { data: ExplorerData }) {
 
         <div className="absolute inset-x-3 bottom-3 flex flex-col items-stretch gap-2 sm:flex-row sm:items-end">
           <Timeline periods={periods} year={year} byPeriod={byPeriod} onYear={(y) => setQ({ year: y === latest ? null : y })} />
-          <Legend directional={directional} direction={ind.direction} seq={seq} format={ind.format} night={night} />
+          <Legend directional={directional} direction={ind.direction} seq={seq} format={ind.format} night={night} picture={night && !!data.imagery} />
         </div>
       </section>
     </div>

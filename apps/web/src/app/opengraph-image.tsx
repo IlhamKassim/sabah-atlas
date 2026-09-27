@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
-import { api } from "@/lib/api";
 import { projectSabah } from "@/lib/geo";
+import { nightLayers } from "@/lib/lights";
 import { nightMapSvg } from "@/lib/night-svg";
 
 export const alt = "SabahKu: the economic atlas of Sabah's 27 districts, drawn at night from satellite night-time lights";
@@ -13,9 +13,7 @@ export const revalidate = 86400;
 // The link preview (LinkedIn, WhatsApp, X): Sabah after dark, each district glowing with its night-time light.
 export default async function Image() {
   const geo = await projectSabah(600, 510, 12);
-  const lights = await api.indicator("ntl_radiance_total").catch(() => null);
-  const total = Object.fromEntries((lights?.values ?? []).map((v) => [v.district_id, v.value]));
-  const map = `data:image/svg+xml;utf8,${encodeURIComponent(nightMapSvg(geo, total))}`;
+  const map = `data:image/svg+xml;utf8,${encodeURIComponent(nightMapSvg(geo, ...(await nightLayers(600, 510, 12))))}`;
 
   return new ImageResponse(
     (

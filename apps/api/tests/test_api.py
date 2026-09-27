@@ -47,3 +47,15 @@ def test_unknown_district_404(client):
 def test_compare_caps_at_four(client):
     r = client.get("/v1/compare?ids=pitas,kudat,tongod,ranau,tenom").json()
     assert len(r["districts"]) == 4
+
+
+def test_night_pictures(client):
+    r = client.get("/v1/lights")
+    if r.status_code == 404:
+        pytest.skip("no night-light pictures loaded (built without EARTHDATA_TOKEN)")
+    idx = r.json()
+    w, s, e, n = idx["bounds"]
+    assert 115 < w < e < 120 and 4 < s < n < 8  # Sabah
+    png = client.get(f"/v1/lights/{idx['years'][-1]}.png")
+    assert png.headers["content-type"] == "image/png" and png.content[:4] == b"\x89PNG"
+    assert client.get("/v1/lights/1900.png").status_code == 404

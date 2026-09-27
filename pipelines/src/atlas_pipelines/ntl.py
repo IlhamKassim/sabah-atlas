@@ -14,6 +14,10 @@ Per district and year:
 Masks: water/sea pixels (Land_Water_Mask) are dropped, so offshore platforms and
 fishing fleets do not count; pixel radiance is capped at FLARE_CAP to limit the pull of
 gas flares and industrial point sources; poor-quality retrievals are excluded.
+
+Each year also yields a small picture of Sabah at night for the web map (`sabah_image`):
+the same masked radiance, cropped to Sabah's districts, as a transparent gold PNG on a
+fixed log scale so years are comparable.
 """
 
 from __future__ import annotations
@@ -21,6 +25,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import warnings
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -30,6 +35,8 @@ import httpx
 import numpy as np
 import pandas as pd
 from rasterio import features
+from rasterio.errors import NotGeoreferencedWarning
+from rasterio.io import MemoryFile
 from rasterio.transform import from_origin
 
 from atlas_core.settings import get_settings
@@ -44,6 +51,8 @@ LAND = "Land_Water_Mask"
 PIX_DEG = 10 / 2400
 FLARE_CAP = 500.0  # nW·cm⁻²·sr⁻¹; brightest urban cores in Malaysia sit well below this
 LIT_THRESHOLD = 0.5
+SABAH_TILE = "h29v08"
+IMAGE_TOP = 60.0  # nW·cm⁻²·sr⁻¹ that renders as full brightness (KK's core is around here)
 
 
 class NoToken(RuntimeError):
@@ -188,6 +197,39 @@ def zonal(paths: list[Path]) -> pd.DataFrame:
     return df[["district_id", "year", *SUMS]]
 
 
+def sabah_image(path: Path) -> tuple[bytes, list[float]]:
+    """Sabah at night from one h29v08 granule: an RGBA PNG (gold, transparent where dark,
+    off-land, poor quality or outside Sabah) and its [west, south, east, north] in degrees."""
+    geo = gpd.read_parquet(get_settings().silver / "geometry.parquet")
+    sabah = geo[geo.district_id.str.startswith("sbh-")]
+    tr = _tile_transform(SABAH_TILE)
+    inside = features.rasterize(((g, 1) for g in sabah.geometry), out_shape=(2400, 2400),
+                                transform=tr, fill=0, dtype="uint8")
+    w, s, e, n = sabah.total_bounds
+    c0, c1 = int((w - 110) / PIX_DEG) - 2, int(np.ceil((e - 110) / PIX_DEG)) + 2
+    r0, r1 = int((10 - n) / PIX_DEG) - 2, int(np.ceil((10 - s) / PIX_DEG)) + 2
+    rad, good, land = _read(path)
+    win = np.s_[r0:r1, c0:c1]
+    ok = good[win] & land[win] & (inside[win] == 1)
+    v = np.clip(np.log1p(np.where(ok, rad[win], 0.0)) / np.log1p(IMAGE_TOP), 0, 1)
+    # Dark amber -> lamp gold -> near white; alpha rises quickly so dim villages still show.
+    stops = np.array([[138, 90, 26], [246, 200, 90], [255, 242, 196]], dtype=float)
+    t = np.clip(v * 2, 0, 2)
+    lo = np.minimum(t.astype(int), 1)
+    f = (t - lo)[..., None]
+    rgb = stops[lo] * (1 - f) + stops[lo + 1] * f
+    alpha = np.clip(v * 1.6, 0, 1) * 255
+    img = np.dstack([rgb, alpha]).round().astype("uint8").transpose(2, 0, 1)
+    # A plain picture: its bounds travel in JSON, so GDAL's "no geotransform" warning is noise.
+    with warnings.catch_warnings(), MemoryFile() as mem:
+        warnings.simplefilter("ignore", NotGeoreferencedWarning)
+        with mem.open(driver="PNG", width=img.shape[2], height=img.shape[1], count=4, dtype="uint8") as dst:
+            dst.write(img)
+        png = mem.read()
+    bounds = [110 + c0 * PIX_DEG, 10 - r1 * PIX_DEG, 110 + c1 * PIX_DEG, 10 - r0 * PIX_DEG]
+    return png, [round(b, 6) for b in bounds]
+
+
 SUMS = ["radiance_sum", "lit_area_km2", "valid_area_km2", "land_area_km2", "land_px", "valid_px"]
 
 
@@ -200,6 +242,13 @@ def _lake_container():
     from azure.storage.blob import ContainerClient
 
     return ContainerClient.from_container_url(url, credential=DefaultAzureCredential())
+
+
+def image_dir() -> Path:
+    """Where the yearly Sabah-at-night pictures live (read by `atlas load`)."""
+    d = bronze_dir("ntl_vnp46a4") / "images"
+    d.mkdir(exist_ok=True)
+    return d
 
 
 def run(keep_raw: bool = False) -> dict:
@@ -216,14 +265,29 @@ def run(keep_raw: bool = False) -> dict:
             dest = cache / b.name.split("/", 1)[1]
             if not dest.exists():
                 dest.write_bytes(lake.download_blob(b.name).readall())
+    images = image_dir()
+    if lake:
+        for b in lake.list_blobs(name_starts_with="ntl_images/"):
+            dest = images / b.name.split("/", 1)[1]
+            if not dest.exists():
+                dest.write_bytes(lake.download_blob(b.name).readall())
     frames = []
     for i, g in enumerate(gs, 1):
         part = cache / (g["name"].rsplit(".", 1)[0] + ".parquet")
-        if not part.exists():
+        pic = images / f"{g['year']}.png" if g["tile"] == SABAH_TILE else None
+        if not part.exists() or (pic and not pic.exists()):
             [path] = download([g])
-            zonal([path]).to_parquet(part, index=False)
-            if lake:
-                lake.upload_blob(f"ntl_zonal/{part.name}", part.read_bytes(), overwrite=True)
+            if not part.exists():
+                zonal([path]).to_parquet(part, index=False)
+                if lake:
+                    lake.upload_blob(f"ntl_zonal/{part.name}", part.read_bytes(), overwrite=True)
+            if pic and not pic.exists():
+                png, bounds = sabah_image(path)
+                pic.write_bytes(png)
+                pic.with_suffix(".json").write_text(json.dumps({"year": g["year"], "bounds": bounds}))
+                if lake:
+                    for f in (pic, pic.with_suffix(".json")):
+                        lake.upload_blob(f"ntl_images/{f.name}", f.read_bytes(), overwrite=True)
             if not keep_raw:
                 path.unlink(missing_ok=True)
             print(f"  [{i}/{len(gs)}] {g['year']} {g['tile']}", flush=True)
@@ -252,4 +316,5 @@ def run(keep_raw: bool = False) -> dict:
         "district_years": len(df),
         "years": [int(df.year.min()), int(df.year.max())],
         "sabah_districts": int(df[df.district_id.str.startswith("sbh-")].district_id.nunique()),
+        "images": len(list(images.glob("*.png"))),
     }

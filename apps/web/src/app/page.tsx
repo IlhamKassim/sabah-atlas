@@ -2,6 +2,7 @@ import { Explorer, type ExplorerData } from "@/components/explorer/explorer";
 import { api } from "@/lib/api";
 import { catalog } from "@/lib/data";
 import { projectSabahInContext } from "@/lib/geo";
+import { nightImagery } from "@/lib/lights";
 
 export const dynamic = "force-dynamic";
 
@@ -18,9 +19,10 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   // Every release of the indicator at once, so the timeline can play without round trips.
   // The map's night style (night-lights indicators only) sizes each district's glow by total light.
   const night = ind.category === "lights";
-  const [results, ntlTotal] = await Promise.all([
+  const [results, ntlTotal, imagery] = await Promise.all([
     Promise.all(periods.map((p) => api.indicator(code, p))),
     night ? Promise.all(periods.map((p) => api.indicator("ntl_radiance_total", p))) : Promise.resolve([]),
+    night ? nightImagery(1000, 820, 40) : Promise.resolve(null),
   ]);
   const lights = Object.fromEntries(ntlTotal.map((r) => [r.period, Object.fromEntries(r.values.map((v) => [v.district_id, v.value]))]));
   const src = results.at(-1)?.sources[0] ?? sources[ind.source];
@@ -50,6 +52,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     release: meta.release?.version ?? null,
     geo,
     lights,
+    imagery,
   };
 
   return <Explorer data={data} />;

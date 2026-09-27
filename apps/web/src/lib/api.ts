@@ -221,6 +221,7 @@ export const api = {
   brief: (key: string) => get<Brief>(`/v1/briefs/${encodeURIComponent(key)}`, 60),
   analystEval: () => get<EvalReport>("/v1/analyst/eval", 300),
   modelCards: () => get<Record<string, unknown>[]>("/v1/model-cards", 3600),
+  lights: () => get<{ years: number[]; bounds: [number, number, number, number] }>("/v1/lights", 3600),
 };
 
 export const publicApiUrl = process.env.NEXT_PUBLIC_ATLAS_API_URL ?? API;

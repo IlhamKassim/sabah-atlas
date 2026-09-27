@@ -6,8 +6,10 @@ import { zoom, zoomIdentity, type ZoomBehavior } from "d3-zoom";
 import { useEffect, useRef, useState } from "react";
 
 import { GlowLayer } from "@/components/after-dark/glow-layer";
+import { NightImageLayer } from "@/components/after-dark/night-image";
 import type { ProjectedDistrict } from "@/lib/geo";
-import { NIGHT_FILL_OPACITY } from "@/lib/scales";
+import type { NightImagery } from "@/lib/lights";
+import { NIGHT_FILL_OPACITY, NIGHT_FILL_OPACITY_PICTURE } from "@/lib/scales";
 
 interface Props {
   geo: { width: number; height: number; districts: ProjectedDistrict[]; context: string; contextLabels: { name: string; x: number; y: number }[] };
@@ -22,10 +24,15 @@ interface Props {
   ariaLabel: string;
   /** Total light per district: draws the map at night, with each district glowing. */
   glow?: Record<string, number> | null;
+  /** NASA's yearly pictures of Sabah at night; drawn instead of the glow when available. */
+  imagery?: NightImagery | null;
+  year?: number;
+  /** The reader's own district (by id), marked with a star. */
+  home?: string | null;
 }
 
 /** Pan-and-zoom SVG map of Sabah's districts over neighbouring land. Paths are projected on the server. */
-export function ExplorerMap({ geo, fillOf, labelOf, hatched, dimmed, selected, hover, onHover, onSelect, ariaLabel, glow }: Props) {
+export function ExplorerMap({ geo, fillOf, labelOf, hatched, dimmed, selected, hover, onHover, onSelect, ariaLabel, glow, imagery, year, home }: Props) {
   const { width: W, height: H } = geo;
   const svgRef = useRef<SVGSVGElement>(null);
   const gRef = useRef<SVGGElement>(null);
@@ -122,7 +129,7 @@ export function ExplorerMap({ geo, fillOf, labelOf, hatched, dimmed, selected, h
                 <path
                   d={d.d}
                   fill={fillOf(d.id)}
-                  fillOpacity={glow ? NIGHT_FILL_OPACITY : 1}
+                  fillOpacity={glow ? (imagery ? NIGHT_FILL_OPACITY_PICTURE : NIGHT_FILL_OPACITY) : 1}
                   stroke={glow ? "#050a0b" : "var(--bg)"}
                   strokeWidth={sw(0.9)}
                   strokeLinejoin="round"
@@ -148,7 +155,11 @@ export function ExplorerMap({ geo, fillOf, labelOf, hatched, dimmed, selected, h
               </g>
             );
           })}
-          {glow && <GlowLayer uid="night" land={geo.districts} points={geo.districts} total={glow} scale={k} />}
+          {glow && imagery && year ? (
+            <NightImageLayer uid="night" imagery={imagery} year={year} land={geo.districts} preload scale={k} />
+          ) : (
+            glow && <GlowLayer uid="night" land={geo.districts} points={geo.districts} total={glow} scale={k} />
+          )}
           {/* Outlines for hover and selection drawn last so they sit above neighbours. */}
           {[hover, selected].filter((id, i, a) => id && a.indexOf(id) === i).map((id) => {
             const d = geo.districts.find((x) => x.id === id);
@@ -156,6 +167,14 @@ export function ExplorerMap({ geo, fillOf, labelOf, hatched, dimmed, selected, h
               <path key={`o-${id}`} d={d.d} fill="none" stroke={id === selected ? "var(--kunyit)" : "var(--ink)"} strokeWidth={sw(id === selected ? 2.4 : 1.6)} strokeLinejoin="round" pointerEvents="none" />
             ) : null;
           })}
+          {(() => {
+            const h = geo.districts.find((d) => d.id === home);
+            return h ? (
+              <text x={h.cx} y={h.cy} dy={showLabels || h.id === selected ? "-0.9em" : "0.35em"} textAnchor="middle" fontSize={16 / k} fill="var(--kunyit)" stroke="rgba(6,14,12,0.8)" strokeWidth={3 / k} paintOrder="stroke" className="pointer-events-none select-none" aria-label="Your district">
+                ★
+              </text>
+            ) : null;
+          })()}
           {geo.districts.map((d) =>
             showLabels || d.id === selected ? (
               <text

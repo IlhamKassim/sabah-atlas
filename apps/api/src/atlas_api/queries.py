@@ -134,3 +134,17 @@ def all_analytics(kind: str) -> list[dict]:
         """SELECT a.district_id, d.slug, d.display_name AS name, d.division, a.payload, a.model_version
            FROM analytics a JOIN district d ON d.id = a.district_id
            WHERE a.kind = %s AND d.state = 'Sabah' ORDER BY d.display_name""", (kind,))
+
+
+def lights_index() -> dict | None:
+    """Years with a Sabah-at-night picture, and the pictures' shared bounds."""
+    rows = fetch("SELECT year, west, south, east, north FROM ntl_image ORDER BY year")
+    if not rows:
+        return None
+    r = rows[-1]
+    return {"years": [x["year"] for x in rows], "bounds": [r["west"], r["south"], r["east"], r["north"]]}
+
+
+def lights_png(year: int) -> bytes | None:
+    row = fetch_one("SELECT png FROM ntl_image WHERE year=%s", (year,))
+    return bytes(row["png"]) if row else None
