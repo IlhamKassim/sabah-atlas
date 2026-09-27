@@ -115,7 +115,7 @@ export function SabahMap({
       >
         <defs>
           <pattern id={`${uid}-hatch`} width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-            <line x1="0" y1="0" x2="0" y2="5" stroke="#16241f" strokeOpacity="0.45" strokeWidth="1.4" />
+            <line x1="0" y1="0" x2="0" y2="5" stroke="#0a1614" strokeOpacity="0.45" strokeWidth="1.4" />
           </pattern>
           {framed && !night && (
             <pattern id={`${uid}-sea`} width={9 * unit + 3} height={9 * unit + 3} patternUnits="userSpaceOnUse">

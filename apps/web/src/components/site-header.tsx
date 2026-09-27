@@ -49,7 +49,7 @@ export function SiteHeader() {
       <div className="flex h-12 items-center justify-between gap-4 px-3 sm:px-4">
         <Link href="/" className="flex items-center gap-2.5" aria-label="SabahKu home" onClick={() => setOpen(false)}>
           <LogoMark />
-          <Wordmark className="text-[1.15rem]" />
+          <Wordmark className="text-[1.2rem]" />
           <span className="hidden font-mono text-[0.62rem] uppercase tracking-[0.14em] text-faint xl:inline">Economic atlas · 27 districts</span>
         </Link>
 

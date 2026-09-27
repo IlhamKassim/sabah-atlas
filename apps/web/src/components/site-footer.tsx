@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { LogoMark, Wordmark } from "./logo";
+import { LogoStacked } from "./logo";
 
 export function SiteFooter() {
   // The map is a full-screen app; its sidebar carries the credits instead.
@@ -12,7 +12,7 @@ export function SiteFooter() {
     <footer className="no-print mt-16 border-t border-line bg-panel text-muted">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 text-sm sm:grid-cols-3 sm:px-6">
         <div>
-          <p className="flex items-center gap-2 text-lg text-ink"><LogoMark size={24} /><Wordmark /></p>
+          <LogoStacked size={52} className="text-xl" />
           <p className="mt-3 max-w-xs">
             Every number has a source and a year. Every modelled number has an uncertainty range. If SabahKu
             cannot back a claim, it does not make it.

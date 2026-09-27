@@ -26,7 +26,7 @@ export default function AboutPage() {
         </ul>
         <h2>Design and cultural credits</h2>
         <p>
-          The colours come from Sabah&apos;s landscape: the sunset at Tanjung Aru for the West Coast, the Crocker Range rainforest for the Interior, the sand at the Tip of Borneo for Kudat, Kinabatangan orchids for Sandakan and the Semporna sea for Tawau. The mark is Mount Kinabalu&apos;s summit above the sea. The district <em>jalur</em> strips borrow the <em>structure</em> of Sabah&apos;s textiles, not their patterns: their banding follows the <strong>mogah</strong> sarongs woven by Iranun and Bajau communities, and loading states echo the ordered dots of <strong>Rungus beadwork</strong> from Kudat.
+          The colours come from Sabah&apos;s landscape: the sunset at Tanjung Aru for the West Coast, the Crocker Range rainforest for the Interior, the sand at the Tip of Borneo for Kudat, Kinabatangan orchids for Sandakan and the Semporna sea for Tawau. The mark is Mount Kinabalu&apos;s ridge drawn as one line, with the dawn sun resting on the summit. The district <em>jalur</em> strips borrow the <em>structure</em> of Sabah&apos;s textiles, not their patterns: their banding follows the <strong>mogah</strong> sarongs woven by Iranun and Bajau communities, and loading states echo the ordered dots of <strong>Rungus beadwork</strong> from Kudat.
         </p>
         <p>
           These are abstracted geometries, not reproductions of specific ceremonial motifs. We credit the communities whose craft informed them, and we intend to have the motif set reviewed by a cultural practitioner or a heritage academic at Universiti Malaysia Sabah before the version 1.0 launch. If you are one, we would value your advice.

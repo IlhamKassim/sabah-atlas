@@ -12,22 +12,22 @@
   --panel-2: #162a26;
   --line: #22403a;         /* rules, borders */
   --field: #0d1b19;        /* inputs */
-  --ink: #e6eee8;          /* Kabus: morning mist on Kinabalu */
+  --ink: #f3efe6;          /* Kabus: morning mist on Kinabalu (2a cream) */
   --muted: #95aaa3;
   --faint: #6c837c;
   --nodata: #2a3a36;
   --sea: #0c1d22;          /* map water */
   --sea-dot: #1d5a63;      /* animated sea texture */
   --night: #07110f;        /* always dark: tooltips, code */
-  --on-night: #e6eee8;
+  --on-night: #f3efe6;
 
-  --laut: #3cc0b4;         /* Laut Semporna: primary, above benchmark */
-  --laut-deep: #8fe0d6;
-  --karang: #7fd6cb;       /* coral shallows: light accent */
+  --laut: #4fa394;         /* Laut Semporna: primary, above benchmark (2a teal) */
+  --laut-deep: #8fcbbf;
+  --karang: #7fbfb2;       /* coral shallows: light accent */
   --hutan: #5fae76;        /* Hutan Crocker: rainforest green */
   --mogah: #ec6f5a;        /* Rafflesia: below benchmark */
-  --kunyit: #f2c14e;       /* Fajar Kinabalu: dawn gold, highlight */
-  --kunyit-ink: #f2c14e;
+  --kunyit: #f4b860;       /* Fajar Kinabalu: dawn gold, highlight (2a sun) */
+  --kunyit-ink: #f4b860;
   --senja: #f28c5b;        /* Senja Tanjung Aru: sunset */
 
   --div-west: #f28c5b;     /* West Coast: Tanjung Aru sunset */
@@ -35,31 +35,38 @@
   --div-kudat: #e3c15f;    /* Kudat: Tip of Borneo sand */
   --div-sandakan: #b58ad6; /* Sandakan: Kinabatangan orchids */
   --div-tawau: #3cc0b4;    /* Tawau: Semporna sea */
+
+  /* Logo system 2a: Kinabalu after dark */
+  --brand-ridge: var(--laut);
+  --brand-base: #3b7c70;
+  --brand-sun: var(--kunyit);
+  --brand-halo: rgb(244 184 96 / 0.18);
+  --brand-ku: var(--kunyit);
 }
 
 [data-theme="light"] {
   color-scheme: light;
-  --bg: #f4efe4;           /* Pasir: Tanjung Aru sand */
-  --panel: #ece5d6;
-  --panel-2: #e3dac7;
-  --line: #d6cbb4;
-  --field: #fbf8f1;
-  --ink: #16241f;
+  --bg: #f3efe6;           /* Pasir: Tanjung Aru sand (2a cream) */
+  --panel: #ebe5d9;
+  --panel-2: #e2dbcb;
+  --line: #d4cbb8;
+  --field: #fbf9f4;
+  --ink: #0a1614;
   --muted: #56645e;        /* AA on bg */
   --faint: #7b857f;
   --nodata: #ddd5c4;
   --sea: #dce9e6;
   --sea-dot: #a9cdc8;
-  --night: #0f1d1a;
-  --on-night: #eef3ef;
+  --night: #0a1614;
+  --on-night: #f3efe6;
 
-  --laut: #0d7470;
-  --laut-deep: #0a4b4c;
-  --karang: #5fb8ad;
+  --laut: #2a7063;
+  --laut-deep: #174b42;
+  --karang: #6fb3a5;
   --hutan: #2f6b43;
   --mogah: #b23b2c;
-  --kunyit: #d9a22b;
-  --kunyit-ink: #7a5510;
+  --kunyit: #d4912a;
+  --kunyit-ink: #8a5a10;
   --senja: #c85f2c;
 
   --div-west: #d9703f;
@@ -67,6 +74,13 @@
   --div-kudat: #c79b2c;
   --div-sandakan: #8e62b3;
   --div-tawau: #1f9a90;
+
+  /* 2a "light ground" variant */
+  --brand-ridge: var(--laut);
+  --brand-base: #7fb3a8;
+  --brand-sun: var(--kunyit);
+  --brand-halo: rgb(244 184 96 / 0.35);
+  --brand-ku: #b87414;
 }
 
 @theme inline {
@@ -89,7 +103,9 @@
   --color-kunyit: var(--kunyit);
   --color-kunyit-ink: var(--kunyit-ink);
   --color-senja: var(--senja);
-  --font-display: var(--font-grotesk), var(--font-plex-sans), system-ui, sans-serif;
+  --color-brand-ku: var(--brand-ku);
+  --font-brand: var(--font-bricolage), system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-plex-sans), system-ui, sans-serif;
   --font-sans: var(--font-plex-sans), system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 }
@@ -206,27 +222,27 @@ body {
 @media print {
   :root, :root[data-theme] {
     color-scheme: light;
-    --bg: #f4efe4;           /* Pasir: Tanjung Aru sand */
-    --panel: #ece5d6;
-    --panel-2: #e3dac7;
-    --line: #d6cbb4;
-    --field: #fbf8f1;
-    --ink: #16241f;
+    --bg: #f3efe6;           /* Pasir: Tanjung Aru sand (2a cream) */
+    --panel: #ebe5d9;
+    --panel-2: #e2dbcb;
+    --line: #d4cbb8;
+    --field: #fbf9f4;
+    --ink: #0a1614;
     --muted: #56645e;        /* AA on bg */
     --faint: #7b857f;
     --nodata: #ddd5c4;
     --sea: #dce9e6;
     --sea-dot: #a9cdc8;
-    --night: #0f1d1a;
-    --on-night: #eef3ef;
+    --night: #0a1614;
+    --on-night: #f3efe6;
   
-    --laut: #0d7470;
-    --laut-deep: #0a4b4c;
-    --karang: #5fb8ad;
+    --laut: #2a7063;
+    --laut-deep: #174b42;
+    --karang: #6fb3a5;
     --hutan: #2f6b43;
     --mogah: #b23b2c;
-    --kunyit: #d9a22b;
-    --kunyit-ink: #7a5510;
+    --kunyit: #d4912a;
+    --kunyit-ink: #8a5a10;
     --senja: #c85f2c;
   
     --div-west: #d9703f;
