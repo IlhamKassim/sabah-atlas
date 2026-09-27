@@ -1,0 +1,9 @@
+# Build context is apps/web, so the repo-root .dockerignore does not apply here.
+# Without this, `COPY . .` sends the host's node_modules and .next into every build,
+# overwriting the Linux node_modules installed in the deps stage.
+node_modules
+.next
+.env*
+*.tsbuildinfo
+npm-debug.log*
+.DS_Store
