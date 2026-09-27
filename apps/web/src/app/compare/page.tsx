@@ -5,10 +5,12 @@ import { CiteButton } from "@/components/cite-button";
 import { DistrictPicker } from "@/components/district-picker";
 import { Jalur, JalurLegend } from "@/components/jalur";
 import { COMPARE_COLORS, MultiLine } from "@/components/multi-line";
+import { SabahMap } from "@/components/sabah-map";
 import { Container, SectionTitle } from "@/components/ui";
 import { api, type Obs } from "@/lib/api";
 import { catalog, jalurCells } from "@/lib/data";
 import { fmt } from "@/lib/format";
+import { projectSabahInContext } from "@/lib/geo";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Compare districts" };
@@ -21,7 +23,7 @@ const DASH = ["solid", "dashed", "dotted", "dash-dot"];
 export default async function ComparePage({ searchParams }: PageProps<"/compare">) {
   const sp = await searchParams;
   const raw = typeof sp.ids === "string" ? sp.ids.split(",").filter(Boolean).slice(0, 4) : [];
-  const [ds, cat] = await Promise.all([api.districts("sabah"), catalog()]);
+  const [ds, cat, geo] = await Promise.all([api.districts("sabah"), catalog(), projectSabahInContext(1000, 820)]);
   const options = ds.filter((d) => d.kind === "district").map((d) => ({ slug: d.slug, name: d.name, division: d.division ?? "" }));
   const cmp = raw.length ? await api.compare(raw) : null;
   const { indicators: ind } = cat;
@@ -36,7 +38,26 @@ export default async function ComparePage({ searchParams }: PageProps<"/compare"
         {cmp && <CiteButton title={`Comparison of ${cmp.districts.map((d) => d.name).join(", ")}`} />}
       </div>
       <div className="mogah-rule mt-3" aria-hidden />
-      <div className="no-print mt-6"><DistrictPicker options={options} /></div>
+      <div className="mt-6 grid gap-6 md:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="no-print"><DistrictPicker options={options} /></div>
+        {/* Selected districts in their chart colours; clicking a district adds or removes it. */}
+        <SabahMap
+          width={geo.width}
+          height={geo.height}
+          districts={geo.districts}
+          context={{ path: geo.context }}
+          data={Object.fromEntries(geo.districts.map((g) => {
+            const i = raw.indexOf(g.slug);
+            return [g.id, { fill: i >= 0 ? COMPARE_COLORS[i] : "var(--nodata)", label: i >= 0 ? "Click to remove" : raw.length < 4 ? "Click to add" : "Four already chosen" }];
+          }))}
+          hrefFor={Object.fromEntries(geo.districts.map((g) => {
+            const next = raw.includes(g.slug) ? raw.filter((x) => x !== g.slug) : raw.length < 4 ? [...raw, g.slug] : raw;
+            return [g.slug, next.length ? `/compare?ids=${next.join(",")}` : "/compare"];
+          }))}
+          className="hidden md:block"
+          ariaLabel={`Map of the districts being compared${raw.length ? `: ${raw.join(", ")}` : ""}`}
+        />
+      </div>
 
       {!cmp || !cmp.districts.length ? (
         <p className="mt-10 text-muted">Pick districts above, or try <Link className="underline" href="/compare?ids=pitas,kota-marudu,kudat,tongod">the four lowest-income districts</Link>.</p>

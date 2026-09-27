@@ -21,6 +21,7 @@ export function SiteFooter() {
         <div className="font-mono text-xs leading-6">
           <p className="mb-1 uppercase tracking-wider text-kunyit">Atlas</p>
           <Link className="block hover:text-kunyit" href="/">Explore the map</Link>
+          <Link className="block hover:text-kunyit" href="/overview">Sabah at a glance</Link>
           <Link className="block hover:text-kunyit" href="/methodology">Methodology &amp; model cards</Link>
           <Link className="block hover:text-kunyit" href="/data">Data releases &amp; API</Link>
           <Link className="block hover:text-kunyit" href="/about">About, credits &amp; corrections</Link>

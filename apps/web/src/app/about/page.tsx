@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AboutTabs } from "@/components/about-tabs";
 import { Container } from "@/components/ui";
 
 export const metadata: Metadata = { title: "About" };
@@ -8,6 +9,7 @@ export const metadata: Metadata = { title: "About" };
 export default function AboutPage() {
   return (
     <Container className="py-8">
+      <AboutTabs />
       <p className="kicker">About</p>
       <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Numbers a planner can defend</h1>
       <div className="mogah-rule mt-3" aria-hidden />

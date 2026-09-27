@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AboutTabs } from "@/components/about-tabs";
 import { Container } from "@/components/ui";
 import { api } from "@/lib/api";
 import { catalog } from "@/lib/data";
@@ -41,6 +42,7 @@ export default async function MethodologyPage() {
 
   return (
     <Container className="py-8">
+      <AboutTabs />
       <p className="kicker">Methodology</p>
       <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">How SabahKu knows what it says</h1>
       <div className="mogah-rule mt-3" aria-hidden />

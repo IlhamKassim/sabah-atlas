@@ -4,13 +4,13 @@ import Link from "next/link";
 import { ForecastTable } from "@/components/forecast-table";
 import { Container, SectionTitle } from "@/components/ui";
 import { api } from "@/lib/api";
-import { projectSabah } from "@/lib/geo";
+import { projectSabahInContext } from "@/lib/geo";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Forecasts" };
 
 export default async function ForecastsPage() {
-  const [fc, map, cards] = await Promise.all([api.analytics("forecast"), projectSabah(520, 390, 8), api.modelCards()]);
+  const [fc, map, cards] = await Promise.all([api.analytics("forecast"), projectSabahInContext(560, 460, 14), api.modelCards()]);
   const card = cards.find((c) => c.task === "forecast") as { gdp?: { median_ape_by_horizon?: Record<string, Record<string, number>>; sabah_coverage_out_of_sample?: Record<string, number> }; income?: { median_ape?: Record<string, number> } } | undefined;
   const bt = card?.gdp?.median_ape_by_horizon;
   const rows = fc
