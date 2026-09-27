@@ -106,6 +106,23 @@ def run() -> dict:
             mc = pd.DataFrame([{"model_version": c["model_version"], "task": c["task"],
                                 "card": _jsonify(c)} for c in json.loads(cards.read_text())])
             counts["model_card"] = _copy(conn, "model_card", mc)
+        counts["ntl_image"] = _load_images(conn)
         conn.commit()
     return counts
 
+
+
+def _load_images(conn: psycopg.Connection) -> int | None:
+    """Sabah-at-night pictures from the night-lights step. Left untouched when this machine
+    has none (e.g. a build without EARTHDATA_TOKEN), so an earlier load keeps serving."""
+    from atlas_pipelines.ntl import image_dir
+
+    pics = sorted(image_dir().glob("*.png"))
+    if not pics:
+        return None
+    conn.execute("TRUNCATE ntl_image")
+    for pic in pics:
+        meta = json.loads(pic.with_suffix(".json").read_text())
+        conn.execute("INSERT INTO ntl_image (year, png, west, south, east, north) VALUES (%s,%s,%s,%s,%s,%s)",
+                     (meta["year"], pic.read_bytes(), *meta["bounds"]))
+    return len(pics)

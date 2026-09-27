@@ -9,6 +9,7 @@ import { api, type District } from "@/lib/api";
 import { allJalur, catalog } from "@/lib/data";
 import { fmt } from "@/lib/format";
 import { projectSabahInContext } from "@/lib/geo";
+import { nightImagery } from "@/lib/lights";
 import { DIVISION_HEX, DIVISIONS, sequentialQuantiles } from "@/lib/scales";
 
 export const dynamic = "force-dynamic";
@@ -36,12 +37,13 @@ function range(ds: District[], code: string, format: string) {
 }
 
 export default async function Overview() {
-  const [ds, cat, hero, chapterMap, lights] = await Promise.all([
+  const [ds, cat, hero, chapterMap, lights, imagery] = await Promise.all([
     api.districts("sabah"),
     catalog(),
     projectSabahInContext(640, 520, 16),
     projectSabahInContext(560, 460, 14),
     api.indicator("ntl_radiance_total"),
+    nightImagery(640, 520, 16),
   ]);
   const jalur = await allJalur(cat.indicators);
   const districts = ds.filter((d) => d.kind === "district");
@@ -111,10 +113,12 @@ export default async function Overview() {
               context={{ path: hero.context }}
               data={heroData}
               glow={glow}
+              imagery={imagery}
+              year={lights.period}
               ariaLabel={`Sabah at night, ${lights.period}: each district glows with its satellite night-time light`}
             />
             <figcaption className="mt-2 flex flex-wrap items-baseline justify-between gap-2 text-xs text-muted">
-              <span>Sabah after dark, {lights.period}. Each glow is a district&apos;s total night-time light (NASA Black Marble).</span>
+              <span>Sabah after dark, {lights.period}. {imagery ? "NASA Black Marble satellite picture of the year's night-time light." : "Each glow is a district's total night-time light (NASA Black Marble)."}</span>
               <Link href="/?indicator=ntl_radiance_mean" className="font-mono uppercase tracking-wider text-kunyit hover:underline">Night lights on the map →</Link>
             </figcaption>
           </figure>

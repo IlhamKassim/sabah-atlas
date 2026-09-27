@@ -16,6 +16,7 @@ import { api, ApiError, type Indicator, type Obs, publicApiUrl, type ScoreItem, 
 import { catalog, jalurCells, latest } from "@/lib/data";
 import { explainFlag, fmt, ordinal, signed } from "@/lib/format";
 import { projectSabahInContext } from "@/lib/geo";
+import { nightImagery, type NightImagery } from "@/lib/lights";
 import { scoreSentence, VERDICT_LABEL } from "@/lib/narrative";
 import { DIVISION_HEX, sequentialQuantiles } from "@/lib/scales";
 
@@ -44,9 +45,9 @@ const TABLE_ORDER = ["welfare", "labour", "access", "structure", "demography", "
 
 export default async function DistrictPage({ params }: PageProps<"/district/[slug]">) {
   const { slug } = await params;
-  const [p, cat, national, geo, brief, lightsNow] = await Promise.all([
+  const [p, cat, national, geo, brief, lightsNow, imagery] = await Promise.all([
     load(slug), catalog(), api.districts("national"), projectSabahInContext(1000, 820), api.brief(slug).catch(() => null),
-    api.indicator("ntl_radiance_total").catch(() => null),
+    api.indicator("ntl_radiance_total").catch(() => null), nightImagery(1000, 820, 40),
   ]);
   const lightsFirst = lightsNow ? await api.indicator("ntl_radiance_total", lightsNow.periods[0]).catch(() => null) : null;
   const { indicators: ind, sources } = cat;
@@ -290,7 +291,7 @@ export default async function DistrictPage({ params }: PageProps<"/district/[slu
         )}
 
         {/* After dark */}
-        {lightsNow && lightsFirst && <AfterDark name={d.name} id={d.id} geo={geo} first={lightsFirst} last={lightsNow} format={ind.ntl_radiance_total?.format ?? "number1"} />}
+        {lightsNow && lightsFirst && <AfterDark name={d.name} id={d.id} geo={geo} first={lightsFirst} last={lightsNow} imagery={imagery} format={ind.ntl_radiance_total?.format ?? "number1"} />}
 
         {/* All indicators */}
         <section className="mt-12">
@@ -382,8 +383,9 @@ function IndicatorTable({ indicators, ind, sources }: { indicators: Record<strin
 type LightsYear = Awaited<ReturnType<typeof api.indicator>>;
 
 /** The district at night, first year of satellite lights against the latest, zoomed on it. */
-function AfterDark({ name, id, geo, first, last, format }: {
-  name: string; id: string; geo: Awaited<ReturnType<typeof projectSabahInContext>>; first: LightsYear; last: LightsYear; format: string;
+function AfterDark({ name, id, geo, first, last, imagery, format }: {
+  name: string; id: string; geo: Awaited<ReturnType<typeof projectSabahInContext>>; first: LightsYear; last: LightsYear;
+  imagery: NightImagery | null; format: string;
 }) {
   const tint = sequentialQuantiles([...first.values, ...last.values].map((v) => v.value), "lights");
   const own = (y: LightsYear) => y.values.find((v) => v.district_id === id);
@@ -399,6 +401,8 @@ function AfterDark({ name, id, geo, first, last, format }: {
         context={{ path: geo.context }}
         data={Object.fromEntries(y.values.map((v) => [v.district_id, { fill: tint(v.value), label: `${fmt(v.value, format)} total light`, sub: String(y.period) }]))}
         glow={Object.fromEntries(y.values.map((v) => [v.district_id, v.value]))}
+        imagery={imagery}
+        year={y.period}
         highlight={[id]}
         zoomTo={id}
         href="/?indicator=ntl_radiance_mean&d={slug}"
@@ -413,7 +417,7 @@ function AfterDark({ name, id, geo, first, last, format }: {
   return (
     <section className="mt-12">
       <SectionTitle kicker="Lights" title={`${name} after dark`}>
-        Total night-time light seen by NASA&apos;s Black Marble satellite product, {first.period} against {last.period}
+        NASA&apos;s Black Marble satellite pictures of the district at night, {first.period} against {last.period}
         {change != null && <>: <strong className="font-medium text-ink">{signed(change, 0, "%")}</strong> over {last.period - first.period} years</>}.
         Lights track where people, roads and industry are; they are a proxy, not a measure of output.{" "}
         <Link className="underline decoration-dotted underline-offset-2 hover:text-laut" href={`/?indicator=ntl_radiance_mean&d=${last.values.find((v) => v.district_id === id)?.slug ?? ""}`}>Play every year on the map</Link>.

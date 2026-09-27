@@ -9,6 +9,8 @@ export function nightMapSvg(
   geo: { width: number; height: number; districts: ProjectedDistrict[] },
   total: Record<string, number>,
   highlight?: string,
+  /** NASA's picture of Sabah at night (a data URI and its place on the map): replaces the drawn glow. */
+  picture?: { href: string; x: number; y: number; w: number; h: number } | null,
 ) {
   const { width: W, height: H, districts } = geo;
   const land = districts.map((d) => `<path d="${d.d}"/>`).join("");
@@ -26,7 +28,9 @@ export function nightMapSvg(
 <filter id="b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${(4 * W) / 600}"/></filter>
 </defs>
 <g fill="#16211e" stroke="#05090b" stroke-width="0.8" stroke-linejoin="round">${land}</g>
-<g clip-path="url(#land)"><g filter="url(#b)">${glows}</g>${cores}</g>
+${picture
+    ? `<g clip-path="url(#land)"><image href="${picture.href}" x="${picture.x}" y="${picture.y}" width="${picture.w}" height="${picture.h}" preserveAspectRatio="none" filter="url(#b)" opacity="0.9"/><image href="${picture.href}" x="${picture.x}" y="${picture.y}" width="${picture.w}" height="${picture.h}" preserveAspectRatio="none"/></g>`
+    : `<g clip-path="url(#land)"><g filter="url(#b)">${glows}</g>${cores}</g>`}
 ${hl ? `<path d="${hl.d}" fill="none" stroke="#f2c14e" stroke-width="2.4" stroke-linejoin="round"/>` : ""}
 </svg>`;
 }

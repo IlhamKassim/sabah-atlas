@@ -7,8 +7,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { GlowLayer } from "@/components/after-dark/glow-layer";
+import { NightImageLayer } from "@/components/after-dark/night-image";
 import type { ProjectedDistrict } from "@/lib/geo";
-import { NIGHT_FILL_OPACITY } from "@/lib/scales";
+import type { NightImagery } from "@/lib/lights";
+import { NIGHT_FILL_OPACITY, NIGHT_FILL_OPACITY_PICTURE } from "@/lib/scales";
 
 export interface MapDatum {
   fill: string;
@@ -25,7 +27,7 @@ export interface MapDatum {
  */
 export function SabahMap({
   width, height, districts, data, context, highlight, dim, labels = false, interactive = true, href = "/district/{slug}", hrefFor,
-  zoomTo, zoomable = false, glow, framed = true, ariaLabel, className = "",
+  zoomTo, zoomable = false, glow, imagery, year, framed = true, ariaLabel, className = "",
 }: {
   width: number;
   height: number;
@@ -45,6 +47,9 @@ export function SabahMap({
   zoomTo?: string;
   zoomable?: boolean;
   glow?: Record<string, number> | null;
+  /** With `glow`: NASA's picture of that year, drawn instead of the glow when available. */
+  imagery?: NightImagery | null;
+  year?: number;
   framed?: boolean;
   ariaLabel: string;
   className?: string;
@@ -133,7 +138,7 @@ export function SabahMap({
                 <path
                   d={d.d}
                   fill={datum?.fill ?? "var(--nodata)"}
-                  fillOpacity={night ? NIGHT_FILL_OPACITY : 1}
+                  fillOpacity={night ? (imagery ? NIGHT_FILL_OPACITY_PICTURE : NIGHT_FILL_OPACITY) : 1}
                   stroke={night ? "#05090b" : "var(--bg)"}
                   strokeWidth={0.9}
                   vectorEffect="non-scaling-stroke"
@@ -158,7 +163,11 @@ export function SabahMap({
               </g>
             );
           })}
-          {glow && <GlowLayer uid={`${uid}-n`} land={districts} points={districts} total={glow} unit={unit} scale={k} />}
+          {glow && imagery && year ? (
+            <NightImageLayer uid={`${uid}-n`} imagery={imagery} year={year} land={districts} unit={unit} scale={k} />
+          ) : (
+            glow && <GlowLayer uid={`${uid}-n`} land={districts} points={districts} total={glow} unit={unit} scale={k} />
+          )}
           {[...hi, ...(hover && !hi.has(hover) ? [hover] : [])].map((id) => {
             const d = districts.find((x) => x.id === id);
             return d ? (
