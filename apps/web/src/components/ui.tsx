@@ -11,7 +11,7 @@ export function SectionTitle({ kicker, title, children, id }: { kicker?: string;
   return (
     <div className="mb-5" id={id}>
       {kicker && <p className="kicker mb-1">{kicker}</p>}
-      <h2 className="font-serif text-2xl font-semibold tracking-tight text-granite sm:text-[1.7rem]">{title}</h2>
+      <h2 className="font-display text-2xl font-semibold tracking-tight text-ink sm:text-[1.7rem]">{title}</h2>
       <div className="mogah-rule mt-2" aria-hidden />
       {children && <div className="mt-3 max-w-3xl text-[0.95rem] leading-relaxed text-muted">{children}</div>}
     </div>
@@ -38,11 +38,11 @@ export function SourceNote({ source, period, flag, className = "" }: { source?: 
 
 export function Pill({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "good" | "bad" | "warn" | "model" }) {
   const tones = {
-    neutral: "bg-pasir-2 text-granite border-pasir-3",
+    neutral: "bg-panel text-ink border-line",
     good: "bg-laut/10 text-laut border-laut/30",
     bad: "bg-mogah/10 text-mogah border-mogah/30",
-    warn: "bg-kunyit/15 text-[#7a5510] border-kunyit/40",
-    model: "bg-malam/5 text-granite border-granite/20 border-dashed",
+    warn: "bg-kunyit/15 text-kunyit-ink border-kunyit/40",
+    model: "bg-night/5 text-ink border-ink/20 border-dashed",
   } as const;
   return <span className={`inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 font-mono text-[0.66rem] uppercase tracking-wide ${tones[tone]}`}>{children}</span>;
 }

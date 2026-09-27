@@ -5,7 +5,7 @@ import os
 
 import typer
 
-app = typer.Typer(help="Atlas Ekonomi Sabah data pipeline", no_args_is_help=True)
+app = typer.Typer(help="SabahKu data pipeline", no_args_is_help=True)
 
 
 def _show(obj) -> None:

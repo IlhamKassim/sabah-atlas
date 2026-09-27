@@ -61,7 +61,7 @@ export function ChartFrame({
       c.width = width * 2;
       c.height = height * 2;
       const ctx = c.getContext("2d")!;
-      ctx.fillStyle = "#f3ede1";
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#f4efe4";
       ctx.fillRect(0, 0, c.width, c.height);
       ctx.drawImage(img, 0, 0, c.width, c.height);
       c.toBlob((b) => b && download(`${filename}.png`, b), "image/png");
@@ -72,16 +72,16 @@ export function ChartFrame({
 
   return (
     <figure className={className}>
-      {title && <figcaption className="mb-2 font-serif text-[1.02rem] font-semibold text-granite">{title}</figcaption>}
+      {title && <figcaption className="mb-2 font-display text-[1.02rem] font-semibold text-ink">{title}</figcaption>}
       {controls}
       <div ref={ref}>{children}</div>
       <div className="mt-1.5 flex flex-wrap items-start justify-between gap-2">
         <div className="source-note max-w-2xl">{caption}</div>
         <div className="no-print flex gap-1 font-mono text-[0.62rem] uppercase tracking-wide">
-          <button type="button" onClick={asSvg} className="border border-pasir-3 px-1.5 py-0.5 text-muted hover:border-laut hover:text-laut">SVG</button>
-          <button type="button" onClick={asPng} className="border border-pasir-3 px-1.5 py-0.5 text-muted hover:border-laut hover:text-laut">PNG</button>
+          <button type="button" onClick={asSvg} className="border border-line px-1.5 py-0.5 text-muted hover:border-laut hover:text-laut">SVG</button>
+          <button type="button" onClick={asPng} className="border border-line px-1.5 py-0.5 text-muted hover:border-laut hover:text-laut">PNG</button>
           {rows && (
-            <button type="button" onClick={asCsv} className="border border-pasir-3 px-1.5 py-0.5 text-muted hover:border-laut hover:text-laut">CSV</button>
+            <button type="button" onClick={asCsv} className="border border-line px-1.5 py-0.5 text-muted hover:border-laut hover:text-laut">CSV</button>
           )}
         </div>
       </div>

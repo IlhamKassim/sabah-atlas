@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { CiteButton } from "@/components/cite-button";
+import { HomeStar } from "@/components/home-star";
 import { CitedMarkdown } from "@/components/cited-markdown";
 import { DriversChart } from "@/components/drivers-chart";
 import { FanChart } from "@/components/fan-chart";
@@ -59,23 +60,26 @@ export default async function DistrictPage({ params }: PageProps<"/district/[slu
   const strengths = score.filter((s) => s.verdict === "strength");
   const concerns = score.filter((s) => s.verdict === "concern");
   const mixed = score.filter((s) => s.verdict === "mixed");
-  const divColor = DIVISION_HEX[d.division ?? ""] ?? "#1e2422";
+  const divColor = DIVISION_HEX[d.division ?? ""] ?? "var(--ink)";
   const fc = a.forecast?.indicators ?? {};
 
   return (
     <article>
-      <div className="border-b border-pasir-3 bg-pasir-2/60">
+      <div className="border-b border-line bg-panel/60">
         <Container className="py-7">
           <nav aria-label="Breadcrumb" className="font-mono text-[0.72rem] uppercase tracking-wider text-mogah">
-            <Link href={`/explore?division=${encodeURIComponent(d.division ?? "")}`} className="hover:underline">{d.division} Division</Link>
+            <Link href={`/?division=${encodeURIComponent(d.division ?? "")}`} className="hover:underline">{d.division} Division</Link>
             <span className="mx-2 text-faint">/</span>
             <span className="text-muted">District profile</span>
           </nav>
           <div className="mt-2 grid gap-6 md:grid-cols-[minmax(0,1fr)_300px]">
             <div>
-              <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">{d.name}</h1>
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">{d.name}</h1>
+                {d.kind === "district" && <HomeStar slug={d.slug} name={d.name} />}
+              </div>
               <p className="mt-2 text-sm text-muted">
-                Typology: <strong className="font-medium text-granite">{a.typology?.cluster ?? "—"}</strong>
+                Typology: <strong className="font-medium text-ink">{a.typology?.cluster ?? "—"}</strong>
                 {peerIds.length > 0 && (
                   <>
                     {" · "}Structural peers:{" "}
@@ -102,7 +106,7 @@ export default async function DistrictPage({ params }: PageProps<"/district/[slu
                 width={geo.width}
                 height={geo.height}
                 districts={geo.districts}
-                data={Object.fromEntries(geo.districts.map((g) => [g.id, { fill: g.id === d.id ? divColor : "#ddd5c4" }]))}
+                data={Object.fromEntries(geo.districts.map((g) => [g.id, { fill: g.id === d.id ? divColor : "var(--nodata)" }]))}
                 highlight={[d.id]}
                 ariaLabel={`Location of ${d.name} in Sabah`}
               />
@@ -110,8 +114,8 @@ export default async function DistrictPage({ params }: PageProps<"/district/[slu
           </div>
           <div className="no-print mt-4 flex flex-wrap gap-2">
             <CiteButton title={`${d.name} district profile`} />
-            <a href={`${publicApiUrl}/v1/export/${d.slug}.csv`} className="border border-granite px-2.5 py-1 font-mono text-[0.7rem] uppercase tracking-wider hover:bg-granite hover:text-pasir">Download CSV</a>
-            <Link href={`/compare?ids=${d.slug}${peerIds.filter((i) => i.startsWith("sbh-")).slice(0, 2).map((i) => `,${names[i]?.slug}`).join("")}`} className="border border-pasir-3 px-2.5 py-1 font-mono text-[0.7rem] uppercase tracking-wider text-muted hover:border-granite hover:text-granite">Compare with peers</Link>
+            <a href={`${publicApiUrl}/v1/export/${d.slug}.csv`} className="border border-ink px-2.5 py-1 font-mono text-[0.7rem] uppercase tracking-wider hover:bg-ink hover:text-bg">Download CSV</a>
+            <Link href={`/compare?ids=${d.slug}${peerIds.filter((i) => i.startsWith("sbh-")).slice(0, 2).map((i) => `,${names[i]?.slug}`).join("")}`} className="border border-line px-2.5 py-1 font-mono text-[0.7rem] uppercase tracking-wider text-muted hover:border-ink hover:text-ink">Compare with peers</Link>
           </div>
         </Container>
       </div>
@@ -129,7 +133,7 @@ export default async function DistrictPage({ params }: PageProps<"/district/[slu
             return (
               <div key={code} className="dastar p-3.5">
                 <p className="text-xs text-muted">{i.label}</p>
-                <p className="mt-1 font-mono text-2xl tabular text-granite">{fmt(o.value, i.format)}</p>
+                <p className="mt-1 font-mono text-2xl tabular text-ink">{fmt(o.value, i.format)}</p>
                 <p className="mt-1 text-xs">
                   {s?.peer_median != null && (
                     <span className={better ? "text-laut" : worse ? "text-mogah" : "text-muted"}>
@@ -222,7 +226,7 @@ export default async function DistrictPage({ params }: PageProps<"/district/[slu
                 const i = ind[t];
                 return (
                   <div key={t}>
-                    <p className="font-serif text-[1.02rem] font-semibold">{i.label}, {r.round}</p>
+                    <p className="font-display text-[1.02rem] font-semibold">{i.label}, {r.round}</p>
                     <p className="mt-1 text-sm">
                       Actual <strong className="font-mono">{fmt(r.actual, i.format)}</strong> vs expected <strong className="font-mono">{fmt(r.expected, i.format)}</strong>:{" "}
                       <Pill tone={r.reading.startsWith("better") ? "good" : r.reading.startsWith("worse") ? "bad" : "neutral"}>{r.reading}</Pill>
@@ -242,7 +246,7 @@ export default async function DistrictPage({ params }: PageProps<"/district/[slu
               The five districts nationally most similar in economic structure (income level, GDP per capita, sector mix, density, age, labour participation, water access), whatever their state.
             </SectionTitle>
             <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-              <ol className="divide-y divide-pasir-3 border-y border-pasir-3">
+              <ol className="divide-y divide-line border-y border-line">
                 {a.typology.peers.map((peer, i) => (
                   <li key={peer.district_id} className="flex items-baseline justify-between gap-3 py-2 text-sm">
                     <span>
@@ -307,7 +311,7 @@ export default async function DistrictPage({ params }: PageProps<"/district/[slu
 function ScoreColumn({ title, tone, items, ind, sources, empty }: { title: string; tone: "good" | "bad"; items: ScoreItem[]; ind: Record<string, Indicator>; sources: Record<string, Source>; empty: string }) {
   return (
     <div className={`border-t-4 ${tone === "good" ? "border-laut" : "border-mogah"} dastar p-4`}>
-      <h3 className="font-serif text-lg font-semibold">{title}</h3>
+      <h3 className="font-display text-lg font-semibold">{title}</h3>
       {items.length === 0 ? (
         <p className="mt-2 text-sm text-muted">{empty}</p>
       ) : (
@@ -332,7 +336,7 @@ function IndicatorTable({ indicators, ind, sources }: { indicators: Record<strin
     <div className="overflow-x-auto">
       <table className="w-full min-w-[720px] text-sm">
         <thead>
-          <tr className="border-b border-granite/60 text-left font-mono text-[0.66rem] uppercase tracking-wide text-muted">
+          <tr className="border-b border-ink/60 text-left font-mono text-[0.66rem] uppercase tracking-wide text-muted">
             <th className="py-1.5">Indicator</th>
             <th className="py-1.5 text-right">Latest</th>
             <th className="py-1.5 pl-3">Year</th>
@@ -347,7 +351,7 @@ function IndicatorTable({ indicators, ind, sources }: { indicators: Record<strin
             const o = s[s.length - 1];
             const i = ind[c];
             return (
-              <tr key={c} className="border-b border-pasir-3/70 align-top">
+              <tr key={c} className="border-b border-line/70 align-top">
                 <td className="py-1.5 pr-3">{i.label}<span className="block text-xs text-muted">{i.unit}</span></td>
                 <td className="py-1.5 text-right font-mono tabular">{fmt(o.value, i.format)}</td>
                 <td className="py-1.5 pl-3 font-mono text-xs">{o.period}</td>

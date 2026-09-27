@@ -27,12 +27,12 @@ function Chip({ c, id }: { c?: Citation; id: string }) {
         onClick={() => setOpen((o) => !o)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         aria-expanded={open}
-        className={`mx-0.5 rounded-sm px-1 align-baseline font-mono text-[0.68rem] ${c ? (doc ? "bg-kunyit/25 text-[#6b4a0c]" : "bg-laut/12 text-laut") : "bg-mogah/15 text-mogah"} hover:underline`}
+        className={`mx-0.5 rounded-sm px-1 align-baseline font-mono text-[0.68rem] ${c ? (doc ? "bg-kunyit/25 text-kunyit-ink" : "bg-laut/12 text-laut") : "bg-mogah/15 text-mogah"} hover:underline`}
       >
         {id}
       </button>
       {open && c && (
-        <span role="tooltip" className="absolute left-0 top-6 z-40 block w-[min(88vw,380px)] border border-granite bg-pasir p-2.5 text-left text-xs font-normal leading-snug text-granite shadow-xl">
+        <span role="tooltip" className="absolute left-0 top-6 z-40 block w-[min(88vw,380px)] border border-ink bg-bg p-2.5 text-left text-xs font-normal leading-snug text-ink shadow-xl">
           {doc ? (
             <>
               <span className="block font-semibold">{c.title}</span>
@@ -97,7 +97,7 @@ export function CitedMarkdown({ text, citations }: { text: string; citations: Ci
     if (!line.trim()) return;
     const h = line.match(/^(#{1,4})\s+(.*)$/);
     if (h) {
-      blocks.push(<h3 key={k} className="mb-1 mt-4 font-serif text-lg font-semibold text-laut-deep">{h[2]}</h3>);
+      blocks.push(<h3 key={k} className="mb-1 mt-4 font-display text-lg font-semibold text-laut-deep">{h[2]}</h3>);
       return;
     }
     blocks.push(<p key={k} className="my-2 leading-relaxed">{inline(line, cites, `p${k}`)}</p>);

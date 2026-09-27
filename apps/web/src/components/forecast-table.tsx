@@ -44,7 +44,7 @@ export function ForecastTable({ rows, map }: { rows: Row[]; map: { width: number
   const med = growths.sort((a, b) => a - b)[Math.floor(growths.length / 2)] ?? 0;
   const ext = Math.max(...growths.map((g) => Math.abs(g - med)), 0.5);
   const color = (g: number | null) => {
-    if (g == null) return "#e4ddcf";
+    if (g == null) return "var(--nodata)";
     const t = (g - med) / ext; // -1..1
     const i = Math.round(((t + 1) / 2) * (MOGAH_LAUT.length - 1));
     return MOGAH_LAUT[Math.max(0, Math.min(MOGAH_LAUT.length - 1, i))];
@@ -61,7 +61,7 @@ export function ForecastTable({ rows, map }: { rows: Row[]; map: { width: number
       <div role="radiogroup" aria-label="Scenario" className="no-print mb-4 flex flex-wrap gap-1">
         {SCEN.map(([k, label]) => (
           <button key={k} type="button" role="radio" aria-checked={scenario === k} onClick={() => setScenario(k)}
-            className={`border px-2 py-1 text-xs ${scenario === k ? "border-laut bg-laut text-pasir" : "border-pasir-3 hover:border-laut"}`}>
+            className={`border px-2 py-1 text-xs ${scenario === k ? "border-laut bg-laut text-bg" : "border-line hover:border-laut"}`}>
             {label}
           </button>
         ))}
@@ -78,7 +78,7 @@ export function ForecastTable({ rows, map }: { rows: Row[]; map: { width: number
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-sm">
             <thead>
-              <tr className="border-b border-granite/60 text-left font-mono text-[0.62rem] uppercase tracking-wide text-muted">
+              <tr className="border-b border-ink/60 text-left font-mono text-[0.62rem] uppercase tracking-wide text-muted">
                 <th className="py-1.5">District</th>
                 <th className="py-1.5 text-right">GDP 2020<br />official</th>
                 <th className="py-1.5 text-right">2025<br />nowcast</th>
@@ -89,7 +89,7 @@ export function ForecastTable({ rows, map }: { rows: Row[]; map: { width: number
             </thead>
             <tbody>
               {computed.map((c) => (
-                <tr key={c.id} className="border-b border-pasir-3/70">
+                <tr key={c.id} className="border-b border-line/70">
                   <td className="py-1.5"><Link className="hover:text-laut hover:underline" href={`/district/${c.slug}`}>{c.name}</Link><span className="block text-[0.65rem] text-muted">{c.division}</span></td>
                   <td className="py-1.5 text-right font-mono tabular">{c.off ? fmt(c.off.value, "number0") : "—"}</td>
                   <td className="py-1.5 text-right font-mono tabular text-laut">{c.now ? fmt(c.now.p50, "number0") : "—"}<span className="block text-[0.62rem] text-muted">{c.nowGrowth != null ? signed(c.nowGrowth, 1, "%/yr") : ""}</span></td>

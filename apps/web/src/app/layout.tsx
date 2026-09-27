@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Serif } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { IBM_Plex_Mono, IBM_Plex_Sans, Space_Grotesk } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { SiteFooter } from "@/components/site-footer";
@@ -7,23 +7,36 @@ import { SiteHeader } from "@/components/site-header";
 
 import "./globals.css";
 
-const serif = IBM_Plex_Serif({ subsets: ["latin"], weight: ["500", "600"], style: ["normal", "italic"], variable: "--font-plex-serif" });
+const grotesk = Space_Grotesk({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-grotesk" });
 const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-plex-sans" });
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-plex-mono" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-  title: { default: "Atlas Ekonomi Sabah", template: "%s · Atlas Ekonomi Sabah" },
+  title: { default: "SabahKu · the economic atlas of Sabah's 27 districts", template: "%s · SabahKu" },
   description:
-    "An evidence atlas of Sabah's 27 district economies: official statistics, transparent diagnostics, projections with uncertainty, and a cited AI analyst.",
-  openGraph: { siteName: "Atlas Ekonomi Sabah", locale: "en_MY", type: "website" },
+    "SabahKu maps the economies of Sabah's 27 districts: official statistics, transparent diagnostics, projections with uncertainty, and a cited AI analyst.",
+  openGraph: { siteName: "SabahKu", locale: "en_MY", type: "website" },
 };
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0a1614" },
+    { media: "(prefers-color-scheme: light)", color: "#0a1614" },
+  ],
+};
+
+// Applied before first paint so a saved light theme never flashes dark.
+const THEME_SCRIPT = `try{var t=localStorage.getItem("sabahku-theme");if(t==="light")document.documentElement.dataset.theme="light"}catch(e){}`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable}`}>
-      <body className="flex min-h-screen flex-col bg-pasir text-granite">
-        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:bg-kunyit focus:px-3 focus:py-2 focus:text-malam">
+    <html lang="en" className={`${grotesk.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
+      <body className="flex min-h-screen flex-col bg-bg text-ink">
+        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:bg-kunyit focus:px-3 focus:py-2 focus:text-night">
           Skip to content
         </a>
         <NuqsAdapter>

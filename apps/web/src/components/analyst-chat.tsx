@@ -103,22 +103,22 @@ export function AnalystChat({ apiUrl, districts, initialDistrict, available }: {
             maxLength={800}
             disabled={!available}
             placeholder={available ? "e.g. Why is poverty in Kota Marudu higher than in its peers?" : "The Analyst is not configured on this server yet."}
-            className="mt-1 w-full resize-y border border-pasir-3 bg-white/70 p-2 text-sm"
+            className="mt-1 w-full resize-y border border-line bg-field p-2 text-sm"
           />
         </label>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <select value={district} onChange={(e) => setDistrict(e.target.value)} className="border border-pasir-3 bg-white/70 px-2 py-1 text-sm" aria-label="District context">
+          <select value={district} onChange={(e) => setDistrict(e.target.value)} className="border border-line bg-field px-2 py-1 text-sm" aria-label="District context">
             <option value="">No district context</option>
             {districts.map((d) => <option key={d.slug} value={d.slug}>{d.name}</option>)}
           </select>
-          <button type="submit" disabled={!available || busy || !question.trim()} className="bg-granite px-4 py-1.5 font-mono text-xs uppercase tracking-wider text-pasir hover:bg-laut disabled:opacity-40">
+          <button type="submit" disabled={!available || busy || !question.trim()} className="bg-ink px-4 py-1.5 font-mono text-xs uppercase tracking-wider text-bg hover:bg-laut disabled:opacity-40">
             {busy ? "Working…" : "Ask"}
           </button>
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {EXAMPLES.map((ex) => (
             <button key={ex} type="button" disabled={!available || busy} onClick={() => { setQuestion(ex); submit(ex); }}
-              className="border border-pasir-3 px-2 py-0.5 text-left text-xs text-muted hover:border-laut hover:text-laut disabled:opacity-40">
+              className="border border-line px-2 py-0.5 text-left text-xs text-muted hover:border-laut hover:text-laut disabled:opacity-40">
               {ex}
             </button>
           ))}
@@ -135,7 +135,7 @@ export function AnalystChat({ apiUrl, districts, initialDistrict, available }: {
       {result && (
         <article className="mt-4 border-t-4 border-laut bg-white/50 p-4">
           <div className="mb-2 flex flex-wrap items-center gap-2">
-            <span className="rounded-sm border border-dashed border-granite/40 px-1.5 py-0.5 font-mono text-[0.62rem] uppercase tracking-wide">{result.label}</span>
+            <span className="rounded-sm border border-dashed border-ink/40 px-1.5 py-0.5 font-mono text-[0.62rem] uppercase tracking-wide">{result.label}</span>
             <span className="font-mono text-[0.62rem] text-muted">
               {result.validation.citations_valid}/{result.validation.citations_total} citations verified
               {result.validation.stripped.length ? ` · ${result.validation.stripped.length} unsupported sentence(s) removed` : ""} · {result.model}

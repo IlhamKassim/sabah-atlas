@@ -20,7 +20,7 @@ export default async function ForecastsPage() {
   return (
     <Container className="py-8">
       <p className="kicker">Project</p>
-      <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl">Nowcasts and projections</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Nowcasts and projections</h1>
       <div className="mogah-rule mt-3" aria-hidden />
       <p className="mt-4 max-w-3xl text-muted">
         District GDP has not been published since 2020 and household surveys arrive every two to three years, so the atlas has only a handful of official points per district. The response: nowcast from Sabah&apos;s published sector data, calibrate intervals on backtests, and label every modelled value.

@@ -41,7 +41,7 @@ export interface JalurCell {
 /** Colour: directional indicators use the diverging scale (teal = better, whatever the
  *  direction); structural (neutral) ones use the sequential scale (darker = higher). */
 export function jalurColor(cell: JalurCell): string {
-  if (cell.pct == null) return "#e4ddcf";
+  if (cell.pct == null) return "var(--nodata)";
   if (cell.neutral) {
     const i = Math.round((cell.pct / 100) * (LAUT.length - 2)) + 1;
     return LAUT[Math.min(LAUT.length - 1, i)];

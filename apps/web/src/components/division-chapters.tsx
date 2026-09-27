@@ -51,11 +51,11 @@ export function DivisionChapters({ chapters, map }: { chapters: Chapter[]; map: 
             height={map.height}
             districts={map.districts}
             data={data}
-            stroke="#0f1a1f"
+            stroke="var(--night)"
             highlight={[...inDiv]}
             ariaLabel={`Map highlighting the ${ch.division} Division`}
           />
-          <p className="mt-2 text-center font-mono text-xs uppercase tracking-widest" style={{ color: ch.color === "#2e5b3c" ? "#7cc6be" : ch.color }}>
+          <p className="mt-2 text-center font-mono text-xs uppercase tracking-widest" style={{ color: ch.color }}>
             {ch.division} Division
           </p>
         </div>
@@ -70,15 +70,15 @@ export function DivisionChapters({ chapters, map }: { chapters: Chapter[]; map: 
             aria-labelledby={`ch-${i}`}
           >
             <p className="font-mono text-xs uppercase tracking-widest text-kunyit">Chapter {i + 1} of 5</p>
-            <h3 id={`ch-${i}`} className="mt-1 font-serif text-3xl font-semibold text-pasir">{c.division}</h3>
+            <h3 id={`ch-${i}`} className="mt-1 font-display text-3xl font-semibold text-on-night">{c.division}</h3>
             <div className="mt-2 h-1.5 w-24" style={{ background: c.color }} aria-hidden />
-            <p className="mt-4 max-w-md leading-relaxed text-pasir/80">{c.lede}</p>
+            <p className="mt-4 max-w-md leading-relaxed text-on-night/80">{c.lede}</p>
             <dl className="mt-5 grid max-w-md grid-cols-2 gap-x-6 gap-y-4">
               {c.facts.map((f) => (
                 <div key={f.label}>
-                  <dt className="font-mono text-[0.66rem] uppercase tracking-wider text-pasir/55">{f.label}</dt>
-                  <dd className="mt-0.5 font-mono text-lg text-pasir">{f.value}</dd>
-                  {f.note && <dd className="font-mono text-[0.65rem] text-pasir/50">{f.note}</dd>}
+                  <dt className="font-mono text-[0.66rem] uppercase tracking-wider text-on-night/55">{f.label}</dt>
+                  <dd className="mt-0.5 font-mono text-lg text-on-night">{f.value}</dd>
+                  {f.note && <dd className="font-mono text-[0.65rem] text-on-night/50">{f.note}</dd>}
                 </div>
               ))}
             </dl>

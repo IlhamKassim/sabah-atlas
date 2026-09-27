@@ -31,7 +31,7 @@ export default async function ComparePage({ searchParams }: PageProps<"/compare"
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="kicker">Compare</p>
-          <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl">Districts side by side</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Districts side by side</h1>
         </div>
         {cmp && <CiteButton title={`Comparison of ${cmp.districts.map((d) => d.name).join(", ")}`} />}
       </div>
@@ -67,7 +67,7 @@ export default async function ComparePage({ searchParams }: PageProps<"/compare"
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-sm">
                 <thead>
-                  <tr className="border-b border-granite/60 text-left font-mono text-[0.62rem] uppercase tracking-wide text-muted">
+                  <tr className="border-b border-ink/60 text-left font-mono text-[0.62rem] uppercase tracking-wide text-muted">
                     <th className="py-1.5">Indicator</th>
                     {cmp.districts.map((d) => <th key={d.id} className="py-1.5 text-right">{d.name}</th>)}
                   </tr>
@@ -82,7 +82,7 @@ export default async function ComparePage({ searchParams }: PageProps<"/compare"
                     const vals = lat.map((o) => o?.value).filter((v): v is number => v != null);
                     const best = i.direction === "up" ? Math.max(...vals) : i.direction === "down" ? Math.min(...vals) : null;
                     return (
-                      <tr key={code} className="border-b border-pasir-3/70">
+                      <tr key={code} className="border-b border-line/70">
                         <td className="py-1.5 pr-3">{i.label}<span className="block text-[0.65rem] text-muted">{i.unit}</span></td>
                         {lat.map((o, k) => (
                           <td key={k} className={`py-1.5 text-right font-mono tabular ${o && best != null && o.value === best && vals.length > 1 ? "font-semibold text-laut" : ""}`}>

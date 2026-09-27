@@ -81,7 +81,7 @@ def _geojson(geo: gpd.GeoDataFrame, reg: pd.DataFrame, tolerance: float, path: P
 def _citation(version: str) -> str:
     return f"""cff-version: 1.2.0
 message: "If you use this data, please cite it as below."
-title: "Atlas Ekonomi Sabah — district economic data release {version}"
+title: "SabahKu — district economic data release {version}"
 type: dataset
 authors:
   - family-names: Kassim
@@ -153,7 +153,7 @@ def run() -> dict:
     shutil.copy(files("atlas_core") / "reference" / "errata.yaml", out / "errata.yaml")
     (out / "CITATION.cff").write_text(_citation(version))
     (out / "README.md").write_text(
-        f"# Atlas Ekonomi Sabah data release {version}\n\n"
+        f"# SabahKu data release {version}\n\n"
         f"Content hash: `{content_hash}`\n\n"
         "Every row in `observations.csv` carries `source_id` (see `sources.csv`) and `period`. "
         "`is_modelled` marks derived or modelled values; `quality_flag` marks boundary breaks, "
