@@ -61,7 +61,7 @@ export function ChartFrame({
       c.width = width * 2;
       c.height = height * 2;
       const ctx = c.getContext("2d")!;
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#f4efe4";
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#f3efe6";
       ctx.fillRect(0, 0, c.width, c.height);
       ctx.drawImage(img, 0, 0, c.width, c.height);
       c.toBlob((b) => b && download(`${filename}.png`, b), "image/png");

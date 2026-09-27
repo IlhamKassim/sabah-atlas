@@ -31,6 +31,6 @@ export function nightMapSvg(
 ${picture
     ? `<g clip-path="url(#land)"><image href="${picture.href}" x="${picture.x}" y="${picture.y}" width="${picture.w}" height="${picture.h}" preserveAspectRatio="none" filter="url(#b)" opacity="0.9"/><image href="${picture.href}" x="${picture.x}" y="${picture.y}" width="${picture.w}" height="${picture.h}" preserveAspectRatio="none"/></g>`
     : `<g clip-path="url(#land)"><g filter="url(#b)">${glows}</g>${cores}</g>`}
-${hl ? `<path d="${hl.d}" fill="none" stroke="#f2c14e" stroke-width="2.4" stroke-linejoin="round"/>` : ""}
+${hl ? `<path d="${hl.d}" fill="none" stroke="#f4b860" stroke-width="2.4" stroke-linejoin="round"/>` : ""}
 </svg>`;
 }

@@ -71,5 +71,5 @@ export function inkOn(hex: string): string {
   if (h.length !== 6) return "var(--ink)";
   const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
   const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return lum > 0.5 ? "#16241f" : "#eef3ef";
+  return lum > 0.5 ? "#0a1614" : "#f3efe6";
 }
