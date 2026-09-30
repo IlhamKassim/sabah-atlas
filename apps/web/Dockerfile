@@ -25,6 +25,8 @@ RUN adduser -D -u 10001 atlas
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
+# Next writes its data and ISR cache here at runtime.
+RUN mkdir -p .next/cache && chown atlas .next/cache
 USER atlas
 EXPOSE 3000
 CMD ["node", "server.js"]

@@ -23,6 +23,7 @@ param earthdataToken string = ''
 @secure()
 param reviewToken string
 param apiImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
+param pipelineImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
 param webImage string = 'mcr.microsoft.com/k8se/quickstart:latest'
 @description('Custom domains already bound to the web app ([{name, certificateId, bindingType}]); deploy.sh passes the live list so redeploys keep them')
 param webCustomDomains array = []
@@ -216,7 +217,7 @@ resource web 'Microsoft.App/containerApps@2024-03-01' = {
   dependsOn: [ acrPull ]
 }
 
-// Weekly pipeline: checks OpenDOSM for new vintages, rebuilds and reloads. Same image as the API.
+// Weekly pipeline: checks OpenDOSM for new vintages, rebuilds and reloads. Full workspace image, separate from the slim API.
 resource pipeline 'Microsoft.App/jobs@2024-03-01' = {
   name: '${prefix}-pipeline'
   location: location
@@ -234,7 +235,7 @@ resource pipeline 'Microsoft.App/jobs@2024-03-01' = {
     template: {
       containers: [ {
         name: 'pipeline'
-        image: apiImage
+        image: pipelineImage
         command: [ 'atlas', 'build' ]
         resources: { cpu: json('1.0'), memory: '2Gi' }
         env: concat(commonEnv, [

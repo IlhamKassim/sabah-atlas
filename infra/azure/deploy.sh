@@ -30,14 +30,14 @@ echo "Creates/updates: Container Apps (api, web; scale to zero), PostgreSQL Flex
 echo "ACR Basic, Log Analytics + App Insights, weekly pipeline job, budget."
 ask "Proceed?" || exit 0
 
-params() {  # $1 = api image, $2 = web image
+params() {  # $1 = api image, $2 = web image, $3 = pipeline image
   # Keep custom domains bound outside Bicep (managed certificates need the DNS to exist first).
   az containerapp show -g "$RG" -n atlas-web --query properties.configuration.ingress.customDomains \
     -o json 2>/dev/null > "$TMP/domains.json" || echo "[]" > "$TMP/domains.json"
-  uv run --quiet python - "$TMP/params.json" "$1" "$2" "$LOC" "$BUDGET" "$TMP/domains.json" <<'EOF'
+  uv run --quiet python - "$TMP/params.json" "$1" "$2" "$3" "$LOC" "$BUDGET" "$TMP/domains.json" <<'EOF'
 import json, sys
 from dotenv import dotenv_values
-out, api, web, loc, budget, domains = sys.argv[1:]
+out, api, web, pipeline, loc, budget, domains = sys.argv[1:]
 v = dotenv_values(".env")
 g = lambda k: v.get(k) or ""
 p = {"prefix": "atlas", "location": loc, "alertEmail": g("ATLAS_ALERT_EMAIL"), "monthlyBudget": int(budget),
@@ -48,7 +48,7 @@ p = {"prefix": "atlas", "location": loc, "alertEmail": g("ATLAS_ALERT_EMAIL"), "
      "earthdataToken": g("EARTHDATA_TOKEN")}
 p["webCustomDomains"] = json.load(open(domains)) or []
 if api:
-    p |= {"apiImage": api, "webImage": web}
+    p |= {"apiImage": api, "webImage": web, "pipelineImage": pipeline}
 json.dump({"contentVersion": "1.0.0.0", "parameters": {k: {"value": x} for k, x in p.items()}}, open(out, "w"))
 EOF
   chmod 600 "$TMP/params.json"
@@ -58,9 +58,9 @@ out() { az deployment group show -g "$RG" -n main --query "properties.outputs.$1
 az group create -n "$RG" -l "$LOC" -o none
 # First run: placeholder images, so the URLs exist before the web image is built.
 if az deployment group show -g "$RG" -n main -o none 2>/dev/null; then
-  ACR=$(out acrLoginServer); params "$ACR/atlas-api:beta" "$ACR/atlas-web:beta"
+  ACR=$(out acrLoginServer); params "$ACR/atlas-api:beta" "$ACR/atlas-web:beta" "$ACR/atlas-pipeline:beta"
 else
-  params "" ""
+  params "" "" ""
 fi
 az deployment group create -g "$RG" -n main -f infra/azure/main.bicep -p @"$TMP/params.json" -o none --only-show-errors
 ACR=$(out acrLoginServer); API_URL=$(out apiUrl); WEB_URL=$(out webUrl); REL=$(out releasesUrl)
@@ -70,12 +70,13 @@ STORAGE=$(out storageAccount); PG=$(out pgHost)
 # Images are built locally: ACR Tasks (az acr build) is unavailable on free-credit subscriptions.
 echo "Building images for linux/amd64 (the web image bakes in the public URLs)…"
 az acr login -n "${ACR%%.*}" --only-show-errors
-docker buildx build --platform linux/amd64 -t "$ACR/atlas-api:beta" -f apps/api/Dockerfile --push .
+docker buildx build --platform linux/amd64 --target api -t "$ACR/atlas-api:beta" -f apps/api/Dockerfile --push .
+docker buildx build --platform linux/amd64 --target pipeline -t "$ACR/atlas-pipeline:beta" -f apps/api/Dockerfile --push .
 docker buildx build --platform linux/amd64 -t "$ACR/atlas-web:beta" \
   --build-arg ATLAS_API_URL="$API_URL" --build-arg NEXT_PUBLIC_SITE_URL="$WEB_URL" \
   --build-arg ATLAS_RELEASES_BASE_URL="$REL" --push apps/web
 
-params "$ACR/atlas-api:beta" "$ACR/atlas-web:beta"
+params "$ACR/atlas-api:beta" "$ACR/atlas-web:beta" "$ACR/atlas-pipeline:beta"
 az deployment group create -g "$RG" -n main -f infra/azure/main.bicep -p @"$TMP/params.json" -o none --only-show-errors
 # Same tag, new digest: force fresh revisions so the apps pick up the new images.
 suffix=$(date +%m%d%H%M)

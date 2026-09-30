@@ -21,6 +21,8 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+      target: api
+    image: atlas-api:beta
     profiles: ["full"]
     environment:
       ATLAS_DATABASE_URL: postgresql+psycopg://atlas:atlas@db:5432/atlas
