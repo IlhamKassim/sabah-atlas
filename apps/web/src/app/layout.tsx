@@ -1,3 +1,4 @@
+import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
@@ -30,6 +31,9 @@ export const viewport: Viewport = {
 // Applied before first paint so a saved light theme never flashes dark.
 const THEME_SCRIPT = `try{var t=localStorage.getItem("sabahku-theme");if(t==="light")document.documentElement.dataset.theme="light"}catch(e){}`;
 
+// Inlined at build time; unset (local dev) means no Google Analytics tag at all.
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${bricolage.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
@@ -48,6 +52,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <SiteFooter />
         </NuqsAdapter>
       </body>
+      {GA_ID && <GoogleAnalytics gaId={GA_ID} />}
     </html>
   );
 }
