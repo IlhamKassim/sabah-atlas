@@ -65,6 +65,7 @@ fi
 az deployment group create -g "$RG" -n main -f infra/azure/main.bicep -p @"$TMP/params.json" -o none --only-show-errors
 ACR=$(out acrLoginServer); API_URL=$(out apiUrl); WEB_URL=$(out webUrl); REL=$(out releasesUrl)
 SITE=$(env_get ATLAS_SITE_URL); WEB_URL=${SITE:-$WEB_URL}  # public address, e.g. https://sabah-ku.com
+GA_ID=$(env_get ATLAS_GA_ID)  # Google Analytics measurement ID, e.g. G-XXXXXXXXXX
 STORAGE=$(out storageAccount); PG=$(out pgHost)
 
 # Images are built locally: ACR Tasks (az acr build) is unavailable on free-credit subscriptions.
@@ -72,7 +73,7 @@ echo "Building images for linux/amd64 (the web image bakes in the public URLs)â€
 az acr login -n "${ACR%%.*}" --only-show-errors
 docker buildx build --platform linux/amd64 -t "$ACR/atlas-api:beta" -f apps/api/Dockerfile --push .
 docker buildx build --platform linux/amd64 -t "$ACR/atlas-web:beta" \
-  --build-arg ATLAS_API_URL="$API_URL" --build-arg NEXT_PUBLIC_SITE_URL="$WEB_URL" \
+  --build-arg ATLAS_API_URL="$API_URL" --build-arg NEXT_PUBLIC_SITE_URL="$WEB_URL" --build-arg NEXT_PUBLIC_GA_ID="$GA_ID" \
   --build-arg ATLAS_RELEASES_BASE_URL="$REL" --push apps/web
 
 params "$ACR/atlas-api:beta" "$ACR/atlas-web:beta"
