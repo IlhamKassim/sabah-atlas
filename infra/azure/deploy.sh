@@ -62,8 +62,10 @@ out() { az deployment group show -g "$RG" -n main --query "properties.outputs.$1
 
 az group create -n "$RG" -l "$LOC" -o none
 # First run: placeholder images, so the URLs exist before the web image is built.
-if az deployment group show -g "$RG" -n main -o none 2>/dev/null; then
-  ACR=$(out acrLoginServer); params "$ACR/atlas-api:beta" "$ACR/atlas-web:beta"
+# The registry is looked up directly: a failed run leaves the "main" deployment without outputs.
+ACR=$(az acr list -g "$RG" --query "[0].loginServer" -o tsv 2>/dev/null || true)
+if [[ -n "$ACR" ]]; then
+  params "$ACR/atlas-api:beta" "$ACR/atlas-web:beta"
 else
   params "" ""
 fi
