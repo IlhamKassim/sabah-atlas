@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 import { Explorer, type ExplorerData } from "@/components/explorer/explorer";
 import { api } from "@/lib/api";
 import { catalog } from "@/lib/data";
@@ -5,6 +7,7 @@ import { projectSabahInContext } from "@/lib/geo";
 import { nightImagery } from "@/lib/lights";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default async function Home({ searchParams }: PageProps<"/">) {
   const sp = await searchParams;

@@ -6,7 +6,11 @@ import { Container, Pill, SectionTitle } from "@/components/ui";
 import { api, ApiError, type BriefSummary, type EvalReport, publicApiUrl } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "AI Analyst" };
+export const metadata: Metadata = {
+  title: "AI Analyst",
+  description: "Ask about any Sabah district. The AI Analyst answers only from the atlas's data and document library, and every factual sentence carries a citation checked against the database.",
+  alternates: { canonical: "/analyst" },
+};
 
 async function optional<T>(p: Promise<T>): Promise<T | null> {
   try {

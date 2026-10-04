@@ -9,13 +9,21 @@ import { Container, Pill } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { catalog, jalurCells } from "@/lib/data";
 
-export const dynamic = "force-dynamic";
+// Rendered on first visit, then cached; refreshed at most every minute so review decisions show up quickly.
+export const revalidate = 60;
+export async function generateStaticParams() {
+  return [];
+}
 
 export async function generateMetadata({ params }: PageProps<"/district/[slug]/brief">): Promise<Metadata> {
   const { slug } = await params;
   try {
     const p = await api.district(slug);
-    return { title: `${p.district.name} district brief` };
+    return {
+      title: `${p.district.name} district brief`,
+      description: `A cited economic brief on ${p.district.name}, ${p.district.division} Division, Sabah: what the data shows, where the district stands among its peers, and the sources behind each claim.`,
+      alternates: { canonical: `/district/${slug}/brief` },
+    };
   } catch {
     return { title: "District brief" };
   }

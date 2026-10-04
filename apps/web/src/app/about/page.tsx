@@ -4,7 +4,11 @@ import Link from "next/link";
 import { AboutTabs } from "@/components/about-tabs";
 import { Container } from "@/components/ui";
 
-export const metadata: Metadata = { title: "About" };
+export const metadata: Metadata = {
+  title: "About",
+  description: "Why SabahKu exists: one place for each Sabah district's economic structure, trajectory and peers, with the reasoning shown, for planners, researchers and representatives.",
+  alternates: { canonical: "/about" },
+};
 
 export default function AboutPage() {
   return (

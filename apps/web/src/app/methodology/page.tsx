@@ -7,7 +7,11 @@ import { api } from "@/lib/api";
 import { catalog } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Methodology & model cards" };
+export const metadata: Metadata = {
+  title: "Methodology & model cards",
+  description: "How SabahKu builds its numbers: data sources, district typology, scorecards, shift-share, nowcasts and their backtested error, in plain language and in full technical detail.",
+  alternates: { canonical: "/methodology" },
+};
 
 type Card = Record<string, unknown> & { task: string; title: string; model_version: string; method: string; limitations: string[] };
 const num = (v: unknown, d = 1) => (typeof v === "number" ? v.toFixed(d) : "—");

@@ -1,7 +1,11 @@
 import type { MetadataRoute } from "next";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+import { SITE } from "@/lib/site";
 
 export default function robots(): MetadataRoute.Robots {
-  return { rules: { userAgent: "*", allow: "/" }, sitemap: `${SITE}/sitemap.xml`, host: SITE };
+  // Query-string variants are views of a canonical page: /compare alone has thousands of ?ids= combinations.
+  return {
+    rules: { userAgent: "*", allow: "/", disallow: ["/compare?", "/analyst?", "/explore", "/?"] },
+    sitemap: `${SITE}/sitemap.xml`,
+  };
 }

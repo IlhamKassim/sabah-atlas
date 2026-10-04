@@ -7,7 +7,11 @@ import { api } from "@/lib/api";
 import { projectSabahInContext } from "@/lib/geo";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Forecasts" };
+export const metadata: Metadata = {
+  title: "Forecasts",
+  description: "Nowcasts and projections of district GDP and household income across Sabah, with backtest-calibrated uncertainty intervals and every modelled value labelled.",
+  alternates: { canonical: "/forecasts" },
+};
 
 export default async function ForecastsPage() {
   const [fc, map, cards] = await Promise.all([api.analytics("forecast"), projectSabahInContext(560, 460, 14), api.modelCards()]);

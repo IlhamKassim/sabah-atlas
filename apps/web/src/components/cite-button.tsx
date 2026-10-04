@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 /** "Cite this view": APA + BibTeX with the data release version and a permalink. */
@@ -9,7 +9,6 @@ export function CiteButton({ title, release }: { title: string; release?: string
   const [copied, setCopied] = useState<string | null>(null);
   const [version, setVersion] = useState(release ?? "");
   const path = usePathname();
-  const sp = useSearchParams();
 
   useEffect(() => {
     if (release) return;
@@ -19,7 +18,8 @@ export function CiteButton({ title, release }: { title: string; release?: string
       .catch(() => {});
   }, [release]);
 
-  const url = typeof window !== "undefined" ? `${window.location.origin}${path}${sp.size ? `?${sp}` : ""}` : path;
+  // Read the full URL only once opened (always client-side), so the button never makes a cached page depend on its query string.
+  const url = open ? `${window.location.origin}${path}${window.location.search}` : path;
   const today = new Date().toISOString().slice(0, 10);
   const year = today.slice(0, 4);
   const apa = `Kassim, I. (${year}). ${title} [Data view]. SabahKu, data release ${version || "latest"}. ${url} (accessed ${today})`;

@@ -210,7 +210,7 @@ resource web 'Microsoft.App/containerApps@2024-03-01' = {
           { name: 'ATLAS_RELEASES_BASE_URL', value: '${storage.properties.primaryEndpoints.blob}releases' }
         ]
       } ]
-      scale: { minReplicas: 0, maxReplicas: 2 }
+      scale: { minReplicas: 1, maxReplicas: 2 }  // web stays warm so visitors and crawlers never wait on a cold start
     }
   }
   dependsOn: [ acrPull ]

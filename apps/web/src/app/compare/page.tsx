@@ -13,7 +13,11 @@ import { fmt } from "@/lib/format";
 import { projectSabahInContext } from "@/lib/geo";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Compare districts" };
+export const metadata: Metadata = {
+  title: "Compare districts",
+  description: "Put up to four Sabah districts side by side: income, poverty, inequality, GDP, jobs, basic services and economic structure, with trajectories over time.",
+  alternates: { canonical: "/compare" },
+};
 
 const ROWS = ["income_median", "poverty_absolute", "gini", "gdp_per_capita", "gdp_growth", "income_growth", "unemployment_rate", "lfpr",
   "access_piped_water", "access_electricity", "share_agriculture", "share_manufacturing", "share_services", "population", "pop_density"];
