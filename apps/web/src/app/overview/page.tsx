@@ -16,6 +16,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Sabah at a glance",
   description: "Sabah's 27 districts in one read: the income and poverty gaps, each district's signature strip, and the five divisions chapter by chapter.",
+  alternates: { canonical: "/overview" },
 };
 
 // Every clause below is checked against the data release (medians across the division's

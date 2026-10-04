@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
 
 import { AboutTabs } from "@/components/about-tabs";
+import { JsonLd } from "@/components/json-ld";
 import { Container, SectionTitle } from "@/components/ui";
 import { publicApiUrl } from "@/lib/api";
 import { catalog } from "@/lib/data";
+import { atlasDataset } from "@/lib/structured-data";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Data & API" };
+export const metadata: Metadata = {
+  title: "Data & API",
+  description: "Download SabahKu's versioned, checksummed data releases for Sabah's districts under CC BY 4.0, or query the open read API. No key needed.",
+  alternates: { canonical: "/data" },
+};
 
 const DESCRIBE: Record<string, string> = {
   "observations.csv": "Every value: district, indicator, year, value, source, flags, Sabah rank & percentiles",
@@ -39,6 +45,7 @@ export default async function DataPage() {
 
   return (
     <Container className="py-8">
+      <JsonLd data={atlasDataset(rel)} />
       <AboutTabs />
       <p className="kicker">Data</p>
       <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Download everything</h1>

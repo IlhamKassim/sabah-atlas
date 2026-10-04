@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
 
 import { api } from "@/lib/api";
+import { SITE } from "@/lib/site";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 const PAGES = ["", "/overview", "/compare", "/forecasts", "/analyst", "/methodology", "/data", "/about"];
 
 export const dynamic = "force-dynamic";

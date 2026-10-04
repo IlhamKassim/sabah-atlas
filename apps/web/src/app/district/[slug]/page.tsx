@@ -8,6 +8,7 @@ import { CitedMarkdown } from "@/components/cited-markdown";
 import { DriversChart } from "@/components/drivers-chart";
 import { FanChart } from "@/components/fan-chart";
 import { Jalur, JalurLegend } from "@/components/jalur";
+import { JsonLd } from "@/components/json-ld";
 import { SabahMap } from "@/components/sabah-map";
 import { ShiftShareChart } from "@/components/shift-share-chart";
 import { Sparkline } from "@/components/sparkline";
@@ -19,8 +20,14 @@ import { projectSabahInContext } from "@/lib/geo";
 import { nightImagery, type NightImagery } from "@/lib/lights";
 import { scoreSentence, VERDICT_LABEL } from "@/lib/narrative";
 import { DIVISION_HEX, sequentialQuantiles } from "@/lib/scales";
+import { districtDataset } from "@/lib/structured-data";
 
-export const dynamic = "force-dynamic";
+// Rendered on first visit and then served from cache, refreshed in the background as its API data expires
+// (60 s for the brief, 5 min otherwise). Nothing is prerendered at build, so builds never need the API.
+export const revalidate = 300;
+export async function generateStaticParams() {
+  return [];
+}
 
 async function load(slug: string) {
   try {
@@ -37,6 +44,7 @@ export async function generateMetadata({ params }: PageProps<"/district/[slug]">
   return {
     title: `${p.district.name} district profile`,
     description: `Economic profile of ${p.district.name}, ${p.district.division} Division, Sabah: indicators, diagnostics, peers and projections with sources.`,
+    alternates: { canonical: `/district/${slug}` },
   };
 }
 
@@ -68,6 +76,7 @@ export default async function DistrictPage({ params }: PageProps<"/district/[slu
 
   return (
     <article>
+      <JsonLd data={districtDataset(d, cat.meta.release)} />
       <div className="border-b border-line bg-panel/60">
         <Container className="py-7">
           <nav aria-label="Breadcrumb" className="font-mono text-[0.72rem] uppercase tracking-wider text-mogah">

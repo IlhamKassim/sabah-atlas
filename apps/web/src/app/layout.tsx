@@ -5,6 +5,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { SITE } from "@/lib/site";
 
 import "./globals.css";
 
@@ -14,7 +15,7 @@ const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], 
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-plex-mono" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(SITE),
   title: { default: "SabahKu · the economic atlas of Sabah's 27 districts", template: "%s · SabahKu" },
   description:
     "SabahKu maps the economies of Sabah's 27 districts: official statistics, transparent diagnostics, projections with uncertainty, and a cited AI analyst.",
