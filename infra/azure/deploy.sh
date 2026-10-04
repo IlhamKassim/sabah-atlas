@@ -34,10 +34,13 @@ params() {  # $1 = api image, $2 = web image
   # Keep custom domains bound outside Bicep (managed certificates need the DNS to exist first).
   az containerapp show -g "$RG" -n atlas-web --query properties.configuration.ingress.customDomains \
     -o json 2>/dev/null > "$TMP/domains.json" || echo "[]" > "$TMP/domains.json"
-  uv run --quiet python - "$TMP/params.json" "$1" "$2" "$LOC" "$BUDGET" "$TMP/domains.json" <<'EOF'
+  # Azure refuses to change an existing budget's start date, so redeploys reuse it (Bicep defaults to this month).
+  local bstart
+  bstart=$(az consumption budget show --budget-name atlas-budget -g "$RG" --query timePeriod.startDate -o tsv 2>/dev/null | cut -c1-10 || true)
+  uv run --quiet python - "$TMP/params.json" "$1" "$2" "$LOC" "$BUDGET" "$TMP/domains.json" "$bstart" <<'EOF'
 import json, sys
 from dotenv import dotenv_values
-out, api, web, loc, budget, domains = sys.argv[1:]
+out, api, web, loc, budget, domains, bstart = sys.argv[1:]
 v = dotenv_values(".env")
 g = lambda k: v.get(k) or ""
 p = {"prefix": "atlas", "location": loc, "alertEmail": g("ATLAS_ALERT_EMAIL"), "monthlyBudget": int(budget),
@@ -47,6 +50,8 @@ p = {"prefix": "atlas", "location": loc, "alertEmail": g("ATLAS_ALERT_EMAIL"), "
      "briefDeployment": g("ATLAS_BRIEF_DEPLOYMENT"), "embedDeployment": g("ATLAS_EMBED_DEPLOYMENT"),
      "earthdataToken": g("EARTHDATA_TOKEN")}
 p["webCustomDomains"] = json.load(open(domains)) or []
+if bstart:
+    p["budgetStartDate"] = bstart
 if api:
     p |= {"apiImage": api, "webImage": web}
 json.dump({"contentVersion": "1.0.0.0", "parameters": {k: {"value": x} for k, x in p.items()}}, open(out, "w"))
