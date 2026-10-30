@@ -140,8 +140,19 @@ def _read(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     return np.minimum(rad, FLARE_CAP), good, is_land
 
 
+def _districts() -> gpd.GeoDataFrame:
+    """District polygons. `atlas build` runs this step before harmonise writes them to silver
+    (and the deploy runner starts with an empty lake), so build them from bronze if needed."""
+    path = get_settings().silver / "geometry.parquet"
+    if path.exists():
+        return gpd.read_parquet(path)
+    from atlas_pipelines.harmonise import geometry
+
+    return geometry()
+
+
 def zonal(paths: list[Path]) -> pd.DataFrame:
-    geo = gpd.read_parquet(get_settings().silver / "geometry.parquet")
+    geo = _districts()
     rows = []
     shapes_cache: dict[str, np.ndarray] = {}
     ids = list(geo.district_id)
@@ -200,7 +211,7 @@ def zonal(paths: list[Path]) -> pd.DataFrame:
 def sabah_image(path: Path) -> tuple[bytes, list[float]]:
     """Sabah at night from one h29v08 granule: an RGBA PNG (gold, transparent where dark,
     off-land, poor quality or outside Sabah) and its [west, south, east, north] in degrees."""
-    geo = gpd.read_parquet(get_settings().silver / "geometry.parquet")
+    geo = _districts()
     sabah = geo[geo.district_id.str.startswith("sbh-")]
     tr = _tile_transform(SABAH_TILE)
     inside = features.rasterize(((g, 1) for g in sabah.geometry), out_shape=(2400, 2400),
