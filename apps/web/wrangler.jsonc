@@ -1,0 +1,21 @@
+// Cloudflare Workers, static assets only: no Worker script, so every request is a free static-asset
+// request on the Workers Free plan. Deployed by .github/workflows/deploy.yml after `pnpm build`.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sabahku",
+  "compatibility_date": "2026-10-28",
+  "assets": {
+    "directory": "./out",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+  // The workers.dev address stays on (it is how you check a deploy before the domain points here);
+  // public/_headers keeps it out of search results.
+  "workers_dev": true,
+  "preview_urls": false,
+  // sabah-ku.com's DNS is on Cloudflare; deploying creates these records. Canonical URLs point at the apex.
+  "routes": [
+    { "pattern": "sabah-ku.com", "custom_domain": true },
+    { "pattern": "www.sabah-ku.com", "custom_domain": true }
+  ]
+}

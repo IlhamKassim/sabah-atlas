@@ -2,13 +2,15 @@
 
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import Link from "next/link";
-import { useCallback, useMemo, useRef, useState, useTransition } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Wordmark } from "@/components/logo";
 import { explainFlag, fmt, ordinal } from "@/lib/format";
+import { DEFAULT_INDICATOR, indicatorView, type IndicatorResult } from "@/lib/explorer-data";
 import { useHomeDistrict } from "@/lib/home-district";
 import type { ProjectedDistrict } from "@/lib/geo";
 import type { NightImagery } from "@/lib/lights";
+import { getJson, publicApi } from "@/lib/public-api";
 import { DIVISION_HEX, DIVISIONS, percentileColor, sequentialQuantiles } from "@/lib/scales";
 
 import { DistrictPanel } from "./district-panel";
@@ -44,13 +46,42 @@ export const CATEGORY_LABEL: Record<string, string> = {
 };
 const CATEGORY_ORDER = ["welfare", "structure", "labour", "lights", "demography", "access", "momentum"];
 
+interface Query { indicator: string | null; year: number | null; d: string | null; division: string | null }
+const NO_QUERY: Query = { indicator: null, year: null, d: null, division: null };
+
+// The static HTML is the default view; the reader's query string (?indicator=, ?year=, ?d=) applies once the page loads.
 export function Explorer({ data }: { data: ExplorerData }) {
-  const { indicator: ind, periods, byPeriod, districts, geo } = data;
-  const [pending, start] = useTransition();
+  return (
+    <Suspense fallback={<ExplorerView data={data} q={NO_QUERY} setQ={() => {}} pending={false} />}>
+      <ExplorerFromUrl data={data} />
+    </Suspense>
+  );
+}
+
+function ExplorerFromUrl({ data }: { data: ExplorerData }) {
   const [q, setQ] = useQueryStates(
     { indicator: parseAsString, year: parseAsInteger, d: parseAsString, division: parseAsString },
     { history: "replace" },
   );
+  const [shown, setShown] = useState(data);
+  const code = q.indicator ?? DEFAULT_INDICATOR;
+  const pending = code !== shown.indicator.code;
+  // Another indicator: fetch its static JSON, keeping the current map on screen until it arrives.
+  useEffect(() => {
+    if (!pending) return;
+    let stale = false;
+    indicatorView(code, (c, p) => getJson<IndicatorResult>(publicApi.indicator(c, p)))
+      .then((v) => !stale && setShown({ ...data, ...v }))
+      .catch(() => !stale && void setQ({ indicator: null, year: null }));
+    return () => {
+      stale = true;
+    };
+  }, [code, pending, data, setQ]);
+  return <ExplorerView data={shown} q={q} setQ={setQ} pending={pending} />;
+}
+
+function ExplorerView({ data, q, setQ, pending }: { data: ExplorerData; q: Query; setQ: (patch: Partial<Query>) => unknown; pending: boolean }) {
+  const { indicator: ind, periods, byPeriod, districts, geo } = data;
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"rank" | "name" | "division">("rank");
   const [hover, setHover] = useState<string | null>(null);
@@ -75,7 +106,7 @@ export function Explorer({ data }: { data: ExplorerData }) {
   const night = ind.category === "lights";
   const colorOf = useCallback((v: Value | undefined) => (!v ? "var(--nodata)" : directional ? percentileColor(v.pct) : seq(v.value)), [directional, seq]);
 
-  const setIndicator = (code: string) => void setQ({ indicator: code === "income_median" ? null : code, year: null }, { shallow: false, startTransition: start });
+  const setIndicator = (code: string) => void setQ({ indicator: code === DEFAULT_INDICATOR ? null : code, year: null });
   const select = (slug: string | null) => void setQ({ d: slug });
 
   const range = useMemo(() => {

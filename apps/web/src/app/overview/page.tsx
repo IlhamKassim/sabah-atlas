@@ -12,7 +12,6 @@ import { projectSabahInContext } from "@/lib/geo";
 import { nightImagery } from "@/lib/lights";
 import { DIVISION_HEX, DIVISIONS, sequentialQuantiles } from "@/lib/scales";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Sabah at a glance",
   description: "Sabah's 27 districts in one read: the income and poverty gaps, each district's signature strip, and the five divisions chapter by chapter.",

@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { AnalystChat } from "@/components/analyst-chat";
+import { AnalystChatFromUrl } from "@/components/analyst-chat";
 import { Container, Pill, SectionTitle } from "@/components/ui";
-import { api, ApiError, type BriefSummary, type EvalReport, publicApiUrl } from "@/lib/api";
+import { api, ApiError, type BriefSummary, type EvalReport } from "@/lib/api";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "AI Analyst",
   description: "Ask about any Sabah district. The AI Analyst answers only from the atlas's data and document library, and every factual sentence carries a citation checked against the database.",
@@ -21,8 +20,11 @@ async function optional<T>(p: Promise<T>): Promise<T | null> {
   }
 }
 
-export default async function AnalystPage({ searchParams }: PageProps<"/analyst">) {
-  const sp = await searchParams;
+// The static site has no server of its own: the chat needs a separately hosted Analyst
+// (NEXT_PUBLIC_ANALYST_URL), or the local API in development.
+const ANALYST_URL = process.env.NEXT_PUBLIC_ANALYST_URL || process.env.NEXT_PUBLIC_ATLAS_API_URL || "";
+
+export default async function AnalystPage() {
   const [status, ds, briefs, evalRep] = await Promise.all([
     api.analystStatus(),
     api.districts("sabah"),
@@ -31,7 +33,7 @@ export default async function AnalystPage({ searchParams }: PageProps<"/analyst"
   ]);
   const districts = ds.filter((d) => d.kind === "district").map((d) => ({ slug: d.slug, name: d.name }));
   const bySlug = Object.fromEntries((briefs ?? []).map((b) => [b.slug, b])) as Record<string, BriefSummary>;
-  const initial = typeof sp.district === "string" ? sp.district : undefined;
+  const live = status.available && !!ANALYST_URL;
 
   return (
     <Container className="py-8">
@@ -44,12 +46,12 @@ export default async function AnalystPage({ searchParams }: PageProps<"/analyst"
 
       <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <section aria-label="Ask the Analyst">
-          {!status.available && (
+          {!live && (
             <p className="mb-4 border-l-4 border-kunyit bg-kunyit/10 p-3 text-sm">
-              The Analyst is switched off on this server (no model configured). The reviewed brief library and evaluation results remain available.
+              Live questions are paused for now. The reviewed brief library and evaluation results remain available.
             </p>
           )}
-          <AnalystChat apiUrl={publicApiUrl} districts={districts} initialDistrict={initial} available={status.available} />
+          <AnalystChatFromUrl apiUrl={ANALYST_URL} districts={districts} available={live} />
         </section>
 
         <aside className="space-y-10">

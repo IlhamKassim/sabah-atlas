@@ -9,10 +9,10 @@ import { Container, Pill } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { catalog, jalurCells } from "@/lib/data";
 
-// Rendered on first visit, then cached; refreshed at most every minute so review decisions show up quickly.
-export const revalidate = 60;
+// Rendered at build time for every Sabah district; a review decision shows after the next deploy.
+export const dynamicParams = false;
 export async function generateStaticParams() {
-  return [];
+  return (await api.districts("sabah")).filter((d) => d.kind === "district").map((d) => ({ slug: d.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/district/[slug]/brief">): Promise<Metadata> {

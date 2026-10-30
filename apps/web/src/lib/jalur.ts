@@ -1,3 +1,4 @@
+import type { Indicator, Obs } from "./api";
 import { LAUT, percentileColor } from "./scales";
 
 /** The jalur (woven strip): one band per indicator, grouped like a woven cloth. */
@@ -47,4 +48,27 @@ export function jalurColor(cell: JalurCell): string {
     return LAUT[Math.min(LAUT.length - 1, i)];
   }
   return percentileColor(cell.pct);
+}
+
+export function latest(series: Obs[] | undefined): Obs | undefined {
+  return series?.length ? series[series.length - 1] : undefined;
+}
+
+/** Latest-period jalur cells from a profile's indicator series. */
+export function jalurCells(indicators: Record<string, Obs[]>, catalogue: Record<string, Indicator>): Record<string, JalurCell> {
+  const out: Record<string, JalurCell> = {};
+  for (const g of JALUR_GROUPS) {
+    for (const code of g.codes) {
+      const o = latest(indicators[code]);
+      out[code] = {
+        code,
+        pct: o?.pct_sabah ?? null,
+        value: o?.value ?? null,
+        period: o?.period ?? null,
+        neutral: catalogue[code]?.direction === "neutral",
+        flagged: !!o?.quality_flag?.includes("boundary_break"),
+      };
+    }
+  }
+  return out;
 }

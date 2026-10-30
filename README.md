@@ -14,7 +14,7 @@
 | **Analytics** (`ml/`) | Rule-based scorecard vs structural peers · shift-share decomposition · PCA + k-means typology with nearest-neighbour peers and positive deviance · ridge/LightGBM driver analysis with SHAP · GDP nowcasts from state sector data with reconciliation · income projections · split-conformal intervals. Every layer has a model card. |
 | **API** (`apps/api/`) | FastAPI, versioned under `/v1`, ETags keyed to the data release, CSV export, OpenAPI docs. |
 | **Web** (`apps/web/`) | Next.js. A full-screen map (pan, zoom, play through the years) with a searchable district list, 27 district profiles, compare, forecasts, methodology rendered from live model cards, data downloads, cite-this-view. Night and day themes in a palette taken from Sabah's landscape. |
-| **Infra** (`infra/`) | Docker Compose for local dev (Postgres + PostGIS + pgvector); Bicep for Azure Container Apps + PostgreSQL Flexible Server. |
+| **Infra** (`infra/`, `.github/workflows/deploy.yml`) | Docker Compose for local dev (Postgres + PostGIS + pgvector). In production the site is static files on Cloudflare (Workers Free), rebuilt weekly by GitHub Actions from a Neon Postgres database. |
 
 ## Quick start
 
@@ -40,6 +40,14 @@ Run the checks with `uv run pytest`, `uv run ruff check .`, `pnpm --dir apps/web
 ## Honest limits
 
 District-level survey data starts in 2019 and arrives every two to three years; district GDP is published only to 2020. The atlas trains on all 160 districts, nowcasts from published state data, shows intervals, and says plainly when evidence is thin. See `/methodology` for backtests, coverage checks and known limitations.
+
+## Deploying
+
+The public site has no server: a GitHub Actions workflow ([deploy.yml](.github/workflows/deploy.yml)) runs `atlas build` against a [Neon](https://neon.tech) database (free tier, Postgres 16 with PostGIS and pgvector), starts the API inside the runner, saves its responses as static JSON (`python -m atlas_api.snapshot`), builds the Next.js site as a static export and deploys it to Cloudflare Workers static assets (free plan). It runs every Monday, on every push to `main`, and by hand from the Actions tab.
+
+One-time setup: `bash infra/setup.sh` walks you through it (about 15 minutes): a Neon project, a Cloudflare deploy token, the NASA Earthdata token, and the GitHub secrets and variables the workflow reads (`ATLAS_DATABASE_URL`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `EARTHDATA_TOKEN`; `SITE_URL`, `GA_ID`, optionally `ANALYST_URL`). If you have a local database with briefs, copy it up with `bash infra/neon/seed.sh` before the first deploy.
+
+The live AI Analyst needs a server, so on the static site it is paused unless `ANALYST_URL` points at a hosted copy of the API's `/v1/ask`. District briefs are pre-generated and still show.
 
 ## AI briefs and review
 

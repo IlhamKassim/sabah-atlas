@@ -233,17 +233,6 @@ def sabah_image(path: Path) -> tuple[bytes, list[float]]:
 SUMS = ["radiance_sum", "lit_area_km2", "valid_area_km2", "land_area_km2", "land_px", "valid_px"]
 
 
-def _lake_container():
-    """Blob container holding the zonal cache between cloud runs (the job's disk is ephemeral)."""
-    url = os.environ.get("ATLAS_LAKE_CONTAINER_URL")
-    if not url:
-        return None
-    from azure.identity import DefaultAzureCredential
-    from azure.storage.blob import ContainerClient
-
-    return ContainerClient.from_container_url(url, credential=DefaultAzureCredential())
-
-
 def image_dir() -> Path:
     """Where the yearly Sabah-at-night pictures live (read by `atlas load`)."""
     d = bronze_dir("ntl_vnp46a4") / "images"
@@ -255,22 +244,12 @@ def run(keep_raw: bool = False) -> dict:
     """Stream granules one at a time (download → zonal stats → delete), so peak disk use
     is one ~75 MB tile rather than ~3 GB for the full 2012–2025 archive. Per-granule
     results are cached, so an interrupted run resumes and a weekly run only fetches
-    new years."""
+    new years. In the deploy workflow the zonal and images folders persist between runs
+    through the GitHub Actions cache."""
     gs = granules()
     cache = bronze_dir("ntl_vnp46a4") / "zonal"
     cache.mkdir(exist_ok=True)
-    lake = _lake_container()
-    if lake:
-        for b in lake.list_blobs(name_starts_with="ntl_zonal/"):
-            dest = cache / b.name.split("/", 1)[1]
-            if not dest.exists():
-                dest.write_bytes(lake.download_blob(b.name).readall())
     images = image_dir()
-    if lake:
-        for b in lake.list_blobs(name_starts_with="ntl_images/"):
-            dest = images / b.name.split("/", 1)[1]
-            if not dest.exists():
-                dest.write_bytes(lake.download_blob(b.name).readall())
     frames = []
     for i, g in enumerate(gs, 1):
         part = cache / (g["name"].rsplit(".", 1)[0] + ".parquet")
@@ -279,15 +258,10 @@ def run(keep_raw: bool = False) -> dict:
             [path] = download([g])
             if not part.exists():
                 zonal([path]).to_parquet(part, index=False)
-                if lake:
-                    lake.upload_blob(f"ntl_zonal/{part.name}", part.read_bytes(), overwrite=True)
             if pic and not pic.exists():
                 png, bounds = sabah_image(path)
                 pic.write_bytes(png)
                 pic.with_suffix(".json").write_text(json.dumps({"year": g["year"], "bounds": bounds}))
-                if lake:
-                    for f in (pic, pic.with_suffix(".json")):
-                        lake.upload_blob(f"ntl_images/{f.name}", f.read_bytes(), overwrite=True)
             if not keep_raw:
                 path.unlink(missing_ok=True)
             print(f"  [{i}/{len(gs)}] {g['year']} {g['tile']}", flush=True)

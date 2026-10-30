@@ -1,13 +1,12 @@
 "use client";
 
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
-import { useEffect, useRef, useTransition } from "react";
+import { useEffect, useRef } from "react";
 
 import { useHomeDistrict } from "@/lib/home-district";
 
 export function DistrictPicker({ options }: { options: { slug: string; name: string; division: string }[] }) {
-  const [pending, start] = useTransition();
-  const [ids, setIds] = useQueryState("ids", parseAsArrayOf(parseAsString).withDefault([]).withOptions({ shallow: false, startTransition: start }));
+  const [ids, setIds] = useQueryState("ids", parseAsArrayOf(parseAsString).withDefault([]));
   const home = useHomeDistrict();
   // Arriving with nothing chosen: start from the reader's own district, once.
   const seeded = useRef(false);
@@ -22,7 +21,7 @@ export function DistrictPicker({ options }: { options: { slug: string; name: str
   };
   const divisions = Array.from(new Set(options.map((o) => o.division)));
   return (
-    <div className={pending ? "opacity-70" : ""}>
+    <div>
       <p className="kicker text-muted">Choose up to four districts ({ids.length}/4)</p>
       <div className="mt-2 grid gap-3 sm:grid-cols-5">
         {divisions.map((dv) => (

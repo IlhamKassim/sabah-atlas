@@ -5,7 +5,7 @@ import { SITE } from "@/lib/site";
 
 const PAGES = ["", "/overview", "/compare", "/forecasts", "/analyst", "/methodology", "/data", "/about"];
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [meta, districts] = await Promise.all([api.meta().catch(() => null), api.districts().catch(() => [])]);

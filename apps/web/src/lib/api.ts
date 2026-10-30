@@ -192,10 +192,9 @@ export class ApiError extends Error {
   }
 }
 
-async function get<T>(path: string, revalidate = 300): Promise<T> {
-  const res = await fetch(`${API}${path}`, {
-    next: { revalidate: process.env.NODE_ENV === "development" ? 0 : revalidate },
-  });
+// Pages are rendered once at build time; in development every request goes to the API.
+async function get<T>(path: string): Promise<T> {
+  const res = await fetch(`${API}${path}`, { cache: process.env.NODE_ENV === "development" ? "no-store" : "force-cache" });
   if (!res.ok) throw new ApiError(res.status, `${path}: ${res.status}`);
   return res.json() as Promise<T>;
 }
@@ -216,12 +215,11 @@ export const api = {
     get<{ district_id: string; slug: string; name: string; division: string; payload: NonNullable<Analytics[K]>; model_version: string }[]>(
       `/v1/analytics/${kind}`,
     ),
-  analystStatus: () => get<{ available: boolean; model?: string; reason?: string }>("/v1/analyst/status", 60),
-  briefs: () => get<BriefSummary[]>("/v1/briefs", 60),
-  brief: (key: string) => get<Brief>(`/v1/briefs/${encodeURIComponent(key)}`, 60),
-  analystEval: () => get<EvalReport>("/v1/analyst/eval", 300),
-  modelCards: () => get<Record<string, unknown>[]>("/v1/model-cards", 3600),
-  lights: () => get<{ years: number[]; bounds: [number, number, number, number] }>("/v1/lights", 3600),
+  analystStatus: () => get<{ available: boolean; model?: string; reason?: string }>("/v1/analyst/status"),
+  briefs: () => get<BriefSummary[]>("/v1/briefs"),
+  brief: (key: string) => get<Brief>(`/v1/briefs/${encodeURIComponent(key)}`),
+  analystEval: () => get<EvalReport>("/v1/analyst/eval"),
+  modelCards: () => get<Record<string, unknown>[]>("/v1/model-cards"),
+  lights: () => get<{ years: number[]; bounds: [number, number, number, number] }>("/v1/lights"),
 };
 
-export const publicApiUrl = process.env.NEXT_PUBLIC_ATLAS_API_URL ?? API;

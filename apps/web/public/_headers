@@ -1,0 +1,21 @@
+# Cloudflare static-asset headers (a static export cannot set headers from next.config).
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Content-Security-Policy: frame-ancestors 'self'
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+
+# The static read API: open to other sites, like the old live API.
+/api/*
+  Access-Control-Allow-Origin: *
+
+/api/v1/export/*
+  Content-Disposition: attachment
+
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Only sabah-ku.com should be indexed, not the Worker's own workers.dev address.
+https://:version.:subdomain.workers.dev/*
+  X-Robots-Tag: noindex

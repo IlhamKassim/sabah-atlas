@@ -6,7 +6,6 @@ import { Container } from "@/components/ui";
 import { api } from "@/lib/api";
 import { catalog } from "@/lib/data";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Methodology & model cards",
   description: "How SabahKu builds its numbers: data sources, district typology, scorecards, shift-share, nowcasts and their backtested error, in plain language and in full technical detail.",

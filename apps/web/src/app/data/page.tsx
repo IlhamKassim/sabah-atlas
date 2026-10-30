@@ -3,11 +3,10 @@ import type { Metadata } from "next";
 import { AboutTabs } from "@/components/about-tabs";
 import { JsonLd } from "@/components/json-ld";
 import { Container, SectionTitle } from "@/components/ui";
-import { publicApiUrl } from "@/lib/api";
 import { catalog } from "@/lib/data";
+import { SITE } from "@/lib/site";
 import { atlasDataset } from "@/lib/structured-data";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Data & API",
   description: "Download SabahKu's versioned, checksummed data releases for Sabah's districts under CC BY 4.0, or query the open read API. No key needed.",
@@ -84,22 +83,22 @@ export default async function DataPage() {
       <section className="mt-12 grid gap-10 lg:grid-cols-2">
         <div>
           <SectionTitle kicker="API" title="Open read API" />
-          <p className="text-sm text-muted">JSON over HTTPS, versioned under <code className="font-mono">/v1</code>, cached with ETags keyed to the data release. No key needed for read endpoints.</p>
+          <p className="text-sm text-muted">Static JSON files under <code className="font-mono">/api/v1</code>, rebuilt with every data release. No key, open to any site (CORS).</p>
           <ul className="mt-3 space-y-1 font-mono text-xs">
             {[
-              ["/v1/districts", "All districts with headline indicators"],
-              ["/v1/districts/{id}", "Full profile: series, scorecard, peers, forecasts, sources"],
-              ["/v1/indicators/{code}?period=", "One indicator for all districts"],
-              ["/v1/compare?ids=a,b,c", "Aligned series for up to four districts"],
-              ["/v1/forecast/{id}?indicator=", "Fan-chart series with backtest error"],
-              ["/v1/export/{id}.csv", "Tidy CSV for a district"],
-              ["/v1/model-cards", "All model cards"],
-              ["/v1/data/releases", "Current release manifest"],
+              ["/api/v1/districts.json", "All Sabah districts with headline indicators"],
+              ["/api/v1/districts/{slug}.json", "Full profile: series, scorecard, peers, forecasts, sources"],
+              ["/api/v1/indicators/{code}.json", "One indicator for all Sabah districts, latest period"],
+              ["/api/v1/indicators/{code}/{period}.json", "The same for one period"],
+              ["/api/v1/national/indicators/{code}.json", "Latest period for all 160 districts"],
+              ["/api/v1/compare/{slug}.json", "Aligned series for one district (merge up to four)"],
+              ["/api/v1/export/{slug}.csv", "Tidy CSV for a district"],
+              ["/api/v1/model-cards.json", "All model cards"],
+              ["/api/v1/data/releases.json", "Current release manifest"],
             ].map(([p, d]) => <li key={p}><span className="text-laut">GET {p}</span> <span className="font-sans text-muted">— {d}</span></li>)}
           </ul>
-          <p className="mt-3 text-sm">Interactive docs: <a className="text-laut underline" href={`${publicApiUrl}/docs`}>{publicApiUrl}/docs</a> · OpenAPI: <a className="text-laut underline" href={`${publicApiUrl}/openapi.json`}>openapi.json</a></p>
           <pre className="mt-3 overflow-x-auto bg-night p-3 font-mono text-xs text-on-night">{`import pandas as pd
-url = "${publicApiUrl}/v1/indicators/income_median?scope=national"
+url = "${SITE}/api/v1/national/indicators/income_median.json"
 df = pd.json_normalize(pd.read_json(url, typ="series")["values"])`}</pre>
         </div>
         <div>

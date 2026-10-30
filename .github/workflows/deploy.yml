@@ -1,0 +1,81 @@
+name: Deploy
+
+# Builds the whole atlas and publishes it to Cloudflare as static files:
+# DOSM + night lights → Neon (atlas build) → API inside this runner → static JSON + HTML → Cloudflare.
+# Weekly for new data, on every push to main, and by hand from the Actions tab
+# (for example after approving briefs with `atlas review`).
+on:
+  schedule:
+    - cron: "0 2 * * 1" # Mondays 02:00 UTC
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Never cancel a run halfway through loading the database.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      ATLAS_DATABASE_URL: ${{ secrets.ATLAS_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+
+      # Night-light zonal stats and pictures are slow to compute; keep them between runs.
+      # If the cache expires, the next run recomputes them from NASA (slower, same result).
+      - uses: actions/cache@v4
+        with:
+          path: |
+            data/lake/bronze/ntl_vnp46a4/zonal
+            data/lake/bronze/ntl_vnp46a4/images
+          key: ntl-${{ github.run_id }}
+          restore-keys: ntl-
+
+      - name: Build the atlas into the database
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: uv run atlas build
+
+      - name: Start the API
+        run: |
+          uv run uvicorn atlas_api.main:app --port 8000 > api.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:8000/healthz && exit 0; sleep 2; done
+          cat api.log; exit 1
+
+      - name: Save the read API as static files
+        run: uv run python -m atlas_api.snapshot apps/web/public/api
+
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: apps/web/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+      - name: Build the site
+        working-directory: apps/web
+        env:
+          ATLAS_API_URL: http://localhost:8000
+          NEXT_PUBLIC_SITE_URL: ${{ vars.SITE_URL || 'https://sabah-ku.com' }}
+          NEXT_PUBLIC_GA_ID: ${{ vars.GA_ID }}
+          NEXT_PUBLIC_ANALYST_URL: ${{ vars.ANALYST_URL }}
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+
+      - name: Deploy to Cloudflare
+        working-directory: apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm dlx wrangler@4 deploy

@@ -13,20 +13,20 @@ import { SabahMap } from "@/components/sabah-map";
 import { ShiftShareChart } from "@/components/shift-share-chart";
 import { Sparkline } from "@/components/sparkline";
 import { Container, Pill, SectionTitle, SourceNote } from "@/components/ui";
-import { api, ApiError, type Indicator, type Obs, publicApiUrl, type ScoreItem, type Source } from "@/lib/api";
+import { api, ApiError, type Indicator, type Obs, type ScoreItem, type Source } from "@/lib/api";
 import { catalog, jalurCells, latest } from "@/lib/data";
 import { explainFlag, fmt, ordinal, signed } from "@/lib/format";
 import { projectSabahInContext } from "@/lib/geo";
 import { nightImagery, type NightImagery } from "@/lib/lights";
+import { publicApi } from "@/lib/public-api";
 import { scoreSentence, VERDICT_LABEL } from "@/lib/narrative";
 import { DIVISION_HEX, sequentialQuantiles } from "@/lib/scales";
 import { districtDataset } from "@/lib/structured-data";
 
-// Rendered on first visit and then served from cache, refreshed in the background as its API data expires
-// (60 s for the brief, 5 min otherwise). Nothing is prerendered at build, so builds never need the API.
-export const revalidate = 300;
+// Every Sabah district is rendered at build time; other slugs are 404s.
+export const dynamicParams = false;
 export async function generateStaticParams() {
-  return [];
+  return (await api.districts("sabah")).map((d) => ({ slug: d.slug }));
 }
 
 async function load(slug: string) {
@@ -130,7 +130,7 @@ export default async function DistrictPage({ params }: PageProps<"/district/[slu
           </div>
           <div className="no-print mt-4 flex flex-wrap gap-2">
             <CiteButton title={`${d.name} district profile`} />
-            <a href={`${publicApiUrl}/v1/export/${d.slug}.csv`} className="border border-ink px-2.5 py-1 font-mono text-[0.7rem] uppercase tracking-wider hover:bg-ink hover:text-bg">Download CSV</a>
+            <a href={publicApi.csv(d.slug)} className="border border-ink px-2.5 py-1 font-mono text-[0.7rem] uppercase tracking-wider hover:bg-ink hover:text-bg">Download CSV</a>
             <Link href={`/compare?ids=${d.slug}${peerIds.filter((i) => i.startsWith("sbh-")).slice(0, 2).map((i) => `,${names[i]?.slug}`).join("")}`} className="border border-line px-2.5 py-1 font-mono text-[0.7rem] uppercase tracking-wider text-muted hover:border-ink hover:text-ink">Compare with peers</Link>
           </div>
         </Container>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useQueryState } from "nuqs";
+import { Suspense, useState } from "react";
 
 import { type Citation, CitedMarkdown } from "./cited-markdown";
 
@@ -30,6 +31,22 @@ const EXAMPLES = [
   "How has Kota Kinabalu's GDP likely changed since 2020?",
   "Who are Tongod's structural peers, and which improved faster?",
 ];
+
+type ChatProps = { apiUrl: string; districts: { slug: string; name: string }[]; available: boolean };
+
+// The static HTML starts with no district chosen; ?district= applies once the page loads.
+export function AnalystChatFromUrl(props: ChatProps) {
+  return (
+    <Suspense fallback={<AnalystChat {...props} />}>
+      <ChatWithDistrict {...props} />
+    </Suspense>
+  );
+}
+
+function ChatWithDistrict(props: ChatProps) {
+  const [district] = useQueryState("district");
+  return <AnalystChat key={district ?? ""} {...props} initialDistrict={district ?? undefined} />;
+}
 
 export function AnalystChat({ apiUrl, districts, initialDistrict, available }: {
   apiUrl: string;

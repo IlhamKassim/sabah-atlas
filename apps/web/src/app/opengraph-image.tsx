@@ -9,8 +9,6 @@ import { nightMapSvg } from "@/lib/night-svg";
 export const alt = "SabahKu: the economic atlas of Sabah's 27 districts, drawn at night from satellite night-time lights";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-// Rebuilt daily from the API; at build time (CI, no API) the map is drawn without the glow.
-export const revalidate = 86400;
 
 // The link preview (LinkedIn, WhatsApp, X): Sabah after dark, each district glowing with its night-time light.
 export default async function Image() {
