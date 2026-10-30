@@ -44,14 +44,14 @@ async function loadComparison(slugs: string[]): Promise<Comparison> {
 // The static HTML has nothing chosen; ?ids= applies once the page loads.
 export function CompareView(props: CompareProps) {
   return (
-    <Suspense fallback={<CompareBody {...props} raw={[]} cmp={null} pending={false} />}>
+    <Suspense fallback={<CompareBody {...props} raw={[]} setIds={() => {}} cmp={null} pending={false} />}>
       <CompareFromUrl {...props} />
     </Suspense>
   );
 }
 
 function CompareFromUrl(props: CompareProps) {
-  const [ids] = useQueryState("ids", parseAsArrayOf(parseAsString).withDefault([]));
+  const [ids, setIds] = useQueryState("ids", parseAsArrayOf(parseAsString).withDefault([]));
   const raw = ids.filter(Boolean).slice(0, 4);
   const key = raw.join(",");
   const [loaded, setLoaded] = useState<{ key: string; cmp: Comparison } | null>(null);
@@ -64,10 +64,10 @@ function CompareFromUrl(props: CompareProps) {
     };
   }, [key]);
   const cmp = key ? loaded?.cmp ?? null : null;
-  return <CompareBody {...props} raw={raw} cmp={cmp} pending={!!key && loaded?.key !== key} />;
+  return <CompareBody {...props} raw={raw} setIds={(next) => setIds(next.length ? next : null)} cmp={cmp} pending={!!key && loaded?.key !== key} />;
 }
 
-function CompareBody({ options, geo, ind, raw, cmp, pending }: CompareProps & { raw: string[]; cmp: Comparison | null; pending: boolean }) {
+function CompareBody({ options, geo, ind, raw, setIds, cmp, pending }: CompareProps & { raw: string[]; setIds: (ids: string[]) => unknown; cmp: Comparison | null; pending: boolean }) {
   return (
     <Container className={`py-8 ${pending ? "opacity-70" : ""}`}>
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -79,7 +79,7 @@ function CompareBody({ options, geo, ind, raw, cmp, pending }: CompareProps & { 
       </div>
       <div className="mogah-rule mt-3" aria-hidden />
       <div className="mt-6 grid gap-6 md:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="no-print"><DistrictPicker options={options} /></div>
+        <div className="no-print"><DistrictPicker options={options} ids={raw} setIds={setIds} /></div>
         {/* Selected districts in their chart colours; clicking a district adds or removes it. */}
         <SabahMap
           width={geo.width}

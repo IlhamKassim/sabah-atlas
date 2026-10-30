@@ -11,6 +11,12 @@ import { DIVISION_HEX } from "@/lib/scales";
 export const alt = "A SabahKu district card: the district outlined on Sabah at night, with its headline figures";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+// Drawn once per Sabah district at build time (static export).
+export const dynamic = "force-static";
+export const dynamicParams = false;
+export async function generateStaticParams() {
+  return (await api.districts("sabah")).map((d) => ({ slug: d.slug }));
+}
 
 // Each district's link preview: its outline on Sabah at night, and three headline figures.
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {

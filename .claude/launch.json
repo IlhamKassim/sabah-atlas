@@ -4,14 +4,43 @@
     {
       "name": "api",
       "runtimeExecutable": "uv",
-      "runtimeArgs": ["run", "uvicorn", "atlas_api.main:app", "--port", "8000", "--reload", "--reload-dir", "apps/api/src"],
+      "runtimeArgs": [
+        "run",
+        "uvicorn",
+        "atlas_api.main:app",
+        "--port",
+        "8000",
+        "--reload",
+        "--reload-dir",
+        "apps/api/src"
+      ],
       "port": 8000
     },
     {
       "name": "web",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--dir", "apps/web", "dev", "--port", "3000"],
+      "runtimeArgs": [
+        "--dir",
+        "apps/web",
+        "dev",
+        "--port",
+        "3000"
+      ],
       "port": 3000
+    },
+    {
+      "name": "static",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "--yes",
+        "wrangler@4",
+        "dev",
+        "--cwd",
+        "apps/web",
+        "--port",
+        "8788"
+      ],
+      "port": 8788
     }
   ]
 }

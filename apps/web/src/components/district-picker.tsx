@@ -1,12 +1,15 @@
 "use client";
 
-import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
 
 import { useHomeDistrict } from "@/lib/home-district";
 
-export function DistrictPicker({ options }: { options: { slug: string; name: string; division: string }[] }) {
-  const [ids, setIds] = useQueryState("ids", parseAsArrayOf(parseAsString).withDefault([]));
+// The chosen slugs live in ?ids=; the compare page owns that state and passes it in.
+export function DistrictPicker({ options, ids, setIds }: {
+  options: { slug: string; name: string; division: string }[];
+  ids: string[];
+  setIds: (ids: string[]) => unknown;
+}) {
   const home = useHomeDistrict();
   // Arriving with nothing chosen: start from the reader's own district, once.
   const seeded = useRef(false);

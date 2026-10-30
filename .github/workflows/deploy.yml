@@ -78,4 +78,5 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: pnpm dlx wrangler@4 deploy
+        # npx, not pnpm dlx: pnpm blocks the install scripts wrangler's esbuild and workerd need.
+        run: npx --yes wrangler@4 deploy
